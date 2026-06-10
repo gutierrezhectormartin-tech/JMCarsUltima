@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Logica/Logica.csproj" Id="7305b574-ae76-4b30-9f90-2ce55309c66f" />
+  <Project Path="Modelo/Modelo.csproj" Id="12c9008c-1f30-4b52-b8e4-ef2a04e9dbf0" />
+  <Project Path="Persistencia/Persistencia.csproj" Id="f740313e-e2b4-4b1f-b020-cc9637716056" />
+  <Project Path="WebAPI/WebAPI.csproj" Id="ec389941-5148-4fe4-8085-0785adde44b5" />
+</Solution>
