@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 3,
   "targets": {
     "net8.0": {
       "Microsoft.Bcl.Cryptography/8.0.0": {
@@ -1217,23 +1217,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\infor\\.nuget\\packages\\": {},
+    "C:\\Users\\gutie\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\Persistencia\\Persistencia.csproj",
+      "projectUniqueName": "C:\\Users\\gutie\\Desktop\\JMCarsUltima\\JMCarsUltima\\Persistencia\\Persistencia.csproj",
       "projectName": "Persistencia",
-      "projectPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\Persistencia\\Persistencia.csproj",
-      "packagesPath": "C:\\Users\\infor\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\Persistencia\\obj\\",
+      "projectPath": "C:\\Users\\gutie\\Desktop\\JMCarsUltima\\JMCarsUltima\\Persistencia\\Persistencia.csproj",
+      "packagesPath": "C:\\Users\\gutie\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\gutie\\Desktop\\JMCarsUltima\\JMCarsUltima\\Persistencia\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\infor\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\gutie\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -1247,11 +1247,10 @@
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\Modelo\\Modelo.csproj": {
-              "projectPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\Modelo\\Modelo.csproj"
+            "C:\\Users\\gutie\\Desktop\\JMCarsUltima\\JMCarsUltima\\Modelo\\Modelo.csproj": {
+              "projectPath": "C:\\Users\\gutie\\Desktop\\JMCarsUltima\\JMCarsUltima\\Modelo\\Modelo.csproj"
             }
           }
         }
@@ -1266,11 +1265,10 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "10.0.300"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
-        "framework": "net8.0",
         "targetAlias": "net8.0",
         "dependencies": {
           "Microsoft.Data.SqlClient": {
@@ -1294,7 +1292,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.314/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
