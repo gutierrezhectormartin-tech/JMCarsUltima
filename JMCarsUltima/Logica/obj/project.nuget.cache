@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "qhqgX5LHBhU=",
+  "dgSpecHash": "1MoRgG74/O4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\JMCars V2\\JMCars\\Logica\\Logica.csproj",
+  "projectFilePath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\Logica\\Logica.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\infor\\.nuget\\packages\\microsoft.bcl.cryptography\\8.0.0\\microsoft.bcl.cryptography.8.0.0.nupkg.sha512",
     "C:\\Users\\infor\\.nuget\\packages\\microsoft.data.sqlclient\\7.0.1\\microsoft.data.sqlclient.7.0.1.nupkg.sha512",

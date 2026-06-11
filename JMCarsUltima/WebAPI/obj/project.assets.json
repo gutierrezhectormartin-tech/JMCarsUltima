@@ -1697,11 +1697,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\JMCars V2\\JMCars\\WebAPI\\WebAPI.csproj",
+      "projectUniqueName": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\WebAPI\\WebAPI.csproj",
       "projectName": "WebAPI",
-      "projectPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\JMCars V2\\JMCars\\WebAPI\\WebAPI.csproj",
+      "projectPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\WebAPI\\WebAPI.csproj",
       "packagesPath": "C:\\Users\\infor\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\JMCars V2\\JMCars\\WebAPI\\obj\\",
+      "outputPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\WebAPI\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1724,11 +1724,11 @@
           "framework": "net8.0",
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\JMCars V2\\JMCars\\Logica\\Logica.csproj": {
-              "projectPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\JMCars V2\\JMCars\\Logica\\Logica.csproj"
+            "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\Logica\\Logica.csproj": {
+              "projectPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\Logica\\Logica.csproj"
             },
-            "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\JMCars V2\\JMCars\\Modelo\\Modelo.csproj": {
-              "projectPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\JMCars V2\\JMCars\\Modelo\\Modelo.csproj"
+            "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\Modelo\\Modelo.csproj": {
+              "projectPath": "C:\\Users\\infor\\OneDrive\\Documents\\Prueba Final AS\\V2\\JMCarsUltima-main\\JMCarsUltima\\JMCarsV2\\JMCarsUltima\\Modelo\\Modelo.csproj"
             }
           }
         }

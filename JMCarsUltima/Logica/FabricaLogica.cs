@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// comentario nomas
+// comentario nomas Para ver si funciona nuevamente
 
 namespace Logica
 {
