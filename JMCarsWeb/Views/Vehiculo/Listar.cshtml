@@ -1,0 +1,42 @@
+﻿@model List<Modelo.Vehiculo>
+
+<h2>Vehículos publicados</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No hay vehículos disponibles.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Año</th>
+                <th>Caja De Cambios</th>
+                <th>Motorización</th>
+                <th>Kilometraje</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var vehiculo in Model)
+            {
+                <tr>
+                    <td>@vehiculo.IdVehiculo</td>
+                    <td>@vehiculo.Modelo.Marca.NombreMarca</td>
+                    <td>@vehiculo.Modelo.Modelo</td>
+                    <td>@vehiculo.Anio</td>
+                    <td>@vehiculo.CajaCambios</td>
+                    <td>@vehiculo.Motorizacion</td>
+                    <td>@vehiculo.Km</td>
+                    <td>@vehiculo.Descripcion</td>
+                    <td>@vehiculo.Precio</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

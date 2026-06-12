@@ -21,10 +21,12 @@ namespace Modelo
             }
         }
 
-        public Cliente (int pIdUsuario, string pNombre, string pTelefono, string pEmail, string pPass, bool pEstado, string pCi) :
-            base (pIdUsuario, pNombre, pTelefono, pEmail, pPass, pEstado)
+        public Cliente (int pIdUsuario, string pNombre, string pTelefono, string pEmail, string pPass, bool pEstado, Rol pRolUsu, string pCi) :
+            base (pIdUsuario, pNombre, pTelefono, pEmail, pPass, pEstado, pRolUsu)
         {
             Cedula = pCi;
         }
+
+        public Cliente() { }
     }
 }

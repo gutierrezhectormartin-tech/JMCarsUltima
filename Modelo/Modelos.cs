@@ -44,5 +44,7 @@ namespace Modelo
             Marca = pMarca;
         }
 
+        public Modelos() { }
+
     }
 }

@@ -1,22 +1,31 @@
-html {
-  font-size: 14px;
+/* esstilos personalizados de JMCars */
+
+header .navbar {
+    background-color: #031051 !important;
+    border-bottom: 3px solid #0b1440;
+    padding: 12px 0;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+.navbar {
+    background-color: #031051 !important;
+    border-bottom: 3px solid #0b1440;
+    padding: 12px 0;
+    
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.navbar-brand {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #8d9eb2 !important;
+    letter-spacing: 1px;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
+    .navbar-brand:hover {
+        color: #ff6b6b !important;
+    }
 
-body {
-  margin-bottom: 60px;
+form .btn {
+    height: 38px;
+    line-height: 1.5;
+    white-space: nowrap;
 }

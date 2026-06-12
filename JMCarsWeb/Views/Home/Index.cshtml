@@ -1,8 +1,55 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model List<Modelo.Vehiculo>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h1>Vehículos publicados</h1>
+
+<form method="get" class="d-flex align-items-center gap-2 my-3">
+
+    <input type="text"
+           name="marca"
+           placeholder="Buscar por marca"
+           value="@Context.Request.Query["marca"]" 
+           class="form-control"
+    />
+
+    <button type="submit" class="btn btn-primary">
+        Buscar
+    </button>
+
+    <a href="/" class="btn btn-outline-dark" role="button">
+        ← Volver
+    </a>
+
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Año</th>
+            <th>Caja De Cambios</th>
+            <th>Motorizacion</th>
+            <th>Kilometraje</th>
+            <th>Descripcion</th>
+            <th>Precio</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var v in Model)
+        {
+            <tr>
+                <td>@v.IdVehiculo</td>
+                <td>@v.Modelo.Marca.NombreMarca</td>
+                <td>@v.Modelo.Modelo</td>
+                <td>@v.Anio</td>
+                <td>@v.CajaCambios</td>
+                <td>@v.Motorizacion</td>
+                <td>@v.Km.ToString("N0")</td>
+                <td>@v.Descripcion</td>
+                <td>@v.Precio.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>

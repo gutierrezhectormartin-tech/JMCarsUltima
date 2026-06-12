@@ -77,43 +77,44 @@ namespace Persistencia
                     {
                         return new Administrador(
                             id,
-                            nombre,
+                            nombre ?? string.Empty,
                             "",
                             pEmail,
                             pPass,
-                            estado
+                            estado,
+                            Rol.Administrador
                         );
                     }
-
                     else if (rol == (int)Rol.Escribano)
                     {
                         return new Escribano(
                             id,
-                            nombre,
+                            nombre ?? string.Empty,
                             "",
                             pEmail,
                             pPass,
                             estado,
+                            Rol.Escribano,
                             "",
                             ""
                         );
                     }
-
                     else
                     {
                         return new Cliente(
                             id,
-                            nombre,
+                            nombre ?? string.Empty,
                             "",
                             pEmail,
                             pPass,
                             estado,
+                            Rol.Cliente,
                             ""
                         );
                     }
                 }
 
-                return null;
+                return null!;
             }
             catch (Exception ex)
             {

@@ -1,0 +1,40 @@
+﻿<h2>Recuperar contraseña</h2>
+
+<form method="post">
+
+    <div class="mb-3">
+
+        <label>Email</label>
+
+        <input type="email"
+               name="email"
+               class="form-control" />
+
+    </div>
+
+    <button type="submit"
+            class="btn btn-dark">
+
+        Recuperar contraseña
+
+    </button>
+
+</form>
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-success mt-3">
+
+        @ViewBag.Mensaje
+
+    </div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger mt-3">
+
+        @ViewBag.Error
+
+    </div>
+}

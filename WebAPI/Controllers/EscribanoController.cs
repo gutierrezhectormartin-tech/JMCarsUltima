@@ -54,7 +54,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPost("{id}")]
+        [HttpPut("{id}")]
         public IActionResult ActualizarPerfil(int id, [FromBody] Escribano escribano)
         {
             if (!ModelState.IsValid)

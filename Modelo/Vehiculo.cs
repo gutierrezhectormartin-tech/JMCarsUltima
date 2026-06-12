@@ -137,5 +137,6 @@ namespace Modelo
             Vendedor = pVendedor;
             Fotografia = pFotografia;
         }
+        public Vehiculo() {}
     }
 }

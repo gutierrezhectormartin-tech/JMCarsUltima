@@ -104,6 +104,7 @@ namespace Persistencia
                         email,
                         "",
                         estado,
+                        Rol.Escribano,
                         numCaja,
                         direccion
                     );

@@ -6,8 +6,8 @@ namespace Modelo
 {
     public class Administrador : Usuario
     {
-        public Administrador(int pIdUsuario, string pNombre, string pTelefono, string pEmail, string pPass, bool pEstado) :
-            base( pIdUsuario,  pNombre,  pTelefono,  pEmail,  pPass, pEstado){}
+        public Administrador(int pIdUsuario, string pNombre, string pTelefono, string pEmail, string pPass, bool pEstado, Rol pRolUsu) :
+            base( pIdUsuario,  pNombre,  pTelefono,  pEmail,  pPass, pEstado, pRolUsu){}
 
     }
 }

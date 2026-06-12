@@ -1,32 +1,38 @@
-using JMCarsWeb.Models;
+﻿using JMCarsWeb.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using Modelo;
 
 namespace JMCarsWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly VehiculoService _vehiculoService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(VehiculoService vehiculoService)
         {
-            _logger = logger;
+            _vehiculoService = vehiculoService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string marca)
+        {
+            List<Vehiculo> lista = await _vehiculoService.ListarVehiculos();
+
+            if (!string.IsNullOrEmpty(marca))
+            {
+                lista = lista.Where(v =>
+                    v.Modelo.Marca.NombreMarca
+                    .ToLower()
+                    .Contains(marca.ToLower()))
+                    .ToList();
+            }
+
+            return View(lista);
+        }
+
+        [HttpGet]
+        public IActionResult CuentaInactivada()
         {
             return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

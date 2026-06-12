@@ -13,6 +13,7 @@ namespace Modelo
         private string email;
         private string contrasena;
         private bool estadoUsu;
+        private Rol rolUsu;
 
         public int IdUsuario
         {
@@ -77,7 +78,16 @@ namespace Modelo
             }
         }
 
-        public Usuario(int pIdUsuario, string pNombre, string pTelefono, string pEmail, string pPass, bool pEstado)
+        public Rol RolUsu
+        {
+            get { return rolUsu; }
+            set
+            {
+                rolUsu = value;
+            }
+        }
+
+        public Usuario(int pIdUsuario, string pNombre, string pTelefono, string pEmail, string pPass, bool pEstado, Rol pRolUsu)
         {
             IdUsuario = pIdUsuario;
             NombreCompleto = pNombre;
@@ -85,7 +95,10 @@ namespace Modelo
             Email = pEmail;
             Contrasena = pPass;
             EstadoUsu = pEstado;
+            RolUsu = pRolUsu;
         }
+
+        public Usuario() { }
 
     }
 }

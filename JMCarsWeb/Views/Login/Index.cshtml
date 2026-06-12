@@ -1,0 +1,43 @@
+@model Modelo.Usuario
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <h2>Iniciar sesión</h2>
+
+        @if (ViewBag.Mensaje != null)
+        {
+            <div class="alert alert-success">@ViewBag.Mensaje</div>
+        }
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        @using (Html.BeginForm("Login", "Login", FormMethod.Post))
+        {
+            <div class="mb-3">
+                @Html.LabelFor(m => m.Email, "Email", new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", required = "required" })
+            </div>
+            <div class="mb-3">
+                @Html.LabelFor(m => m.Contrasena, "Contraseña", new { @class = "form-label" })
+                @Html.PasswordFor(m => m.Contrasena, new { @class = "form-control", required = "required" })
+            </div>
+            <button type="submit" class="btn btn-primary">Ingresar</button>
+        }
+
+        <p class="mt-3">
+            @Html.ActionLink("Registrate como Cliente", "Registro", "Cliente")
+        </p>
+        <p>
+            @Html.ActionLink("Registrate como Escribano", "Registro", "Escribano")
+        </p>
+        <p>
+            @Html.ActionLink("¿Olvidaste tu contraseña?", "RecuperarContrasena", "Usuario")
+        </p>
+    </div>
+</div>

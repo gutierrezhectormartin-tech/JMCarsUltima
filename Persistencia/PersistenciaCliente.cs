@@ -98,6 +98,7 @@ namespace Persistencia
                         email,
                         "",
                         estado,
+                        Rol.Cliente,
                         cedula
                     );
                 }

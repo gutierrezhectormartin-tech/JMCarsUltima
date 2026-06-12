@@ -32,5 +32,7 @@ namespace Modelo
             IdMarca = pIdMarca;
             NombreMarca = pNombreMarca;
         }
+
+        public Marcas() { }
     }
 }

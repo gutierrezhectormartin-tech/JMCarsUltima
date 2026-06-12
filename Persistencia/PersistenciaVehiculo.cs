@@ -54,6 +54,7 @@ namespace Persistencia
                         "",
                         "",
                         true,
+                        Rol.Cliente,
                         ""
                     );
 
