@@ -20,14 +20,6 @@ namespace Persistencia
 
             return _instancia;
         }
-
-        // se llama una unica vez desde el arranque de WebApi
-        // para pasarle a la persistencia la conexion del appsettings.json
-        public static void ConfigurarConexion(string pConexion)
-        {
-            Conexion.SetConexion(pConexion);
-        }
-
         public IPersistenciaUsuario GetPersistenciaUsuario()
         {
             return new PersistenciaUsuario();

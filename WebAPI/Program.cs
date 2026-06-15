@@ -12,10 +12,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Esto tuve que poner para que cargara la conexion
-var connectionString = builder.Configuration.GetConnectionString("Aplicacion")!;
-FabricaPersistencia.ConfigurarConexion(connectionString);
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
