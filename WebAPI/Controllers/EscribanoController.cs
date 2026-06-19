@@ -20,7 +20,12 @@ namespace WebAPI.Controllers
         [HttpPost("registrar")]
         public IActionResult Registrar([FromBody] Escribano escribano)
         {
-            if(!ModelState.IsValid)
+            if (string.IsNullOrEmpty(escribano.Contrasena))
+            { 
+                return BadRequest(new { mensaje = "La contraseña es obligatoria." }); 
+            }
+
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }

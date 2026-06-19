@@ -7,13 +7,19 @@ using Modelo;
 
 namespace WebAPI.Controllers
 {
+    public class ActualizarPerfilClienteRequest
+    {
+        public string NombreCompleto { get; set; }
+        public string Telefono { get; set; }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
-    public class ClientController : ControllerBase
+    public class ClienteController : ControllerBase
     {
         private readonly ILogicaCliente _logicaCliente;
 
-        public ClientController()
+        public ClienteController()
         {
             _logicaCliente = FabricaLogica.GetInstancia().GetLogicaCliente();
         }
@@ -23,6 +29,11 @@ namespace WebAPI.Controllers
         [HttpPost("registrar")]
         public IActionResult Registrar([FromBody] Cliente cliente)
         {
+            if (string.IsNullOrEmpty(cliente.Contrasena))
+            {
+                return BadRequest(new { mensaje = "La contraseña es obligatoria." });
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -58,7 +69,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPost("{id}")]
+        [HttpPut("{id}")]
         public IActionResult ActualizarPerfil(int id, [FromBody] Cliente cliente)
         {
             if (!ModelState.IsValid)

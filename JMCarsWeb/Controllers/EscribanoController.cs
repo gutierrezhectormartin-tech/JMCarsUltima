@@ -32,7 +32,7 @@ namespace WebApi.Controllers
             try
             {
                 await _escribanoService.Registrar(escribanoPasado);
-                ViewBag.Mensaje = "Registro recibido. Tu cuenta será activada cuando un administrador la apruebe.";
+                TempData["Mensaje"] = "Registro recibido. Tu cuenta será activada cuando un administrador la apruebe.";//le agregue aca el tempdata porque nunca iba a funcionarte con viewbag, luego de un redirect el viewbag se pierde te acordas martin?
                 return RedirectToAction("Index", "Login");
             }
             catch (Exception ex)

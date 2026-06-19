@@ -1,4 +1,4 @@
-@model Modelo.Usuario
+@model JMCarsWeb.ViewModels.LoginViewModel
 @{
     ViewData["Title"] = "Iniciar sesión";
 }
@@ -6,6 +6,17 @@
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
         <h2>Iniciar sesión</h2>
+
+        
+        @if(TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        @if(TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success">@TempData["Mensaje"]</div>
+        }
 
         @if (ViewBag.Mensaje != null)
         {

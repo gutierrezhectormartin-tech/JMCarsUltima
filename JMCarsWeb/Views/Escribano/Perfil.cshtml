@@ -19,6 +19,9 @@
 
         @using (Html.BeginForm("Perfil", "Escribano", FormMethod.Post))
         {
+            @Html.HiddenFor(m => m.Email)
+            @Html.HiddenFor(m => m.NumeroCaja)
+
             <div class="mb-3">
                 @Html.LabelFor(m => m.NombreCompleto, "Nombre completo", new { @class = "form-label" })
                 @Html.TextBoxFor(m => m.NombreCompleto, new { @class = "form-control" })
@@ -31,11 +34,11 @@
             </div>
             <div class="mb-3">
                 @Html.LabelFor(m => m.Email, "Email", new { @class = "form-label" })
-                <p class="form-control-plaintext">@Model.Email</p>
+                <input type ="text" class="form-control" value="@Model.Email" disabled ="disabled"/>
             </div>
             <div class="mb-3">
                 @Html.LabelFor(m => m.NumeroCaja, "Número de caja profesional", new { @class = "form-label" })
-                <p class="form-control-plaintext">@Model.NumeroCaja</p>
+                <input type="text" class="form-control" value="@Model.NumeroCaja" disabled="disabled"/>
             </div>
             <div class="mb-3">
                 @Html.LabelFor(m => m.Direccion, "Dirección del estudio", new { @class = "form-label" })

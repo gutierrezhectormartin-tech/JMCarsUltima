@@ -209,7 +209,15 @@ CREATE TABLE Mensaje (
 )
 GO
 
-
+CREATE TABLE TokenRecuperacion (
+    IdToken INT IDENTITY(1,1) PRIMARY KEY,
+    IdUsuario INT NOT NULL,
+    Token VARCHAR(255) NOT NULL,
+    FechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    FechaExpiracion DATETIME NOT NULL,
+    Usado BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_TokenRecuperacion_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario)
+);
 
 ---------------------- SP-------------------------
 
@@ -279,6 +287,38 @@ BEGIN
     AND Estado = 1
 END
 GO
+
+create proc TokenRecuperacionCrear
+@IdUsuario int,
+@Token varchar(255),
+@FechaExpiracion datetime
+as
+begin
+
+    insert into TokenRecuperacion (IdUsuario, Token, FechaExpiracion)
+    values (@IdUsuario, @Token, @FechaExpiracion);
+end
+go
+
+create proc TokenRecuperacionObtener
+@Token VARCHAR(255)
+as
+begin
+
+    select IdToken, IdUsuario, Token, FechaCreacion, FechaExpiracion, Usado
+    from TokenRecuperacion
+    where Token = @Token and Usado = 0 and FechaExpiracion > GETDATE();
+end
+
+create proc TokenRecuperacionUsado
+@IdToken int
+as
+begin
+
+    update TokenRecuperacion
+    set Usado = 1
+    where IdToken = @IdToken;
+end
 
 -- Crear Vehículo
 CREATE PROCEDURE sp_Vehiculo_Crear

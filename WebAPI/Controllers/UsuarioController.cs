@@ -9,13 +9,7 @@ namespace WebAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
 
-    public class LoginRequest
-    {
-        public string Email { get; set; }
-        public string Contrasenia { get; set; }
-
-    }
-    public class UsuarioController : ControllerBase
+        public class UsuarioController : ControllerBase
     {
         private readonly ILogicaUsuario _logicaUsuario;
 
@@ -34,7 +28,7 @@ namespace WebAPI.Controllers
                 
             try
             {
-                Usuario usuario = _logicaUsuario.Login(request.Email, request.Contrasenia);
+                Usuario usuario = _logicaUsuario.Login(request.Email, request.Contrasena);
                 if(usuario == null)
                     {
                         return Unauthorized(new { mensaje = "Email o Contraseña incorrectos" });
@@ -62,6 +56,11 @@ namespace WebAPI.Controllers
             }
         }
     }
+    public class LoginRequest
+    {
+        public string Email { get; set; }
+        public string Contrasena { get; set; }
 
+    }
 
 }

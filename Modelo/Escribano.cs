@@ -38,5 +38,11 @@ namespace Modelo
             NumeroCaja = pNumeroCaja;
             Direccion = pDireccion;
         }
+
+        public Escribano()
+        {
+            NumeroCaja = string.Empty;
+            Direccion = string.Empty;
+        }
     }
 }

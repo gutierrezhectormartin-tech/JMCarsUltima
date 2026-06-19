@@ -1,4 +1,5 @@
 using JMCarsWeb.Services;
+using JMCarsWeb.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Modelo;
 
@@ -21,22 +22,22 @@ namespace WebApi.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Login(Usuario usu)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 ViewBag.Error = "Email y contraseña son obligatorios.";
-                return View("Index", usu);
+                return View("Index", model);
             }
 
             // Martin cambiamos la llamaada a la logica, para desacoplar por el servicio de usuarios
-            Usuario usuarioLogueado = await _usuarioService.Login(usu.Email, usu.Contrasena);
+            Usuario usuarioLogueado = await _usuarioService.Login(model.Email, model.Contrasena);
 
             if (usuarioLogueado == null)
             {
                 // credenciales invalidas, vuelvo a mostrar el formulario con error
                 ViewBag.Error = "Email o contraseña incorrectos.";
-                return View("Index");
+                return View("Index", model);
             }
 
             //guardamos los datos en el sesion

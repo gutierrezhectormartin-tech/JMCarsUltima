@@ -32,7 +32,7 @@ namespace WebApi.Controllers
             try
             {
                 await _clienteService.Registrar(clientePasado);
-                ViewBag.Mensaje = "Registro realizado con éxito.";
+                TempData ["Mensaje"] = "Registro realizado con éxito."; //le agregue aca el tempdata porque nunca iba a funcionarte con viewbag, luego de un redirect el viewbag se pierde te acordas martin?
                 return RedirectToAction("Index", "Login");
             }
             catch (Exception ex)
@@ -74,7 +74,16 @@ namespace WebApi.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            if(!ModelState.IsValid)
+            ModelState.Remove(nameof(Cliente.Contrasena));
+
+            if (!ModelState.IsValid)
+            {
+                var errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                ViewBag.Error = string.Join(" | ", errores);
+                return View(clientePasado);
+            }
+
+            if (!ModelState.IsValid)
             {
                 return View(clientePasado);
             }

@@ -11,7 +11,7 @@ namespace Modelo
         private string nombreCompleto;
         private string telefono;
         private string email;
-        private string contrasena;
+        private string? contrasena;
         private bool estadoUsu;
         private Rol rolUsu;
 
@@ -58,9 +58,10 @@ namespace Modelo
             }
         }
 
-        [Required(ErrorMessage = "La contraseña es obligatoria.")]
+        //Martin la contraseña no es obligatoria en el cliente, eso solo es obligatorio en el registro se saca, sino
+        //cada vez que vas a usar el modelo, te pide si o si que mandes contraseña.
         [StringLength(255, MinimumLength = 3, ErrorMessage = "La contraseña debe tener entre 3 y 255 caracteres.")]
-        public string Contrasena
+        public string? Contrasena
         {
             get { return contrasena; }
             set

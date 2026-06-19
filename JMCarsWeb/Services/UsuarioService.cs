@@ -12,12 +12,14 @@ namespace JMCarsWeb.Services
             _httpClient = httpClientFactory.CreateClient("JMCarsAPI");
         }
 
-        public async Task<Usuario> Login (string email, string contrasenia)
+        public async Task<Usuario> Login (string email, string contrasena)
         {
-            var request = new { Email = email, Contrasenia = contrasenia };
+            var request = new { Email = email, Contrasena = contrasena };
             var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/login", request);
 
-            if(respuesta.IsSuccessStatusCode)
+
+
+            if (respuesta.IsSuccessStatusCode)
             {
                 return await respuesta.Content.ReadFromJsonAsync<Usuario>();
             }
