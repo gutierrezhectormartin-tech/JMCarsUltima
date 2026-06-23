@@ -178,7 +178,7 @@ namespace Persistencia
             }
             finally
             {
-                oConexion.Close(),
+                oConexion.Close();
             }
         }
 
