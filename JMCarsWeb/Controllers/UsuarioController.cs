@@ -21,16 +21,12 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> RecuperarContrasena(string email)
         {
-            bool existe = await _usuarioService.ExisteMail(email);
+            bool enviado = await _usuarioService.RecuperarContrasena(email);
 
-            if (existe)
-            {
-                ViewBag.Mensaje = "Se enviaron instrucciones al correo.";
-            }
+            if (enviado)
+                ViewBag.Mensaje = "Si el email existe, se enviaron instrucciones a tu correo.";
             else
-            {
-                ViewBag.Error = "No existe una cuenta asociada a ese correo.";
-            }
+                ViewBag.Error = "Ocurrió un error. Intentá nuevamente.";
 
             return View();
         }
