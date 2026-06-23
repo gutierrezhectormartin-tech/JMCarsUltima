@@ -12,5 +12,9 @@ namespace Logica.Interfaces
         Usuario Login(string pEmail, string pPass);
 
         bool ExisteEmail(string pEmail);
+
+        TokenRecuperacion RecuperarContrasena(string pEmail);
+        bool ResetearContrasena(string pToken, string pNuevaContrasena);
+
     }
 }

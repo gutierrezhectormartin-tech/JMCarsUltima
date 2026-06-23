@@ -40,6 +40,10 @@ namespace Persistencia
             return new PersistenciaVehiculo();
         }
 
-  
+        public IPersistenciaTokenRecuperacion GetPersistenciaTokenRecuperacion()
+        {
+            return new PersistenciaTokenRecuperacion();
+        }
+
     }
 }

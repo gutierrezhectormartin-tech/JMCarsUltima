@@ -309,16 +309,44 @@ begin
     from TokenRecuperacion
     where Token = @Token and Usado = 0 and FechaExpiracion > GETDATE();
 end
+go
 
 create proc TokenRecuperacionUsado
 @IdToken int
 as
 begin
-
     update TokenRecuperacion
     set Usado = 1
     where IdToken = @IdToken;
 end
+go
+
+create proc ObtenerUsuarioxMail
+@Email varchar(255)
+as
+begin
+    select U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado,
+        case
+            when A.IdUsuario is not null then 1
+            when E.IdUsuario is not null then 2
+            when C.IdUsuario is not null then 3
+        end as IdRol
+    from Usuario U
+    left join Administrador A on U.IdUsuario = A.IdUsuario
+    left join Escribano E on U.IdUsuario = E.IdUsuario
+    left join Cliente C on U.IdUsuario = C.IdUsuario
+    where U.Email = @Email and U.Estado = 1
+end
+go
+
+create proc ActualizarContrasenaUsuario
+@IdUsuario int,
+@NuevaContrasena varchar(255)
+as
+begin
+    update Usuario set Contrasena = @NuevaContrasena where IdUsuario = @IdUsuario
+end
+go
 
 -- Crear Vehículo
 CREATE PROCEDURE sp_Vehiculo_Crear

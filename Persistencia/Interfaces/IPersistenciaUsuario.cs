@@ -10,6 +10,10 @@ namespace Persistencia.Interfaces
     public interface IPersistenciaUsuario
     {
         Usuario Login(string pEmail, string pPass);
+
+        Usuario ObtenerPorEmail(string pEmail);
+
+        void ActualizarContrasena(int pIdUsuario, string pNuevaContrasena);
         bool ExisteEmail(string pEmail);
     }
 }
