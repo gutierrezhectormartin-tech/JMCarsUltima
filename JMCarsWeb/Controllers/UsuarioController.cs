@@ -30,5 +30,35 @@ namespace WebApi.Controllers
 
             return View();
         }
+
+        [HttpGet]
+        public IActionResult ResetearContrasena(string token)
+        {
+            if(string.IsNullOrEmpty(token))
+            {
+                ViewBag.Error = "El enlace no es válido.";
+                return View("RecuperarContrasena");
+            }
+
+            ViewBag.Token = token;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetearContrasena(string ptoken, string pNuevaContrasena)
+        {
+            bool exito = await _usuarioService.ResetearContrasena(ptoken, pNuevaContrasena);
+
+            if(exito)
+            {
+                TempData["Mensaje"] = "Tu contraseña fue reseteada correctamente. Inicia sesión con tu nueva contraseña.";
+                return RedirectToAction("Index", "Login");
+            }
+
+            ViewBag.Error = "El enlace no es válido o ya expiró";
+            ViewBag.Token = ptoken;
+            return View();
+        }
+
     }
 }

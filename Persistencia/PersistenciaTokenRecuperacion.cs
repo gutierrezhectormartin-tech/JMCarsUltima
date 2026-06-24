@@ -16,7 +16,7 @@ namespace Persistencia
         {
             SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
 
-            SqlCommand oComando = new SqlCommand("TokenRecuperacion", oConexion);
+            SqlCommand oComando = new SqlCommand("TokenRecuperacionCrear", oConexion);
             oComando.CommandType = CommandType.StoredProcedure;
 
             oComando.Parameters.AddWithValue("@IdUsuario", pToken.IdUsuario);

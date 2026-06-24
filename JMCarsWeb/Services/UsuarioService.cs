@@ -32,15 +32,16 @@ namespace JMCarsWeb.Services
             return await _httpClient.GetFromJsonAsync<bool>($"api/usuario/existe-mail/{email}");
         }
 
-        public async Task<bool> RecuperarContrasena(string pEmail)
+        public async Task<bool> RecuperarContrasena(string email)
         {
-            var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/recuperar-contrasena", pEmail);
+            var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/recuperar-contrasena", email);
+            var contenido = await respuesta.Content.ReadAsStringAsync();
             return respuesta.IsSuccessStatusCode;
         }
 
-        public async Task<bool> ResetearContrasena(string pToken, string pNuevaContrasena)
+        public async Task<bool> ResetearContrasena(string token, string NuevaContrasena)
         {
-            var request = new { Token = pToken, NuevaContrasena = pNuevaContrasena };
+            var request = new { Token = token, NuevaContrasena = NuevaContrasena };
             var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/resetear-contrasena", request);
             return respuesta.IsSuccessStatusCode;
         }

@@ -14,11 +14,13 @@ namespace WebAPI.Controllers
     {
         private readonly ILogicaUsuario _logicaUsuario;
         private readonly IEmailService _servicioEmail;
+        private readonly IConfiguration _configuracion;
 
-        public UsuarioController(IEmailService servicioEmail)
+        public UsuarioController(IEmailService servicioEmail, IConfiguration configuracion)
         {
             _logicaUsuario = FabricaLogica.GetInstancia().GetLogicaUsuario();
             _servicioEmail = servicioEmail;
+            _configuracion = configuracion;
         }
 
 
@@ -72,7 +74,7 @@ namespace WebAPI.Controllers
                     return Ok(new { mensaje = "De existir el mail ingresado se enviarán instrucciones a su casilla." });
                 }
 
-                string link = $"http://localhost:7242/Usuario/ResetearContrasena?token={token.Token}";
+                string link = $"https://localhost:7242/Usuario/ResetearContrasena?token={token.Token}";
 
                 await _servicioEmail.EnviarCorreoRecuperacion(pEmail, "Usuario JMCars", link);
 

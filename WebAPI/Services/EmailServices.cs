@@ -34,6 +34,8 @@ namespace WebAPI.Services
 
             using var cliente = new SmtpClient();
 
+            cliente.CheckCertificateRevocation = false;
+
             await cliente.ConnectAsync(_configuracion["EmailSettings:Host"]!, int.Parse(_configuracion["EmailSettings:Port"]!), SecureSocketOptions.StartTls);
 
             await cliente.AuthenticateAsync(_configuracion["EmailSettings:Usuario"]!, _configuracion["EmailSettings:ContrasenaApp"]!);

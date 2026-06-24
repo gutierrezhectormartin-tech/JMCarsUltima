@@ -17,6 +17,7 @@ namespace Logica
         public LogicaUsuario()
         {
             persistenciaUsuario = FabricaPersistencia.GetInstancia().GetPersistenciaUsuario();
+            persistenciaToken = FabricaPersistencia.GetInstancia().GetPersistenciaTokenRecuperacion();
         }
 
         public Usuario Login(string pEmail, string pPass)
