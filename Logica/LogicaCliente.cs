@@ -22,7 +22,7 @@ namespace Logica
         public void Registrar(Cliente pCliente)
         {
             // ver como encriptar la contraseña
-
+            pCliente.Contrasena = Encriptacion.Hashear(pCliente.Contrasena!);
             persistenciaCliente.Registrar(pCliente);
         }
 

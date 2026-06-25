@@ -1,5 +1,15 @@
 ﻿@model List<Modelo.Vehiculo>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success">@TempData["Mensaje"]</div>
+}
+
 <h1>Vehículos publicados</h1>
 
 <form method="get" class="d-flex align-items-center gap-2 my-3">

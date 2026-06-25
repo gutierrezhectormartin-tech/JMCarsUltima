@@ -106,6 +106,22 @@ namespace WebAPI.Controllers
             }  
         }
 
+        //[HttpGet("generar-hashes")]
+        //public IActionResult GenerarHashes()
+        //{
+        //    var contrasenas = new[]
+        //    {
+        //        "admin123", "juan123", "maria123", "carlos123", "ana123",
+        //        "pedro123", "lucia123", "martin123", "vale123", "nico123",
+        //        "sofia123", "diego123", "camila123", "fede123", "laura123"
+        //    };
+
+        //    var resultado = contrasenas.ToDictionary(pass => pass,pass => BCrypt.Net.BCrypt.HashPassword(pass));
+
+        //    return Ok(resultado);
+        //}
+
+
     }
     public class LoginRequest
     {

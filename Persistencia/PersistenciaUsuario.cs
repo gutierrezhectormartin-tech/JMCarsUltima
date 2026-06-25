@@ -38,20 +38,15 @@ namespace Persistencia
             }
         }
 
-        public Usuario Login(string pEmail, string pPass)
+        public Usuario Login(string pEmail)
         {
             SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
-
             SqlCommand oComando = new SqlCommand("sp_Usuario_Login", oConexion);
-
             oComando.CommandType = CommandType.StoredProcedure;
 
             SqlParameter _email = new SqlParameter("@Email", pEmail);
-
-            SqlParameter _pass = new SqlParameter("@Contrasena", pPass);
-
             oComando.Parameters.Add(_email);
-            oComando.Parameters.Add(_pass);
+
 
             try
             {
@@ -69,7 +64,9 @@ namespace Persistencia
                         Convert.ToInt32(oReader["IdUsuario"]);
 
                     string nombre =
-                        oReader["NombreCompleto"].ToString();
+                        oReader["NombreCompleto"].ToString() ?? string.Empty;
+
+                    string hashGuardado = oReader["Contrasena"].ToString() ?? string.Empty;
 
                     bool estado =
                         Convert.ToBoolean(oReader["Estado"]);
@@ -81,7 +78,7 @@ namespace Persistencia
                             nombre ?? string.Empty,
                             "",
                             pEmail,
-                            pPass,
+                            hashGuardado,
                             estado,
                             Rol.Administrador
                         );
@@ -93,7 +90,7 @@ namespace Persistencia
                             nombre ?? string.Empty,
                             "",
                             pEmail,
-                            pPass,
+                            hashGuardado,
                             estado,
                             Rol.Escribano,
                             "",
@@ -107,7 +104,7 @@ namespace Persistencia
                             nombre ?? string.Empty,
                             "",
                             pEmail,
-                            pPass,
+                            hashGuardado,
                             estado,
                             Rol.Cliente,
                             ""

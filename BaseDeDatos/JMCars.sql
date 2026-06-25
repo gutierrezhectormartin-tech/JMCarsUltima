@@ -218,16 +218,17 @@ CREATE TABLE TokenRecuperacion (
     Usado BIT NOT NULL DEFAULT 0,
     CONSTRAINT FK_TokenRecuperacion_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario)
 );
-
+GO
 ---------------------- SP-------------------------
 
 -- Login
-CREATE PROCEDURE sp_Usuario_Login
-    @Email VARCHAR(255), 
-    @Contrasena VARCHAR(255)
+-- >>> Ya no recibe @Contrasena: el SP solo busca por Email/Estado y devuelve el hash guardado.
+--	   La verificacion real del hash (BCrypt) se hace en la capa Logica (LogicaUsuario.Login).
+CREATE PROC sp_Usuario_Login
+    @Email VARCHAR(255) 
 AS
 BEGIN
-    SELECT U.IdUsuario, U.NombreCompleto, U.Estado,
+    SELECT U.IdUsuario, U.NombreCompleto, U.Contrasena, U.Estado,
            CASE 
                WHEN A.IdUsuario IS NOT NULL THEN 1 -- Admin
                WHEN E.IdUsuario IS NOT NULL THEN 2 -- Escribano
@@ -237,11 +238,12 @@ BEGIN
     LEFT JOIN Administrador A ON U.IdUsuario = A.IdUsuario
     LEFT JOIN Escribano E ON U.IdUsuario = E.IdUsuario
     LEFT JOIN Cliente C ON U.IdUsuario = C.IdUsuario
-    WHERE U.Email = @Email AND U.Contrasena = @Contrasena AND U.Estado = 1;
+    WHERE U.Email = @Email AND U.Estado = 1;
 END
 GO
 
 -- Registrar Cliente
+-- >>> @Contrasena llega ya hasheado con BCrypt desde la capa Logica (LogicaCliente.Registrar).
 CREATE PROCEDURE sp_Usuario_RegistrarCliente
     @NombreCompleto VARCHAR(100), @Telefono VARCHAR(20), @Email VARCHAR(255), 
     @Contrasena VARCHAR(255), @Cedula VARCHAR(8)
@@ -259,6 +261,7 @@ END
 GO
 
 -- Registrar Escribano (Inactivo por defecto para aprobación)
+-- >>> @Contrasena llega ya hasheado con BCrypt desde la capa Logica (LogicaEscribano.Registrar).
 CREATE PROCEDURE sp_Usuario_RegistrarEscribano
     @NombreCompleto VARCHAR(100), @Telefono VARCHAR(20), @Email VARCHAR(255), 
     @Contrasena VARCHAR(255), @NumCajaProf VARCHAR(50), @DireccionEstudio VARCHAR(200)
@@ -339,6 +342,7 @@ begin
 end
 go
 
+-- >>> @NuevaContrasena llega ya hasheado con BCrypt desde la capa Logica (LogicaUsuario.ResetearContrasena).
 create proc ActualizarContrasenaUsuario
 @IdUsuario int,
 @NuevaContrasena varchar(255)
@@ -688,88 +692,108 @@ CREATE INDEX IX_Mensaje_Chat ON Mensaje (IdChat, FechaHora);
 -- DATOS DE PRUEBA
 ---------------------------------
 
+-- >>> Las contraseñas de los datos de prueba estan hasheadas con BCrypt (BCrypt.Net-Next),
+--	   con el mismo algoritmo que usa la capa Logica al registrar o resetear una contraseña real.
+--	   La contraseña en texto plano de cada usuario de prueba se indica en el comentario de cada INSERT.
+
 -- =========================
 -- USUARIOS
 -- =========================
 
 -- ADMIN
+-- contraseña en texto plano: admin123
 INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Administrador General', '099111111', 'admin@jmcars.com', 'admin123', 1)
+VALUES ('Administrador General', '099111111', 'admin@jmcars.com', '$2a$11$RnZq9IMIumUFyCbX.jJiNOzpResv2DDHS8qIAeKbNzLd1.hG8Z1Eq', 1)
 
 INSERT INTO Administrador VALUES (SCOPE_IDENTITY())
 GO
 
 
 -- CLIENTES
+-- contraseña en texto plano: juan123
 INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Juan Perez', '099222222', 'juan@gmail.com', 'juan123', 1)
+VALUES ('Juan Perez', '099222222', 'juan@gmail.com', '$2a$11$f3Z36OTiTXCp3uNvdGTn/.u4/l1a.Z4A07QOEDt4xRFvmltxFjMy6', 1)
 
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(), '45678901')
 GO
 
+-- contraseña en texto plano: maria123
 INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Maria Rodriguez', '099333333', 'maria@gmail.com', 'maria123', 1)
+VALUES ('Maria Rodriguez', '099333333', 'maria@gmail.com', '$2a$11$X0P55g8U.n62nmY382g2Mevc/PYUy9QfOZRc5SH0NRcvrvpbSTFEW', 1)
 
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(), '47896521')
 GO
 
+-- contraseña en texto plano: carlos123
 INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Carlos Lopez', '099444444', 'carlos@gmail.com', 'carlos123', 1)
+VALUES ('Carlos Lopez', '099444444', 'carlos@gmail.com', '$2a$11$f00kcEXB1qQuvreMtcdU8OFNpzWL.KHzyQNJnCoz835fpWJ7B/6f2', 1)
 
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(), '51234789')
 GO
 
-INSERT INTO Usuario VALUES ('Ana Silva','099555001','ana@gmail.com','ana123',1)
+-- contraseña en texto plano: ana123
+INSERT INTO Usuario VALUES ('Ana Silva','099555001','ana@gmail.com','$2a$11$gBCgqfKmQddhfbXMRGshMe4nF69Mk9a7jrHd.D/y9u.GKSU/X.Ve.',1)
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345671')
 GO
 
-INSERT INTO Usuario VALUES ('Pedro Gomez','099555002','pedro@gmail.com','pedro123',1)
+-- contraseña en texto plano: pedro123
+INSERT INTO Usuario VALUES ('Pedro Gomez','099555002','pedro@gmail.com','$2a$11$goZSAVgW6V3v0Bg1znpb8.uAqZE6NyQhepL.ApLB8XknTIB.iFCbS',1)
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345672')
 GO
 
-INSERT INTO Usuario VALUES ('Lucia Torres','099555003','lucia@gmail.com','lucia123',1)
+-- contraseña en texto plano: lucia123
+INSERT INTO Usuario VALUES ('Lucia Torres','099555003','lucia@gmail.com','$2a$11$2PboZShybaCIs7ScvEB1le5ZjwsumR0Kubxuq5cNRSuatDmCp3Koy',1)
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345673')
 GO
 
-INSERT INTO Usuario VALUES ('Martin Suarez','099555004','martin@gmail.com','martin123',1)
+-- contraseña en texto plano: martin123
+INSERT INTO Usuario VALUES ('Martin Suarez','099555004','martin@gmail.com','$2a$11$oeCrp9oFsWt6k3opcbaL4uSPAvWsIPrWx8evwWkvQ5tohrOag9Lv.',1)
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345674')
 GO
 
-INSERT INTO Usuario VALUES ('Valentina Castro','099555005','vale@gmail.com','vale123',1)
+-- contraseña en texto plano: vale123
+INSERT INTO Usuario VALUES ('Valentina Castro','099555005','vale@gmail.com','$2a$11$ax4Gx8F/HqL5SJcnU6Q8QeRSq2THhwPVo87FVoVI0P79l3DGMOEma',1)
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345675')
 GO
 
-INSERT INTO Usuario VALUES ('Nicolas Pereira','099555006','nico@gmail.com','nico123',1)
+-- contraseña en texto plano: nico123
+INSERT INTO Usuario VALUES ('Nicolas Pereira','099555006','nico@gmail.com','$2a$11$11Rjnp/8JtVD1cLBC4Ze2ef1GYwikELJWe3YxSLbTHQmQX0SXi1du',1)
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345676')
 GO
 
-INSERT INTO Usuario VALUES ('Sofia Fernandez','099555007','sofia@gmail.com','sofia123',1)
+-- contraseña en texto plano: sofia123
+INSERT INTO Usuario VALUES ('Sofia Fernandez','099555007','sofia@gmail.com','$2a$11$FCGAxt1fCgnI8.bhrFCSJeV8YUjIk0EEUscyx1dSQHpW.tDkrRxY.',1)
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345677')
 GO
 
-INSERT INTO Usuario VALUES ('Diego Alvarez','099555008','diegoa@gmail.com','diego123',1)
+-- contraseña en texto plano: diego123
+INSERT INTO Usuario VALUES ('Diego Alvarez','099555008','diegoa@gmail.com','$2a$11$SVsxbYkDlS8U35NpiDxO4OjsKyWEFUIaNRbOBMHyN6Yso9NxS6Bmu',1)
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345678')
 GO
 
-INSERT INTO Usuario VALUES ('Camila Rodriguez','099555009','camila@gmail.com','camila123',1)
+-- contraseña en texto plano: camila123
+INSERT INTO Usuario VALUES ('Camila Rodriguez','099555009','camila@gmail.com','$2a$11$PsDxWKANCqoOK1fyY2YhnOhRKF5/qsOUc7Cm0j6a..uZRrCaB4ZiO',1)
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345679')
 GO
 
-INSERT INTO Usuario VALUES ('Federico Ramos','099555010','fede@gmail.com','fede123',1)
+-- contraseña en texto plano: fede123
+INSERT INTO Usuario VALUES ('Federico Ramos','099555010','fede@gmail.com','$2a$11$8IfVpKVp23e8b5V2xFGUhO7DwiAb.bRfuPCkLAqpNSRTcQNIVH3.6',1)
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345680')
 GO
 
 
 
 -- ESCRIBANOS
+-- contraseña en texto plano: laura123
 INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Laura Fernandez', '098111111', 'laura@estudio.com', 'laura123', 1)
+VALUES ('Laura Fernandez', '098111111', 'laura@estudio.com', '$2a$11$llXXvtghK8unawt5eMYblOcvHLjIJMm0.Iztqdl58peMXJ6vexHxu', 1)
 
 INSERT INTO Escribano VALUES (SCOPE_IDENTITY(), 'CP1001', '18 de Julio 1234')
 GO
 
+-- contraseña en texto plano: diego123
 INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Diego Martinez', '098222222', 'diego@estudio.com', 'diego123', 0)
+VALUES ('Diego Martinez', '098222222', 'diego@estudio.com', '$2a$11$SVsxbYkDlS8U35NpiDxO4OjsKyWEFUIaNRbOBMHyN6Yso9NxS6Bmu', 0)
 
 INSERT INTO Escribano VALUES (SCOPE_IDENTITY(), 'CP1002', 'Bulevar Artigas 456')
 GO
@@ -1062,4 +1086,3 @@ VALUES
 
 (1, 3, 'Perfecto, me interesa coordinar una visita.')
 GO
-

@@ -24,7 +24,7 @@ namespace Logica
         public void Registrar(Escribano pEscribano)
         {
             // ver como encriptar la contraseña
-
+            pEscribano.Contrasena = Encriptacion.Hashear(pEscribano.Contrasena!);
             persistenciaEscribano.Registrar(pEscribano);
         }
 

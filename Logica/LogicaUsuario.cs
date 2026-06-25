@@ -22,7 +22,21 @@ namespace Logica
 
         public Usuario Login(string pEmail, string pPass)
         {
-            return persistenciaUsuario.Login(pEmail, pPass);
+            Usuario usuario = persistenciaUsuario.Login(pEmail);
+
+            if(usuario == null)
+            {
+                return null!;
+            }
+
+            bool valida = Encriptacion.Verificar(pPass, usuario.Contrasena!);
+
+            if(!valida)
+            {
+                return null!;
+            }
+
+            return usuario;
         }
 
         public bool ExisteEmail(string pEmail)
@@ -71,7 +85,8 @@ namespace Logica
                 return false;
             }
 
-            persistenciaUsuario.ActualizarContrasena(tokenValido.IdUsuario, pNuevaContrasena);
+            string hashNuevo = Encriptacion.Hashear(pNuevaContrasena);
+            persistenciaUsuario.ActualizarContrasena(tokenValido.IdUsuario, hashNuevo);
             persistenciaToken.MarcarUsado(tokenValido.IdToken);
 
             return true;

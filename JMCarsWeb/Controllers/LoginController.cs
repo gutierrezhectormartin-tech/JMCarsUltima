@@ -62,6 +62,7 @@ namespace WebApi.Controllers
         {
             // limpio la sesion del usuario
             HttpContext.Session.Clear();
+            TempData["Mensaje"] = "Se ha cerrado correctamente tu sesión";
             return RedirectToAction("Index", "Home");
         }
     }

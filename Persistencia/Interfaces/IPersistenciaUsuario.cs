@@ -9,7 +9,7 @@ namespace Persistencia.Interfaces
 {
     public interface IPersistenciaUsuario
     {
-        Usuario Login(string pEmail, string pPass);
+        Usuario Login(string pEmail);
 
         Usuario ObtenerPorEmail(string pEmail);
 
