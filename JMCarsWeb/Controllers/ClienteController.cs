@@ -20,7 +20,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Registro(Cliente clientePasado)
+        public async Task<IActionResult> Registro(Cliente clientePasado, bool aceptaTerminos)
         {
            
             if (!ModelState.IsValid)
@@ -28,10 +28,22 @@ namespace WebApi.Controllers
                 return View(clientePasado);
             }
 
+            if(!aceptaTerminos)
+            {
+                ViewBag.Error = "Debe aceptar los terminos y condiciones para registrarse";
+                return View(clientePasado);
+            }
 
             try
             {
-                await _clienteService.Registrar(clientePasado);
+                bool exito = await _clienteService.Registrar(clientePasado, aceptaTerminos);
+
+                if(!exito)
+                {
+                    ViewBag.Error = "No se puede completar el registro. Verifique sus datos";
+                    return View(clientePasado);
+                }
+
                 TempData ["Mensaje"] = "Registro realizado con éxito."; //le agregue aca el tempdata porque nunca iba a funcionarte con viewbag, luego de un redirect el viewbag se pierde te acordas martin?
                 return RedirectToAction("Index", "Login");
             }

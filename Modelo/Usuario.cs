@@ -14,6 +14,7 @@ namespace Modelo
         private string? contrasena;
         private bool estadoUsu;
         private Rol rolUsu;
+        private DateTime? fechaAceptacionTerminos;
 
         public int IdUsuario
         {
@@ -58,6 +59,8 @@ namespace Modelo
             }
         }
 
+        
+
         //Martin la contraseña no es obligatoria en el cliente, eso solo es obligatorio en el registro se saca, sino
         //cada vez que vas a usar el modelo, te pide si o si que mandes contraseña.
         [StringLength(255, MinimumLength = 3, ErrorMessage = "La contraseña debe tener entre 3 y 255 caracteres.")]
@@ -88,7 +91,16 @@ namespace Modelo
             }
         }
 
-        public Usuario(int pIdUsuario, string pNombre, string pTelefono, string pEmail, string pPass, bool pEstado, Rol pRolUsu)
+        public DateTime? FechaAceptacionTerminos
+        {
+            get { return fechaAceptacionTerminos; }
+            set
+            {
+                fechaAceptacionTerminos = value;
+            }
+        }
+
+        public Usuario(int pIdUsuario, string pNombre, string pTelefono, string pEmail, string pPass, bool pEstado, Rol pRolUsu,DateTime? pFechaAceptacion)
         {
             IdUsuario = pIdUsuario;
             NombreCompleto = pNombre;
@@ -97,6 +109,7 @@ namespace Modelo
             Contrasena = pPass;
             EstadoUsu = pEstado;
             RolUsu = pRolUsu;
+            FechaAceptacionTerminos = pFechaAceptacion;
         }
 
         public Usuario() { }

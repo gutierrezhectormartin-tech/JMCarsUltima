@@ -25,7 +25,8 @@ CREATE TABLE Usuario
 	Telefono VARCHAR(20) NOT NULL,
 	Email VARCHAR(255) NOT NULL, 
 	Contrasena VARCHAR(255) NOT NULL check (LEN(Contrasena) >= 3),
-	Estado BIT NOT NULL
+	Estado BIT NOT NULL,
+	FechaAceptacionTerminos DATETIME NULL
 )
 GO
 
@@ -219,6 +220,7 @@ CREATE TABLE TokenRecuperacion (
     CONSTRAINT FK_TokenRecuperacion_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario)
 );
 GO
+
 ---------------------- SP-------------------------
 
 -- Login
@@ -228,7 +230,7 @@ CREATE PROC sp_Usuario_Login
     @Email VARCHAR(255) 
 AS
 BEGIN
-    SELECT U.IdUsuario, U.NombreCompleto, U.Contrasena, U.Estado,
+    SELECT U.IdUsuario, U.NombreCompleto, U.Contrasena, U.Estado, U.FechaAceptacionTerminos,
            CASE 
                WHEN A.IdUsuario IS NOT NULL THEN 1 -- Admin
                WHEN E.IdUsuario IS NOT NULL THEN 2 -- Escribano
@@ -244,15 +246,16 @@ GO
 
 -- Registrar Cliente
 -- >>> @Contrasena llega ya hasheado con BCrypt desde la capa Logica (LogicaCliente.Registrar).
+-- >>> @FechaAceptacionTerminos se completa con la fecha/hora en que el usuario aceptó los Terminos y Condiciones en el formulario de registro.
 CREATE PROCEDURE sp_Usuario_RegistrarCliente
     @NombreCompleto VARCHAR(100), @Telefono VARCHAR(20), @Email VARCHAR(255), 
-    @Contrasena VARCHAR(255), @Cedula VARCHAR(8)
+    @Contrasena VARCHAR(255), @Cedula VARCHAR(8), @FechaAceptacionTerminos DATETIME
 AS
 BEGIN
     BEGIN TRANSACTION;
     BEGIN TRY
-        INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-        VALUES (@NombreCompleto, @Telefono, @Email, @Contrasena, 1);
+        INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
+        VALUES (@NombreCompleto, @Telefono, @Email, @Contrasena, 1, @FechaAceptacionTerminos);
         INSERT INTO Cliente (IdUsuario, Cedula) VALUES (SCOPE_IDENTITY(), @Cedula);
         COMMIT;
     END TRY
@@ -262,15 +265,16 @@ GO
 
 -- Registrar Escribano (Inactivo por defecto para aprobación)
 -- >>> @Contrasena llega ya hasheado con BCrypt desde la capa Logica (LogicaEscribano.Registrar).
+-- >>> @FechaAceptacionTerminos se completa con la fecha/hora en que el usuario aceptó los Terminos y Condiciones en el formulario de registro.
 CREATE PROCEDURE sp_Usuario_RegistrarEscribano
     @NombreCompleto VARCHAR(100), @Telefono VARCHAR(20), @Email VARCHAR(255), 
-    @Contrasena VARCHAR(255), @NumCajaProf VARCHAR(50), @DireccionEstudio VARCHAR(200)
+    @Contrasena VARCHAR(255), @NumCajaProf VARCHAR(50), @DireccionEstudio VARCHAR(200), @FechaAceptacionTerminos DATETIME
 AS
 BEGIN
     BEGIN TRANSACTION;
     BEGIN TRY
-        INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-        VALUES (@NombreCompleto, @Telefono, @Email, @Contrasena, 0);
+        INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
+        VALUES (@NombreCompleto, @Telefono, @Email, @Contrasena, 0, @FechaAceptacionTerminos);
         INSERT INTO Escribano (IdUsuario, NumCajaProf, DireccionEstudio) 
         VALUES (SCOPE_IDENTITY(), @NumCajaProf, @DireccionEstudio);
         COMMIT;
@@ -328,7 +332,7 @@ create proc ObtenerUsuarioxMail
 @Email varchar(255)
 as
 begin
-    select U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado,
+    select U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, U.FechaAceptacionTerminos,
         case
             when A.IdUsuario is not null then 1
             when E.IdUsuario is not null then 2
@@ -597,7 +601,7 @@ CREATE PROCEDURE sp_Cliente_ObtenerPorId
     @IdUsuario INT
 AS
 BEGIN
-    SELECT U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, C.Cedula
+    SELECT U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, U.FechaAceptacionTerminos, C.Cedula
     FROM Usuario U
     INNER JOIN Cliente C ON U.IdUsuario = C.IdUsuario
     WHERE U.IdUsuario = @IdUsuario;
@@ -609,7 +613,7 @@ CREATE PROCEDURE sp_Escribano_ObtenerPorId
     @IdUsuario INT
 AS
 BEGIN
-    SELECT U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, E.NumCajaProf, E.DireccionEstudio
+    SELECT U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, U.FechaAceptacionTerminos, E.NumCajaProf, E.DireccionEstudio
     FROM Usuario U
     INNER JOIN Escribano E ON U.IdUsuario = E.IdUsuario
     WHERE U.IdUsuario = @IdUsuario;
@@ -702,8 +706,8 @@ CREATE INDEX IX_Mensaje_Chat ON Mensaje (IdChat, FechaHora);
 
 -- ADMIN
 -- contraseña en texto plano: admin123
-INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Administrador General', '099111111', 'admin@jmcars.com', '$2a$11$RnZq9IMIumUFyCbX.jJiNOzpResv2DDHS8qIAeKbNzLd1.hG8Z1Eq', 1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
+VALUES ('Administrador General', '099111111', 'admin@jmcars.com', '$2a$11$RnZq9IMIumUFyCbX.jJiNOzpResv2DDHS8qIAeKbNzLd1.hG8Z1Eq', 1, GETDATE())
 
 INSERT INTO Administrador VALUES (SCOPE_IDENTITY())
 GO
@@ -711,73 +715,73 @@ GO
 
 -- CLIENTES
 -- contraseña en texto plano: juan123
-INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Juan Perez', '099222222', 'juan@gmail.com', '$2a$11$f3Z36OTiTXCp3uNvdGTn/.u4/l1a.Z4A07QOEDt4xRFvmltxFjMy6', 1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
+VALUES ('Juan Perez', '099222222', 'juan@gmail.com', '$2a$11$f3Z36OTiTXCp3uNvdGTn/.u4/l1a.Z4A07QOEDt4xRFvmltxFjMy6', 1, GETDATE())
 
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(), '45678901')
 GO
 
 -- contraseña en texto plano: maria123
-INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Maria Rodriguez', '099333333', 'maria@gmail.com', '$2a$11$X0P55g8U.n62nmY382g2Mevc/PYUy9QfOZRc5SH0NRcvrvpbSTFEW', 1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
+VALUES ('Maria Rodriguez', '099333333', 'maria@gmail.com', '$2a$11$X0P55g8U.n62nmY382g2Mevc/PYUy9QfOZRc5SH0NRcvrvpbSTFEW', 1, GETDATE())
 
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(), '47896521')
 GO
 
 -- contraseña en texto plano: carlos123
-INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Carlos Lopez', '099444444', 'carlos@gmail.com', '$2a$11$f00kcEXB1qQuvreMtcdU8OFNpzWL.KHzyQNJnCoz835fpWJ7B/6f2', 1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
+VALUES ('Carlos Lopez', '099444444', 'carlos@gmail.com', '$2a$11$f00kcEXB1qQuvreMtcdU8OFNpzWL.KHzyQNJnCoz835fpWJ7B/6f2', 1, GETDATE())
 
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(), '51234789')
 GO
 
 -- contraseña en texto plano: ana123
-INSERT INTO Usuario VALUES ('Ana Silva','099555001','ana@gmail.com','$2a$11$gBCgqfKmQddhfbXMRGshMe4nF69Mk9a7jrHd.D/y9u.GKSU/X.Ve.',1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos) VALUES ('Ana Silva','099555001','ana@gmail.com','$2a$11$gBCgqfKmQddhfbXMRGshMe4nF69Mk9a7jrHd.D/y9u.GKSU/X.Ve.',1, GETDATE())
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345671')
 GO
 
 -- contraseña en texto plano: pedro123
-INSERT INTO Usuario VALUES ('Pedro Gomez','099555002','pedro@gmail.com','$2a$11$goZSAVgW6V3v0Bg1znpb8.uAqZE6NyQhepL.ApLB8XknTIB.iFCbS',1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos) VALUES ('Pedro Gomez','099555002','pedro@gmail.com','$2a$11$goZSAVgW6V3v0Bg1znpb8.uAqZE6NyQhepL.ApLB8XknTIB.iFCbS',1, GETDATE())
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345672')
 GO
 
 -- contraseña en texto plano: lucia123
-INSERT INTO Usuario VALUES ('Lucia Torres','099555003','lucia@gmail.com','$2a$11$2PboZShybaCIs7ScvEB1le5ZjwsumR0Kubxuq5cNRSuatDmCp3Koy',1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos) VALUES ('Lucia Torres','099555003','lucia@gmail.com','$2a$11$2PboZShybaCIs7ScvEB1le5ZjwsumR0Kubxuq5cNRSuatDmCp3Koy',1, GETDATE())
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345673')
 GO
 
 -- contraseña en texto plano: martin123
-INSERT INTO Usuario VALUES ('Martin Suarez','099555004','martin@gmail.com','$2a$11$oeCrp9oFsWt6k3opcbaL4uSPAvWsIPrWx8evwWkvQ5tohrOag9Lv.',1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos) VALUES ('Martin Suarez','099555004','martin@gmail.com','$2a$11$oeCrp9oFsWt6k3opcbaL4uSPAvWsIPrWx8evwWkvQ5tohrOag9Lv.',1, GETDATE())
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345674')
 GO
 
 -- contraseña en texto plano: vale123
-INSERT INTO Usuario VALUES ('Valentina Castro','099555005','vale@gmail.com','$2a$11$ax4Gx8F/HqL5SJcnU6Q8QeRSq2THhwPVo87FVoVI0P79l3DGMOEma',1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos) VALUES ('Valentina Castro','099555005','vale@gmail.com','$2a$11$ax4Gx8F/HqL5SJcnU6Q8QeRSq2THhwPVo87FVoVI0P79l3DGMOEma',1, GETDATE())
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345675')
 GO
 
 -- contraseña en texto plano: nico123
-INSERT INTO Usuario VALUES ('Nicolas Pereira','099555006','nico@gmail.com','$2a$11$11Rjnp/8JtVD1cLBC4Ze2ef1GYwikELJWe3YxSLbTHQmQX0SXi1du',1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos) VALUES ('Nicolas Pereira','099555006','nico@gmail.com','$2a$11$11Rjnp/8JtVD1cLBC4Ze2ef1GYwikELJWe3YxSLbTHQmQX0SXi1du',1, GETDATE())
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345676')
 GO
 
 -- contraseña en texto plano: sofia123
-INSERT INTO Usuario VALUES ('Sofia Fernandez','099555007','sofia@gmail.com','$2a$11$FCGAxt1fCgnI8.bhrFCSJeV8YUjIk0EEUscyx1dSQHpW.tDkrRxY.',1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos) VALUES ('Sofia Fernandez','099555007','sofia@gmail.com','$2a$11$FCGAxt1fCgnI8.bhrFCSJeV8YUjIk0EEUscyx1dSQHpW.tDkrRxY.',1, GETDATE())
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345677')
 GO
 
 -- contraseña en texto plano: diego123
-INSERT INTO Usuario VALUES ('Diego Alvarez','099555008','diegoa@gmail.com','$2a$11$SVsxbYkDlS8U35NpiDxO4OjsKyWEFUIaNRbOBMHyN6Yso9NxS6Bmu',1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos) VALUES ('Diego Alvarez','099555008','diegoa@gmail.com','$2a$11$SVsxbYkDlS8U35NpiDxO4OjsKyWEFUIaNRbOBMHyN6Yso9NxS6Bmu',1, GETDATE())
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345678')
 GO
 
 -- contraseña en texto plano: camila123
-INSERT INTO Usuario VALUES ('Camila Rodriguez','099555009','camila@gmail.com','$2a$11$PsDxWKANCqoOK1fyY2YhnOhRKF5/qsOUc7Cm0j6a..uZRrCaB4ZiO',1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos) VALUES ('Camila Rodriguez','099555009','camila@gmail.com','$2a$11$PsDxWKANCqoOK1fyY2YhnOhRKF5/qsOUc7Cm0j6a..uZRrCaB4ZiO',1, GETDATE())
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345679')
 GO
 
 -- contraseña en texto plano: fede123
-INSERT INTO Usuario VALUES ('Federico Ramos','099555010','fede@gmail.com','$2a$11$8IfVpKVp23e8b5V2xFGUhO7DwiAb.bRfuPCkLAqpNSRTcQNIVH3.6',1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos) VALUES ('Federico Ramos','099555010','fede@gmail.com','$2a$11$8IfVpKVp23e8b5V2xFGUhO7DwiAb.bRfuPCkLAqpNSRTcQNIVH3.6',1, GETDATE())
 INSERT INTO Cliente VALUES (SCOPE_IDENTITY(),'52345680')
 GO
 
@@ -785,15 +789,15 @@ GO
 
 -- ESCRIBANOS
 -- contraseña en texto plano: laura123
-INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Laura Fernandez', '098111111', 'laura@estudio.com', '$2a$11$llXXvtghK8unawt5eMYblOcvHLjIJMm0.Iztqdl58peMXJ6vexHxu', 1)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
+VALUES ('Laura Fernandez', '098111111', 'laura@estudio.com', '$2a$11$llXXvtghK8unawt5eMYblOcvHLjIJMm0.Iztqdl58peMXJ6vexHxu', 1, GETDATE())
 
 INSERT INTO Escribano VALUES (SCOPE_IDENTITY(), 'CP1001', '18 de Julio 1234')
 GO
 
 -- contraseña en texto plano: diego123
-INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado)
-VALUES ('Diego Martinez', '098222222', 'diego@estudio.com', '$2a$11$SVsxbYkDlS8U35NpiDxO4OjsKyWEFUIaNRbOBMHyN6Yso9NxS6Bmu', 0)
+INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
+VALUES ('Diego Martinez', '098222222', 'diego@estudio.com', '$2a$11$SVsxbYkDlS8U35NpiDxO4OjsKyWEFUIaNRbOBMHyN6Yso9NxS6Bmu', 0, GETDATE())
 
 INSERT INTO Escribano VALUES (SCOPE_IDENTITY(), 'CP1002', 'Bulevar Artigas 456')
 GO

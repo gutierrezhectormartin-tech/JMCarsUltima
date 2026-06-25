@@ -68,28 +68,23 @@ namespace Persistencia
             {
                 oConexion.Open();
 
-                SqlDataReader oReader =
-                    oComando.ExecuteReader();
+                SqlDataReader lector = oComando.ExecuteReader();
 
-                if (oReader.Read())
+                if (lector.Read())
                 {
-                    int id =
-                        Convert.ToInt32(oReader["IdUsuario"]);
+                    int id = Convert.ToInt32(lector["IdUsuario"]);
 
-                    string nombre =
-                        oReader["NombreCompleto"].ToString();
+                    string nombre = lector["NombreCompleto"].ToString() ?? string.Empty;
 
-                    string telefono =
-                        oReader["Telefono"].ToString();
+                    string telefono = lector["Telefono"].ToString() ?? string.Empty;
 
-                    string email =
-                        oReader["Email"].ToString();
+                    string email = lector["Email"].ToString() ?? string.Empty;
 
-                    bool estado =
-                        Convert.ToBoolean(oReader["Estado"]);
+                    bool estado = Convert.ToBoolean(lector["Estado"]);
 
-                    string cedula =
-                        oReader["Cedula"].ToString();
+                    string cedula = lector["Cedula"].ToString() ?? string.Empty;
+
+                    DateTime? fechaAceptacion = lector["FechaAceptacionTerminos"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechaAceptacionTerminos"]);
 
                     return new Cliente(
                         id,
@@ -99,6 +94,7 @@ namespace Persistencia
                         "",
                         estado,
                         Rol.Cliente,
+                        fechaAceptacion,
                         cedula
                     );
                 }

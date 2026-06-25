@@ -45,8 +45,31 @@
                 @Html.TextBoxFor(m => m.Direccion, new { @class = "form-control" })
                 @Html.ValidationMessageFor(m => m.Direccion, "", new { @class = "text-danger" })
             </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" name="aceptaTerminos" id="aceptaTerminos" required />
+                <label class="form-check-label" for="aceptaTerminos">
+                    Acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#modalTerminos">Terminos y Condiciones</a>
+                </label>
+            </div>
             <button type="submit" class="btn btn-primary">Registrarme</button>
             @Html.ActionLink("Volver al login", "Index", "Login", null, new { @class = "btn btn-link" })
         }
+    </div>
+    <div class="modal fade" id="modalTerminos" tabindex="-1" aria-labelledby="modalTerminosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTerminosLabel">Términos y Condiciones</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Texto de ejemplo de los Términos y Condiciones de JMCars. Aquí se detallarán las condiciones de uso de la plataforma, responsabilidades de los usuarios, política de privacidad, y demás cláusulas legales aplicables al servicio.</p>
+                    <p>Este texto es provisorio y debe ser reemplazado por el texto definitivo antes de la entrega final del proyecto.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

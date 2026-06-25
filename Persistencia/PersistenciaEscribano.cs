@@ -71,43 +71,29 @@ namespace Persistencia
             {
                 oConexion.Open();
 
-                SqlDataReader oReader =
+                SqlDataReader lector =
                     oComando.ExecuteReader();
 
-                if (oReader.Read())
+                if (lector.Read())
                 {
-                    int id =
-                        Convert.ToInt32(oReader["IdUsuario"]);
+                    int id = Convert.ToInt32(lector["IdUsuario"]);
 
-                    string nombre =
-                        oReader["NombreCompleto"].ToString();
+                    string nombre = lector["NombreCompleto"].ToString() ?? string.Empty;
 
-                    string telefono =
-                        oReader["Telefono"].ToString();
+                    string telefono = lector["Telefono"].ToString() ?? string.Empty;
 
-                    string email =
-                        oReader["Email"].ToString();
+                    string email = lector["Email"].ToString() ?? string.Empty;
 
-                    bool estado =
-                        Convert.ToBoolean(oReader["Estado"]);
+                    bool estado = Convert.ToBoolean(lector["Estado"]);
 
-                    string numCaja =
-                        oReader["NumCajaProf"].ToString();
+                    string numCaja = lector["NumCajaProf"].ToString() ?? string.Empty;
 
-                    string direccion =
-                        oReader["DireccionEstudio"].ToString();
+                    string direccion = lector["DireccionEstudio"].ToString() ?? string.Empty;
 
-                    return new Escribano(
-                        id,
-                        nombre,
-                        telefono,
-                        email,
-                        "",
-                        estado,
-                        Rol.Escribano,
-                        numCaja,
-                        direccion
-                    );
+                    DateTime? fechaAceptacion = lector["FechaAceptacionTerminos"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechaAceptacionTerminos"]);
+
+                    return new Escribano(id, nombre, telefono, email, "", estado,
+                        Rol.Escribano, fechaAceptacion, numCaja, direccion);
                 }
 
                 return null;

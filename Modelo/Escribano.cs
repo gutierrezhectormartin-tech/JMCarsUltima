@@ -32,8 +32,8 @@ namespace Modelo
             }
         }
 
-        public Escribano(int pIdUsuario, string pNombre, string pTelefono, string pEmail, string pPass, bool pEstado, Rol pRolUsu, string pNumeroCaja, string pDireccion) :
-            base(pIdUsuario, pNombre, pTelefono, pEmail, pPass, pEstado, pRolUsu)
+        public Escribano(int pIdUsuario, string pNombre, string pTelefono, string pEmail, string pPass, bool pEstado, Rol pRolUsu, DateTime? pFechaAceptacion, string pNumeroCaja, string pDireccion) :
+            base(pIdUsuario, pNombre, pTelefono, pEmail, pPass, pEstado, pRolUsu, pFechaAceptacion)
         {
             NumeroCaja = pNumeroCaja;
             Direccion = pDireccion;

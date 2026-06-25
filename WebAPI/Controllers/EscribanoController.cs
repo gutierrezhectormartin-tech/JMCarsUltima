@@ -18,9 +18,13 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("registrar")]
-        public IActionResult Registrar([FromBody] Escribano escribano)
+        public IActionResult Registrar([FromBody] RegistroEscribanoRequest escribano)
         {
-            if (string.IsNullOrEmpty(escribano.Contrasena))
+            if(!escribano.AceptaTerminos)
+            {
+                return BadRequest(new { mensaje = "Debe aceptar los terminos y condiciones para registrarse" });
+            }
+            if (string.IsNullOrEmpty(escribano.Escribano.Contrasena))
             { 
                 return BadRequest(new { mensaje = "La contraseña es obligatoria." }); 
             }
@@ -32,7 +36,8 @@ namespace WebAPI.Controllers
 
             try
             {
-                _logicaEscribano.Registrar(escribano);
+                escribano.Escribano.FechaAceptacionTerminos = DateTime.Now;
+                _logicaEscribano.Registrar(escribano.Escribano);
                 return Ok(new { mensaje = "Escribano resgitrado con éxito" });
             }
             catch (Exception ex)
@@ -93,5 +98,11 @@ namespace WebAPI.Controllers
             }
         }
 
+    }
+
+    public class RegistroEscribanoRequest
+    {
+        public Escribano Escribano { get; set; }
+        public bool AceptaTerminos { get; set; }
     }
 }

@@ -26,60 +26,44 @@ namespace Persistencia
             {
                 oConexion.Open();
 
-                SqlDataReader oReader =
+                SqlDataReader lector =
                     oComando.ExecuteReader();
 
-                while (oReader.Read())
+                while (lector.Read())
                 {
-                    Marcas unaMarca = new Marcas(
-                        Convert.ToInt32(oReader["IdMarca"]),
-                        oReader["NombreMarca"].ToString()
-                    );
+                    Marcas unaMarca = new Marcas(Convert.ToInt32(lector["IdMarca"]), lector["NombreMarca"].ToString());
 
-                    Modelos unModelo = new Modelos(
-                        Convert.ToInt32(oReader["IdModelo"]),
-                        oReader["NombreModelo"].ToString(),
-                        unaMarca
-                    );
+                    Modelos unModelo = new Modelos(Convert.ToInt32(lector["IdModelo"]), lector["NombreModelo"].ToString(), 
+                        unaMarca);
 
                     //Ubicaciones unaUbicacion = new Ubicaciones(
                     //    Convert.ToDecimal(oReader["Latitud"]),
                     //    Convert.ToDecimal(oReader["Longitud"])
                     //);
 
-                    Cliente unCliente = new Cliente(
-                        Convert.ToInt32(oReader["IdUsuario"]),
-                        oReader["NombreCompleto"].ToString(),
-                        "",
-                        "",
-                        "",
-                        true,
-                        Rol.Cliente,
-                        ""
-                    );
+                    Cliente unCliente = new Cliente(Convert.ToInt32(lector["IdUsuario"]), lector["NombreCompleto"].ToString() ?? string.Empty,
+                        "", "", "", true, Rol.Cliente, null, "");
 
 
                     List<string> fotos = new List<string>();
 
-                    Vehiculo unVehiculo = new Vehiculo(
-                        Convert.ToInt32(oReader["IdVehiculo"]),
-                        Convert.ToDecimal(oReader["Precio"]),
-                        Convert.ToInt32(oReader["Kilometraje"]),
-                        Convert.ToInt32(oReader["Ano"]),
-                        oReader["CajaDeCambios"].ToString(),
-                        oReader["Motorizacion"].ToString(),
-                        oReader["Descripcion"].ToString(),
-                        Convert.ToBoolean(oReader["Publicado"]),
+                    Vehiculo unVehiculo = new Vehiculo(Convert.ToInt32(lector["IdVehiculo"]),
+                        Convert.ToDecimal(lector["Precio"]),
+                        Convert.ToInt32(lector["Kilometraje"]),
+                        Convert.ToInt32(lector["Ano"]),
+                        lector["CajaDeCambios"].ToString() ??string.Empty,
+                        lector["Motorizacion"].ToString() ?? string.Empty,
+                        lector["Descripcion"].ToString() ?? string.Empty,
+                        Convert.ToBoolean(lector["Publicado"]),
                         //unaUbicacion,
                         unModelo,
                         unCliente,
-                        fotos
-                                        );
+                        fotos);
 
                     lista.Add(unVehiculo);
                 }
 
-                oReader.Close();
+                lector.Close();
 
                 return lista;
             }

@@ -12,9 +12,11 @@ namespace JMCarsWeb.Services
             _httpClient = httpClientFactory.CreateClient("JMCarsAPI");
         }
 
-        public async Task Registrar(Escribano escribano)
+        public async Task<bool> Registrar(Escribano escribano, bool aceptaTerminos)
         {
-            await _httpClient.PostAsJsonAsync("api/escribano/registrar", escribano);
+            var request = new { Escribano = escribano, AceptaTerminos = aceptaTerminos };
+            var respuesta = await _httpClient.PostAsJsonAsync("api/escribano/registrar", escribano);
+            return respuesta.IsSuccessStatusCode;
         }
 
         public async Task<Escribano> ObtenerPorId(int id)

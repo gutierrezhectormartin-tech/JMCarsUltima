@@ -13,6 +13,12 @@ namespace WebAPI.Controllers
         public string Telefono { get; set; }
     }
 
+    public class RegistroClienteRequest
+    {
+        public Cliente Cliente { get; set; }
+        public bool AceptaTerminos { get; set; }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class ClienteController : ControllerBase
@@ -27,9 +33,14 @@ namespace WebAPI.Controllers
 
 
         [HttpPost("registrar")]
-        public IActionResult Registrar([FromBody] Cliente cliente)
+        public IActionResult Registrar([FromBody] RegistroClienteRequest cliente)
         {
-            if (string.IsNullOrEmpty(cliente.Contrasena))
+            if(!cliente.AceptaTerminos)
+            {
+                return BadRequest(new { mensaje = "Debe aceptar los terminos y condiciones para registrarse" });
+            }
+
+            if (string.IsNullOrEmpty(cliente.Cliente.Contrasena))
             {
                 return BadRequest(new { mensaje = "La contraseña es obligatoria." });
             }
@@ -41,7 +52,8 @@ namespace WebAPI.Controllers
 
             try
             {
-                _logicaCliente.Registrar(cliente);
+                cliente.Cliente.FechaAceptacionTerminos = DateTime.Now;
+                _logicaCliente.Registrar(cliente.Cliente);
                 return Ok(new { mensaje = "Registro realizado con éxito." });
             }
             catch (Exception ex)

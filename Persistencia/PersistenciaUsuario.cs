@@ -52,63 +52,35 @@ namespace Persistencia
             {
                 oConexion.Open();
 
-                SqlDataReader oReader =
-                    oComando.ExecuteReader();
+                SqlDataReader lector = oComando.ExecuteReader();
 
-                if (oReader.Read())
+                if (lector.Read())
                 {
-                    int rol =
-                        Convert.ToInt32(oReader["IdRol"]);
+                    int rol = Convert.ToInt32(lector["IdRol"]);
 
-                    int id =
-                        Convert.ToInt32(oReader["IdUsuario"]);
+                    int id = Convert.ToInt32(lector["IdUsuario"]);
 
-                    string nombre =
-                        oReader["NombreCompleto"].ToString() ?? string.Empty;
+                    string nombre = lector["NombreCompleto"].ToString() ?? string.Empty;
 
-                    string hashGuardado = oReader["Contrasena"].ToString() ?? string.Empty;
+                    string hashGuardado = lector["Contrasena"].ToString() ?? string.Empty;
 
-                    bool estado =
-                        Convert.ToBoolean(oReader["Estado"]);
+                    bool estado = Convert.ToBoolean(lector["Estado"]);
+                    DateTime? fechaAceptacion = lector["FechaAceptacionTerminos"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechaAceptacionTerminos"]);
 
                     if (rol == (int)Rol.Administrador)
                     {
-                        return new Administrador(
-                            id,
-                            nombre ?? string.Empty,
-                            "",
-                            pEmail,
-                            hashGuardado,
-                            estado,
-                            Rol.Administrador
-                        );
+                        return new Administrador(id, nombre ?? string.Empty, "", pEmail, hashGuardado, 
+                            estado, Rol.Administrador, fechaAceptacion);
                     }
                     else if (rol == (int)Rol.Escribano)
                     {
-                        return new Escribano(
-                            id,
-                            nombre ?? string.Empty,
-                            "",
-                            pEmail,
-                            hashGuardado,
-                            estado,
-                            Rol.Escribano,
-                            "",
-                            ""
-                        );
+                        return new Escribano(id, nombre ?? string.Empty, "", pEmail, hashGuardado,
+                            estado, Rol.Escribano, fechaAceptacion, "", "");
                     }
                     else
                     {
-                        return new Cliente(
-                            id,
-                            nombre ?? string.Empty,
-                            "",
-                            pEmail,
-                            hashGuardado,
-                            estado,
-                            Rol.Cliente,
-                            ""
-                        );
+                        return new Cliente(id, nombre ?? string.Empty, "", pEmail, hashGuardado,
+                            estado, Rol.Cliente, fechaAceptacion, "");
                     }
                 }
 
@@ -147,20 +119,21 @@ namespace Persistencia
                     string email = lector["Email"].ToString() ?? string.Empty;
                     bool estado = Convert.ToBoolean(lector["Estado"]);
                     int rol = Convert.ToInt32(lector["IdRol"]);
+                    DateTime? fechaAceptacion = lector["FechaAceptacionTerminos"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechaAceptacionTerminos"]);
 
                     Usuario usuario;
 
                     if(rol == (int)Rol.Administrador)
                     {
-                        usuario = new Administrador(id, nombre, telefono, email, "", estado, Rol.Administrador);
+                        usuario = new Administrador(id, nombre, telefono, email, "", estado, Rol.Administrador, fechaAceptacion);
                     }
                     else if(rol == (int)Rol.Escribano)
                     {
-                        usuario = new Escribano(id, nombre, telefono, email, "", estado, Rol.Escribano, "", "");
+                        usuario = new Escribano(id, nombre, telefono, email, "", estado, Rol.Escribano, fechaAceptacion, "", "");
                     }
                     else
                     {
-                        usuario = new Cliente(id, nombre, telefono, email, "", estado, Rol.Cliente, "");
+                        usuario = new Cliente(id, nombre, telefono, email, "", estado, Rol.Cliente, fechaAceptacion,  "");
                     }
                     return usuario;
                 }
