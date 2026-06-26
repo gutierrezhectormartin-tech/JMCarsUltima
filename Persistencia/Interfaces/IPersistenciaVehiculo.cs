@@ -10,5 +10,6 @@ namespace Persistencia.Interfaces
     public interface IPersistenciaVehiculo
     {
         List<Vehiculo> ListarVehiculos();
+        List<Vehiculo> ListarMisVehiculos(string idUsuario);
     }
 }

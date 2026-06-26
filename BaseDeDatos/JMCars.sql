@@ -408,6 +408,48 @@ BEGIN
 END
 GO
 
+-- Listar Vehículos de un Usuario específico (Mis Vehículos)
+CREATE PROCEDURE sp_Vehiculo_ListarMisVehiculos
+    @IdUsuario INT
+AS
+BEGIN
+    SELECT 
+        V.IdVehiculo,
+        V.Precio,
+        V.Kilometraje,
+        V.Ano,
+        V.CajaDeCambios,
+        V.Motorizacion,
+        V.Descripcion,
+        V.Publicado,
+        V.Latitud,
+        V.Longitud,
+ 
+        M.IdModelo,
+        M.NombreModelo,
+ 
+        MA.IdMarca,
+        MA.NombreMarca,
+ 
+        U.IdUsuario,
+        U.NombreCompleto
+ 
+    FROM Vehiculo V
+ 
+    INNER JOIN Modelo M
+        ON V.IdModelo = M.IdModelo
+ 
+    INNER JOIN Marca MA
+        ON M.IdMarca = MA.IdMarca
+ 
+    INNER JOIN Usuario U
+        ON V.IdUsuarioVendedor = U.IdUsuario
+    WHERE
+        u.IdUsuario = @IdUsuario
+ 
+END
+GO
+
 -- Búsqueda por Radio (Geolocalización)
 CREATE PROCEDURE sp_Vehiculo_BuscarGeneral
     @LatCli DECIMAL(9,6), @LonCli DECIMAL(9,6), @RadioKM INT,

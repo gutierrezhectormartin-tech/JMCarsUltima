@@ -36,5 +36,31 @@ namespace WebAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
+        [HttpGet("mis-vehiculos/{idUsuario}")]
+        public IActionResult ListarMisVehiculos(string idUsuario)
+        {
+            try
+            {
+                // Validación básica de que nos manden un ID
+                if (string.IsNullOrEmpty(idUsuario))
+                {
+                    return BadRequest(new { mensaje = "El ID de usuario es requerido." });
+                }
+
+                List<Vehiculo> misVehiculos = _logicaVehiculo.ListarMisVehiculos(idUsuario);
+
+                if (misVehiculos == null || !misVehiculos.Any())
+                {
+                    return NotFound(new { mensaje = "No se han encontrado vehículos para este usuario" });
+                }
+
+                return Ok(misVehiculos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
     }
 }

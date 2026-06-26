@@ -10,5 +10,6 @@ namespace Logica.Interfaces
     public interface ILogicaVehiculo
     {
         List<Vehiculo> ListarVehiculos();
+        List<Vehiculo> ListarMisVehiculos(string idUsuario);
     }
 }

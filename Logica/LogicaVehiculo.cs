@@ -23,5 +23,10 @@ namespace Logica
         {
             return _persistenciaVehiculo.ListarVehiculos();
         }
+
+        public List<Vehiculo> ListarMisVehiculos(string idUsuario)
+        {
+            return _persistenciaVehiculo.ListarMisVehiculos(idUsuario);
+        }
     }
 }
