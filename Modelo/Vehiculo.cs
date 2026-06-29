@@ -14,7 +14,8 @@ namespace Modelo
         private string motorizacion;
         private string descripcion;
         private bool publicado;
-        //private Ubicaciones ubicacion;
+        private decimal? latitud;
+        private decimal? longitud;
         private Modelos modelo;
         private Cliente vendedor;
         private List<string> fotografia;
@@ -83,14 +84,24 @@ namespace Modelo
                 publicado = value;
             }
         }
-        //public Ubicaciones Ubicacion
-        //{
-        //    get { return ubicacion; }
-        //    set
-        //    {
-        //        ubicacion = value;
-        //    }
-        //}
+        
+        public decimal? Latitud
+        {
+            get { return latitud; }
+            set
+            {
+                latitud = value;
+            }
+        }
+
+        public decimal? Longitud
+        {
+            get { return longitud; }
+            set
+            {
+                longitud = value;
+            }
+        }
         public Modelos Modelo
         {
             get { return modelo; }
@@ -121,7 +132,7 @@ namespace Modelo
             decimal pPrecio, int pKm, int pAnio,
             string pCaja, string pMotorizacion,
             string pDescripcion,
-            bool pPublicado, /*Ubicaciones pUbicacion,*/
+            bool pPublicado, decimal? pLatitud, decimal? pLongitud,
             Modelos pModelo, Cliente pVendedor, List<string> pFotografia)
         {
             IdVehiculo = pIdVehiculo;
@@ -132,7 +143,8 @@ namespace Modelo
             Motorizacion = pMotorizacion;
             Descripcion = pDescripcion;
             Publicado = pPublicado;
-            //Ubicacion = pUbicacion;
+            Latitud = pLatitud;
+            Longitud = pLongitud;
             Modelo = pModelo;
             Vendedor = pVendedor;
             Fotografia = pFotografia;

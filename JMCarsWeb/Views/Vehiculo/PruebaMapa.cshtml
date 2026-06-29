@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "Prueba de Mapa";
+}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <h2>Seleccionar Ubicacion</h2>
+
+        <div class="mb-3">
+            <label class="form-label">Direccion</label>
+            <input type="text" id="inputDireccion" class="form-control" placeholder="Ej: 18 de Julio 1234, Montevideo"/>
+            <button type="button" id="btnBuscarDireccion" class="btn btn-secondary mt-2">Buscar en el Mapa</button>
+        </div>
+
+        <div id="mapaSelector" style="height: 400px;"></div>
+
+        <input type="hidden" id="inputLatitud" name="Latitud" />
+        <input type="hidden" id="inputLongitud" name="Longitud"/>
+    </div>
+</div>
+<script>
+    var mapa = L.map('mapaSelector').setView([-34.9011, -56.1645], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(mapa);
+
+    var marcador = L.marker([-34.9011, -56.1645], { draggable: true }).addTo(mapa);
+</script>
+<script>
+    document.getElementById('btnBuscarDireccion').addEventListener('click', function () {
+        var direccion = document.getElementById('inputDireccion').value;
+
+        if (!direccion) {
+            alert('Por favor ingresá una dirección.');
+            return;
+        }
+
+        var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(direccion);
+
+        fetch(url)
+            .then(function (respuesta) {
+                return respuesta.json();
+            })
+            .then(function (resultados) {
+                if (resultados.length === 0) {
+                    alert('No se encontró esa dirección.');
+                    return;
+                }
+
+                var lat = parseFloat(resultados[0].lat);
+                var lon = parseFloat(resultados[0].lon);
+
+                mapa.setView([lat, lon], 16);
+                marcador.setLatLng([lat, lon]);
+
+                document.getElementById('inputLatitud').value = lat;
+                document.getElementById('inputLongitud').value = lon;
+            });
+    });
+</script>
+<script>
+    marcador.on('dragend', function (evento) {
+        var posicion = evento.target.getLatLng();
+
+        document.getElementById('inputLatitud').value = posicion.lat;
+        document.getElementById('inputLongitud').value = posicion.lng;
+
+        var url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + posicion.lat + '&lon=' + posicion.lng;
+
+        fetch(url)
+            .then(function (respuesta) {
+                return respuesta.json();
+            })
+            .then(function (resultado) {
+                if (resultado.display_name) {
+                    document.getElementById('inputDireccion').value = resultado.display_name;
+                }
+            });
+    });
+</script>

@@ -18,5 +18,11 @@ namespace JMCarsWeb.Controllers
             List<Vehiculo> vehiculos = await _vehiculoService.ListarVehiculos();
             return View(vehiculos);
         }
+
+        [HttpGet]
+        public IActionResult PruebaMapa()
+        {
+            return View();
+        }
     }
 }

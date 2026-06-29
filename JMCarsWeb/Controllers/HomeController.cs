@@ -34,5 +34,11 @@ namespace JMCarsWeb.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public IActionResult TerminosYCondiciones()
+        {
+            return View();
+        }
     }
 }

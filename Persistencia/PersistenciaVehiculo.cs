@@ -33,19 +33,15 @@ namespace Persistencia
                 {
                     Marcas unaMarca = new Marcas(Convert.ToInt32(lector["IdMarca"]), lector["NombreMarca"].ToString());
 
-                    Modelos unModelo = new Modelos(Convert.ToInt32(lector["IdModelo"]), lector["NombreModelo"].ToString(), 
-                        unaMarca);
-
-                    //Ubicaciones unaUbicacion = new Ubicaciones(
-                    //    Convert.ToDecimal(oReader["Latitud"]),
-                    //    Convert.ToDecimal(oReader["Longitud"])
-                    //);
+                    Modelos unModelo = new Modelos(Convert.ToInt32(lector["IdModelo"]), lector["NombreModelo"].ToString(), unaMarca);
 
                     Cliente unCliente = new Cliente(Convert.ToInt32(lector["IdUsuario"]), lector["NombreCompleto"].ToString() ?? string.Empty,
                         "", "", "", true, Rol.Cliente, null, "");
 
 
                     List<string> fotos = new List<string>();
+                    decimal? latitud = lector["Latitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Latitud"]);
+                    decimal? longitud = lector["Longitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Longitud"]);
 
                     Vehiculo unVehiculo = new Vehiculo(Convert.ToInt32(lector["IdVehiculo"]),
                         Convert.ToDecimal(lector["Precio"]),
@@ -55,7 +51,8 @@ namespace Persistencia
                         lector["Motorizacion"].ToString() ?? string.Empty,
                         lector["Descripcion"].ToString() ?? string.Empty,
                         Convert.ToBoolean(lector["Publicado"]),
-                        //unaUbicacion,
+                        latitud,
+                        longitud,
                         unModelo,
                         unCliente,
                         fotos);
@@ -103,16 +100,13 @@ namespace Persistencia
                     Modelos unModelo = new Modelos(Convert.ToInt32(lector["IdModelo"]), lector["NombreModelo"].ToString(),
                         unaMarca);
 
-                    //Ubicaciones unaUbicacion = new Ubicaciones(
-                    //    Convert.ToDecimal(oReader["Latitud"]),
-                    //    Convert.ToDecimal(oReader["Longitud"])
-                    //);
-
                     Cliente unCliente = new Cliente(Convert.ToInt32(lector["IdUsuario"]), lector["NombreCompleto"].ToString() ?? string.Empty,
                         "", "", "", true, Rol.Cliente, null, "");
 
 
                     List<string> fotos = new List<string>();
+                    decimal? latitud = lector["Latitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Latitud"]);
+                    decimal? longitud = lector["Longitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Longitud"]);
 
                     Vehiculo unVehiculo = new Vehiculo(Convert.ToInt32(lector["IdVehiculo"]),
                         Convert.ToDecimal(lector["Precio"]),
@@ -122,7 +116,8 @@ namespace Persistencia
                         lector["Motorizacion"].ToString() ?? string.Empty,
                         lector["Descripcion"].ToString() ?? string.Empty,
                         Convert.ToBoolean(lector["Publicado"]),
-                        //unaUbicacion,
+                        latitud,
+                        longitud,
                         unModelo,
                         unCliente,
                         fotos);
