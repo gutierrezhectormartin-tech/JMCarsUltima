@@ -28,5 +28,11 @@ namespace Logica
         {
             return _persistenciaVehiculo.ListarMisVehiculos(idUsuario);
         }
+
+        public List<Vehiculo> BuscarGeneral(decimal pLatCli, decimal pLonCli, int pRadioKM, int? pIdMarca, decimal? pPrecioMax)
+        {
+            return _persistenciaVehiculo.BuscarGeneral(pLatCli, pLonCli, pRadioKM, pIdMarca, pPrecioMax);
+        }
+
     }
 }

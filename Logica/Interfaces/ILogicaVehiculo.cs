@@ -11,5 +11,7 @@ namespace Logica.Interfaces
     {
         List<Vehiculo> ListarVehiculos();
         List<Vehiculo> ListarMisVehiculos(string idUsuario);
+
+        List<Vehiculo> BuscarGeneral(decimal pLatCli, decimal pLonCli, int pRadioKm, int? pIdMarca, decimal? pPrecioMax);
     }
 }

@@ -226,74 +226,87 @@ GO
 -- Login
 -- >>> Ya no recibe @Contrasena: el SP solo busca por Email/Estado y devuelve el hash guardado.
 --	   La verificacion real del hash (BCrypt) se hace en la capa Logica (LogicaUsuario.Login).
-CREATE PROC sp_Usuario_Login
-    @Email VARCHAR(255) 
-AS
-BEGIN
-    SELECT U.IdUsuario, U.NombreCompleto, U.Contrasena, U.Estado, U.FechaAceptacionTerminos,
-           CASE 
-               WHEN A.IdUsuario IS NOT NULL THEN 1 -- Admin
-               WHEN E.IdUsuario IS NOT NULL THEN 2 -- Escribano
-               WHEN C.IdUsuario IS NOT NULL THEN 3 -- Cliente
-           END AS IdRol
-    FROM Usuario U
-    LEFT JOIN Administrador A ON U.IdUsuario = A.IdUsuario
-    LEFT JOIN Escribano E ON U.IdUsuario = E.IdUsuario
-    LEFT JOIN Cliente C ON U.IdUsuario = C.IdUsuario
-    WHERE U.Email = @Email AND U.Estado = 1;
-END
-GO
+create proc sp_Usuario_Login
+@Email varchar(255)
+as
+begin
+
+    select U.IdUsuario, U.NombreCompleto, U.Contrasena, U.Estado, U.FechaAceptacionTerminos,
+        case
+            when A.IdUsuario is not null then 1 -- Admin
+            when E.IdUsuario is not null then 2 -- Escribano
+            when C.IdUsuario is not null then 3 -- Cliente
+        end as IdRol
+    from Usuario U
+    left join Administrador A on U.IdUsuario = A.IdUsuario
+    left join Escribano E on U.IdUsuario = E.IdUsuario
+    left join Cliente C on U.IdUsuario = C.IdUsuario
+    where U.Email = @Email and U.Estado = 1;
+end
+go
 
 -- Registrar Cliente
 -- >>> @Contrasena llega ya hasheado con BCrypt desde la capa Logica (LogicaCliente.Registrar).
 -- >>> @FechaAceptacionTerminos se completa con la fecha/hora en que el usuario aceptó los Terminos y Condiciones en el formulario de registro.
-CREATE PROCEDURE sp_Usuario_RegistrarCliente
-    @NombreCompleto VARCHAR(100), @Telefono VARCHAR(20), @Email VARCHAR(255), 
-    @Contrasena VARCHAR(255), @Cedula VARCHAR(8), @FechaAceptacionTerminos DATETIME
-AS
-BEGIN
-    BEGIN TRANSACTION;
-    BEGIN TRY
-        INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
-        VALUES (@NombreCompleto, @Telefono, @Email, @Contrasena, 1, @FechaAceptacionTerminos);
-        INSERT INTO Cliente (IdUsuario, Cedula) VALUES (SCOPE_IDENTITY(), @Cedula);
-        COMMIT;
-    END TRY
-    BEGIN CATCH ROLLBACK; THROW; END CATCH
-END
-GO
+create proc sp_Usuario_RegistrarCliente
+@NombreCompleto varchar(100),
+@Telefono varchar(20),
+@Email varchar(255),
+@Contrasena varchar(255),
+@Cedula varchar(8),
+@FechaAceptacionTerminos datetime
+as
+begin
+
+    begin transaction;
+    begin try
+        insert into Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
+        values (@NombreCompleto, @Telefono, @Email, @Contrasena, 1, @FechaAceptacionTerminos);
+        insert into Cliente (IdUsuario, Cedula) values (SCOPE_IDENTITY(), @Cedula);
+        commit;
+    end try
+    begin catch rollback; throw; end catch
+end
+go
 
 -- Registrar Escribano (Inactivo por defecto para aprobación)
 -- >>> @Contrasena llega ya hasheado con BCrypt desde la capa Logica (LogicaEscribano.Registrar).
 -- >>> @FechaAceptacionTerminos se completa con la fecha/hora en que el usuario aceptó los Terminos y Condiciones en el formulario de registro.
-CREATE PROCEDURE sp_Usuario_RegistrarEscribano
-    @NombreCompleto VARCHAR(100), @Telefono VARCHAR(20), @Email VARCHAR(255), 
-    @Contrasena VARCHAR(255), @NumCajaProf VARCHAR(50), @DireccionEstudio VARCHAR(200), @FechaAceptacionTerminos DATETIME
-AS
-BEGIN
-    BEGIN TRANSACTION;
-    BEGIN TRY
-        INSERT INTO Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
-        VALUES (@NombreCompleto, @Telefono, @Email, @Contrasena, 0, @FechaAceptacionTerminos);
-        INSERT INTO Escribano (IdUsuario, NumCajaProf, DireccionEstudio) 
-        VALUES (SCOPE_IDENTITY(), @NumCajaProf, @DireccionEstudio);
-        COMMIT;
-    END TRY
-    BEGIN CATCH ROLLBACK; THROW; END CATCH
-END
-GO
+create proc sp_Usuario_RegistrarEscribano
+@NombreCompleto varchar(100),
+@Telefono varchar(20),
+@Email varchar(255),
+@Contrasena varchar(255),
+@NumCajaProf varchar(50),
+@DireccionEstudio varchar(200),
+@FechaAceptacionTerminos datetime
+as
+begin
+
+    begin transaction;
+    begin try
+        insert into Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
+        values (@NombreCompleto, @Telefono, @Email, @Contrasena, 0, @FechaAceptacionTerminos);
+        insert into Escribano (IdUsuario, NumCajaProf, DireccionEstudio) 
+        values (SCOPE_IDENTITY(), @NumCajaProf, @DireccionEstudio);
+        commit;
+    end try
+    begin catch rollback; throw; end catch
+end
+go
 
 -- Recuperar contraseña 
-CREATE PROCEDURE sp_Usuario_ExisteEmail
-    @Email VARCHAR(255)
-AS
-BEGIN
-    SELECT COUNT(*) 
-    FROM Usuario
-    WHERE Email = @Email
-    AND Estado = 1
-END
-GO
+create proc sp_Usuario_ExisteEmail
+@Email varchar(255)
+as
+begin
+
+    select count(*) 
+    from Usuario
+    where Email = @Email
+    and Estado = 1
+end
+go
 
 create proc TokenRecuperacionCrear
 @IdUsuario int,
@@ -308,7 +321,7 @@ end
 go
 
 create proc TokenRecuperacionObtener
-@Token VARCHAR(255)
+@Token varchar(255)
 as
 begin
 
@@ -322,6 +335,7 @@ create proc TokenRecuperacionUsado
 @IdToken int
 as
 begin
+
     update TokenRecuperacion
     set Usado = 1
     where IdToken = @IdToken;
@@ -332,6 +346,7 @@ create proc ObtenerUsuarioxMail
 @Email varchar(255)
 as
 begin
+
     select U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, U.FechaAceptacionTerminos,
         case
             when A.IdUsuario is not null then 1
@@ -352,29 +367,38 @@ create proc ActualizarContrasenaUsuario
 @NuevaContrasena varchar(255)
 as
 begin
+
     update Usuario set Contrasena = @NuevaContrasena where IdUsuario = @IdUsuario
 end
 go
 
 -- Crear Vehículo
-CREATE PROCEDURE sp_Vehiculo_Crear
-    @Precio DECIMAL(10,2), @Kilometraje INT, @Ano INT, @Caja VARCHAR(30), 
-    @Motor VARCHAR(30), @Desc VARCHAR(MAX), @Lat DECIMAL(9,6), @Lon DECIMAL(9,6), 
-    @IdModelo INT, @IdVendedor INT
-AS
-BEGIN
-    INSERT INTO Vehiculo (Precio, Kilometraje, Ano, CajaDeCambios, Motorizacion, Descripcion, Publicado, Latitud, Longitud, IdModelo, IdUsuarioVendedor)
-    VALUES (@Precio, @Kilometraje, @Ano, @Caja, @Motor, @Desc, 0, @Lat, @Lon, @IdModelo, @IdVendedor);
-    SELECT SCOPE_IDENTITY() AS IdVehiculo;
-END
-GO
+create proc sp_Vehiculo_Crear
+@Precio decimal(10,2),
+@Kilometraje int,
+@Ano int,
+@Caja varchar(30),
+@Motor varchar(30),
+@Desc varchar(max),
+@Lat decimal(9,6),
+@Lon decimal(9,6),
+@IdModelo int,
+@IdVendedor int
+as
+begin
+
+    insert into Vehiculo (Precio, Kilometraje, Ano, CajaDeCambios, Motorizacion, Descripcion, Publicado, Latitud, Longitud, IdModelo, IdUsuarioVendedor)
+    values (@Precio, @Kilometraje, @Ano, @Caja, @Motor, @Desc, 0, @Lat, @Lon, @IdModelo, @IdVendedor);
+    select SCOPE_IDENTITY() as IdVehiculo;
+end
+go
 
 -- Listar Vehículos con datos de Marca/Modelo
+create proc sp_Vehiculo_Listar
+as
+begin
 
-CREATE PROCEDURE sp_Vehiculo_Listar
-AS
-BEGIN
-    SELECT 
+    select 
         V.IdVehiculo,
         V.Precio,
         V.Kilometraje,
@@ -395,25 +419,26 @@ BEGIN
         U.IdUsuario,
         U.NombreCompleto
 
-    FROM Vehiculo V
+    from Vehiculo V
 
-    INNER JOIN Modelo M
-        ON V.IdModelo = M.IdModelo
+    inner join Modelo M
+        on V.IdModelo = M.IdModelo
 
-    INNER JOIN Marca MA
-        ON M.IdMarca = MA.IdMarca
+    inner join Marca MA
+        on M.IdMarca = MA.IdMarca
 
-    INNER JOIN Usuario U
-        ON V.IdUsuarioVendedor = U.IdUsuario
-END
-GO
+    inner join Usuario U
+        on V.IdUsuarioVendedor = U.IdUsuario
+end
+go
 
 -- Listar Vehículos de un Usuario específico (Mis Vehículos)
-CREATE PROCEDURE sp_Vehiculo_ListarMisVehiculos
-    @IdUsuario INT
-AS
-BEGIN
-    SELECT 
+create proc sp_Vehiculo_ListarMisVehiculos
+@IdUsuario int
+as
+begin
+
+    select 
         V.IdVehiculo,
         V.Precio,
         V.Kilometraje,
@@ -434,292 +459,351 @@ BEGIN
         U.IdUsuario,
         U.NombreCompleto
  
-    FROM Vehiculo V
+    from Vehiculo V
  
-    INNER JOIN Modelo M
-        ON V.IdModelo = M.IdModelo
+    inner join Modelo M
+        on V.IdModelo = M.IdModelo
  
-    INNER JOIN Marca MA
-        ON M.IdMarca = MA.IdMarca
+    inner join Marca MA
+        on M.IdMarca = MA.IdMarca
  
-    INNER JOIN Usuario U
-        ON V.IdUsuarioVendedor = U.IdUsuario
-    WHERE
-        u.IdUsuario = @IdUsuario
+    inner join Usuario U
+        on V.IdUsuarioVendedor = U.IdUsuario
+    where
+        U.IdUsuario = @IdUsuario
  
-END
-GO
+end
+go
 
 -- Búsqueda por Radio (Geolocalización)
-CREATE PROCEDURE sp_Vehiculo_BuscarGeneral
-    @LatCli DECIMAL(9,6), @LonCli DECIMAL(9,6), @RadioKM INT,
-    @IdMarca INT = NULL, @PrecioMax DECIMAL(10,2) = NULL
-AS
-BEGIN
-    SELECT V.*, M.NombreModelo, MA.NombreMarca,
-    (6371 * acos(cos(radians(@LatCli)) * cos(radians(V.Latitud)) * cos(radians(V.Longitud) - radians(@LonCli)) + sin(radians(@LatCli)) * sin(radians(V.Latitud)))) AS Distancia
-    FROM Vehiculo V
-    JOIN Modelo M ON V.IdModelo = M.IdModelo
-    JOIN Marca MA ON M.IdMarca = MA.IdMarca
-    WHERE V.Publicado = 1
-    AND (@IdMarca IS NULL OR MA.IdMarca = @IdMarca)
-    AND (@PrecioMax IS NULL OR V.Precio <= @PrecioMax)
-    AND (6371 * acos(cos(radians(@LatCli)) * cos(radians(V.Latitud)) * cos(radians(V.Longitud) - radians(@LonCli)) + sin(radians(@LatCli)) * sin(radians(V.Latitud)))) <= @RadioKM
-    ORDER BY Distancia ASC;
-END
-GO
+create proc sp_Vehiculo_BuscarGeneral
+@LatCli decimal(9,6),
+@LonCli decimal(9,6),
+@RadioKM int,
+@IdMarca int = null,
+@PrecioMax decimal(10,2) = null
+as
+begin
+
+    select 
+        V.IdVehiculo,
+        V.Precio,
+        V.Kilometraje,
+        V.Ano,
+        V.CajaDeCambios,
+        V.Motorizacion,
+        V.Descripcion,
+        V.Publicado,
+        V.Latitud,
+        V.Longitud,
+
+        M.IdModelo,
+        M.NombreModelo,
+
+        MA.IdMarca,
+        MA.NombreMarca,
+
+        U.IdUsuario,
+        U.NombreCompleto,
+
+        (6371 * acos(cos(radians(@LatCli)) * cos(radians(V.Latitud)) * cos(radians(V.Longitud) - radians(@LonCli)) + sin(radians(@LatCli)) * sin(radians(V.Latitud)))) as Distancia
+
+    from Vehiculo V
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    inner join Marca MA on M.IdMarca = MA.IdMarca
+    inner join Usuario U on V.IdUsuarioVendedor = U.IdUsuario
+
+    where V.Publicado = 1
+    and (@IdMarca is null or MA.IdMarca = @IdMarca)
+    and (@PrecioMax is null or V.Precio <= @PrecioMax)
+    and (6371 * acos(cos(radians(@LatCli)) * cos(radians(V.Latitud)) * cos(radians(V.Longitud) - radians(@LonCli)) + sin(radians(@LatCli)) * sin(radians(V.Latitud)))) <= @RadioKM
+
+    order by Distancia asc;
+end
+go
 
 -- Obtener o Crear Chat
-CREATE PROCEDURE sp_Chat_Obtener
-    @IdVehiculo INT, @IdComprador INT, @IdVendedor INT
-AS
-BEGIN
-    -- Validación: El comprador no puede ser el mismo que el vendedor
-    IF (@IdComprador = @IdVendedor)
-    BEGIN
-        RAISERROR ('No puedes iniciar un chat sobre tu propio vehículo.', 16, 1);
-        RETURN;
-    END
+create proc sp_Chat_Obtener
+@IdVehiculo int,
+@IdComprador int,
+@IdVendedor int
+as
+begin
 
-    DECLARE @IdChat INT = (SELECT TOP 1 CP1.IdChat FROM ChatParticipante CP1 
-                           JOIN ChatParticipante CP2 ON CP1.IdChat = CP2.IdChat
-                           JOIN Chat C ON C.IdChat = CP1.IdChat
-                           WHERE CP1.IdUsuario = @IdComprador AND CP2.IdUsuario = @IdVendedor AND C.IdVehiculo = @IdVehiculo);
+    -- Validación: El comprador no puede ser el mismo que el vendedor
+    if (@IdComprador = @IdVendedor)
+    begin
+        raiserror ('No puedes iniciar un chat sobre tu propio vehículo.', 16, 1);
+        return;
+    end
+
+    declare @IdChat int = (select top 1 CP1.IdChat from ChatParticipante CP1 
+                           join ChatParticipante CP2 on CP1.IdChat = CP2.IdChat
+                           join Chat C on C.IdChat = CP1.IdChat
+                           where CP1.IdUsuario = @IdComprador and CP2.IdUsuario = @IdVendedor and C.IdVehiculo = @IdVehiculo);
     
-    IF @IdChat IS NULL
-    BEGIN
-        INSERT INTO Chat (IdVehiculo) VALUES (@IdVehiculo); SET @IdChat = SCOPE_IDENTITY();
-        INSERT INTO ChatParticipante (IdChat, IdUsuario) VALUES (@IdChat, @IdComprador), (@IdChat, @IdVendedor);
-    END
+    if @IdChat is null
+    begin
+        insert into Chat (IdVehiculo) values (@IdVehiculo); set @IdChat = SCOPE_IDENTITY();
+        insert into ChatParticipante (IdChat, IdUsuario) values (@IdChat, @IdComprador), (@IdChat, @IdVendedor);
+    end
     
-    SELECT @IdChat AS IdChat;
-END
-GO
+    select @IdChat as IdChat;
+end
+go
 
 -- Enviar Mensaje
-CREATE PROCEDURE sp_Mensaje_Enviar 
-    @IdChat INT, 
-    @IdEmisor INT, 
-    @Texto VARCHAR(MAX) 
-AS 
-BEGIN 
-    -- Validamos que el emisor sea parte de este chat
-    IF NOT EXISTS (SELECT 1 FROM ChatParticipante WHERE IdChat = @IdChat AND IdUsuario = @IdEmisor)
-    BEGIN
-        RAISERROR ('No tienes permiso para enviar mensajes en este chat.', 16, 1);
-        RETURN;
-    END
+create proc sp_Mensaje_Enviar
+@IdChat int,
+@IdEmisor int,
+@Texto varchar(max)
+as
+begin
 
-    INSERT INTO Mensaje (IdChat, IdUsuarioEmisor, Contenido) 
-    VALUES (@IdChat, @IdEmisor, @Texto);
-END
-GO
+    -- Validamos que el emisor sea parte de este chat
+    if not exists (select 1 from ChatParticipante where IdChat = @IdChat and IdUsuario = @IdEmisor)
+    begin
+        raiserror ('No tienes permiso para enviar mensajes en este chat.', 16, 1);
+        return;
+    end
+
+    insert into Mensaje (IdChat, IdUsuarioEmisor, Contenido) 
+    values (@IdChat, @IdEmisor, @Texto);
+end
+go
 
 -- Solicitar Escribano
-CREATE PROCEDURE sp_Notarial_CrearSolicitud
-    @IdCliente INT, @IdVehiculo INT, @IdEscribano INT
-AS
-BEGIN
-    INSERT INTO SolicitudNotarial (EstadoSolicitud, IdUsuarioCliente, IdVehiculo) VALUES (1, @IdCliente, @IdVehiculo);
-    INSERT INTO SolicitudEscribano (IdSolicitud, IdUsuarioEscribano) VALUES (SCOPE_IDENTITY(), @IdEscribano);
-END
-GO
+create proc sp_Notarial_CrearSolicitud
+@IdCliente int,
+@IdVehiculo int,
+@IdEscribano int
+as
+begin
+
+    insert into SolicitudNotarial (EstadoSolicitud, IdUsuarioCliente, IdVehiculo) values (1, @IdCliente, @IdVehiculo);
+    insert into SolicitudEscribano (IdSolicitud, IdUsuarioEscribano) values (SCOPE_IDENTITY(), @IdEscribano);
+end
+go
 
 -- Finalizar Venta (Cierre total)
-CREATE PROCEDURE sp_Notarial_FinalizarVenta
-    @IdSolicitud INT
-AS
-BEGIN
-    BEGIN TRANSACTION;
-    BEGIN TRY
+create proc sp_Notarial_FinalizarVenta
+@IdSolicitud int
+as
+begin
+
+    begin transaction;
+    begin try
         -- Validamos que la solicitud esté en estado "Aceptada/En Proceso" (Estado 2) 
         -- y no esté ya Finalizada (4) o Cancelada (3)
-        IF NOT EXISTS (SELECT 1 FROM SolicitudNotarial WHERE IdSolicitud = @IdSolicitud AND EstadoSolicitud = 2)
-        BEGIN
-            RAISERROR ('La solicitud no se encuentra en un estado válido para ser finalizada.', 16, 1);
-        END
+        if not exists (select 1 from SolicitudNotarial where IdSolicitud = @IdSolicitud and EstadoSolicitud = 2)
+        begin
+            raiserror ('La solicitud no se encuentra en un estado válido para ser finalizada.', 16, 1);
+        end
 
         -- Finaliza solicitud
-        UPDATE SolicitudNotarial SET EstadoSolicitud = 4 WHERE IdSolicitud = @IdSolicitud;
+        update SolicitudNotarial set EstadoSolicitud = 4 where IdSolicitud = @IdSolicitud;
         
         -- Crea registro en CompraVenta
-        INSERT INTO CompraVenta (EstadoCompraVenta, IdSolicitud) VALUES (2, @IdSolicitud);
+        insert into CompraVenta (EstadoCompraVenta, IdSolicitud) values (2, @IdSolicitud);
         
         -- Quitamos el auto de la venta pública
-        DECLARE @IdV INT = (SELECT IdVehiculo FROM SolicitudNotarial WHERE IdSolicitud = @IdSolicitud);
-        UPDATE Vehiculo SET Publicado = 0 WHERE IdVehiculo = @IdV;
+        declare @IdV int = (select IdVehiculo from SolicitudNotarial where IdSolicitud = @IdSolicitud);
+        update Vehiculo set Publicado = 0 where IdVehiculo = @IdV;
 
-        COMMIT TRANSACTION;
-    END TRY
-    BEGIN CATCH 
-        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-        THROW; 
-    END CATCH
-END
-GO
+        commit transaction;
+    end try
+    begin catch 
+        if @@TRANCOUNT > 0 rollback transaction;
+        throw; 
+    end catch
+end
+go
 
 -- Moderar Publicación
-CREATE PROCEDURE sp_Admin_AprobarVehiculo @Id INT, @Publicado BIT
-AS BEGIN UPDATE Vehiculo SET Publicado = @Publicado WHERE IdVehiculo = @Id END
-GO
+create proc sp_Admin_AprobarVehiculo
+@Id int,
+@Publicado bit
+as
+begin
+
+    update Vehiculo set Publicado = @Publicado where IdVehiculo = @Id
+end
+go
 
 -- Activar/Inactivar Usuario
-CREATE PROCEDURE sp_Admin_SetEstadoUsuario @Id INT, @Estado BIT 
-AS BEGIN UPDATE Usuario SET Estado = @Estado WHERE IdUsuario = @Id END
-GO
+create proc sp_Admin_SetEstadoUsuario
+@Id int,
+@Estado bit
+as
+begin
+
+    update Usuario set Estado = @Estado where IdUsuario = @Id
+end
+go
 
 -- Alerta de 24 horas para Escribanos
-CREATE PROCEDURE sp_Admin_AlertaEscribanos
-AS
-BEGIN
-    SELECT S.IdSolicitud, U.NombreCompleto AS Escribano, S.FechaSolicitud
-    FROM SolicitudNotarial S
-    JOIN SolicitudEscribano SE ON S.IdSolicitud = SE.IdSolicitud
-    JOIN Usuario U ON SE.IdUsuarioEscribano = U.IdUsuario
-    WHERE S.EstadoSolicitud = 1 AND DATEDIFF(HOUR, S.FechaSolicitud, GETDATE()) > 24;
-END
-GO
+create proc sp_Admin_AlertaEscribanos
+as
+begin
+
+    select S.IdSolicitud, U.NombreCompleto as Escribano, S.FechaSolicitud
+    from SolicitudNotarial S
+    join SolicitudEscribano SE on S.IdSolicitud = SE.IdSolicitud
+    join Usuario U on SE.IdUsuarioEscribano = U.IdUsuario
+    where S.EstadoSolicitud = 1 and DATEDIFF(HOUR, S.FechaSolicitud, GETDATE()) > 24;
+end
+go
 
 
 -- Marcas (Alta y Modificación)
-CREATE PROCEDURE sp_Marca_Guardar
-    @IdMarca INT = 0, -- Si es 0 inserta, si es > 0 actualiza
-    @NombreMarca VARCHAR(50)
-AS
-BEGIN
-    IF @IdMarca = 0
-        INSERT INTO Marca (NombreMarca) VALUES (@NombreMarca);
-    ELSE
-        UPDATE Marca SET NombreMarca = @NombreMarca WHERE IdMarca = @IdMarca;
-END
-GO
+create proc sp_Marca_Guardar
+@IdMarca int = 0, -- Si es 0 inserta, si es > 0 actualiza
+@NombreMarca varchar(50)
+as
+begin
+
+    if @IdMarca = 0
+        insert into Marca (NombreMarca) values (@NombreMarca);
+    else
+        update Marca set NombreMarca = @NombreMarca where IdMarca = @IdMarca;
+end
+go
 
 -- Modelos (Alta y Modificación)
-CREATE PROCEDURE sp_Modelo_Guardar
-    @IdModelo INT = 0,
-    @NombreModelo VARCHAR(50),
-    @IdMarca INT
-AS
-BEGIN
-    IF @IdModelo = 0
-        INSERT INTO Modelo (NombreModelo, IdMarca) VALUES (@NombreModelo, @IdMarca);
-    ELSE
-        UPDATE Modelo SET NombreModelo = @NombreModelo, IdMarca = @IdMarca WHERE IdModelo = @IdModelo;
-END
-GO
+create proc sp_Modelo_Guardar
+@IdModelo int = 0,
+@NombreModelo varchar(50),
+@IdMarca int
+as
+begin
+
+    if @IdModelo = 0
+        insert into Modelo (NombreModelo, IdMarca) values (@NombreModelo, @IdMarca);
+    else
+        update Modelo set NombreModelo = @NombreModelo, IdMarca = @IdMarca where IdModelo = @IdModelo;
+end
+go
 
 -- Modificar datos básicos de Usuario
-CREATE PROCEDURE sp_Usuario_ActualizarPerfil
-    @IdUsuario INT,
-    @NombreCompleto VARCHAR(100),
-    @Telefono VARCHAR(20),
-    @Email VARCHAR(255)
-AS
-BEGIN
-    UPDATE Usuario 
-    SET NombreCompleto = @NombreCompleto, 
+create proc sp_Usuario_ActualizarPerfil
+@IdUsuario int,
+@NombreCompleto varchar(100),
+@Telefono varchar(20),
+@Email varchar(255)
+as
+begin
+
+    update Usuario 
+    set NombreCompleto = @NombreCompleto, 
         Telefono = @Telefono, 
         Email = @Email
-    WHERE IdUsuario = @IdUsuario;
-END
-GO
+    where IdUsuario = @IdUsuario;
+end
+go
 
 -- Modificar datos específicos del Escribano
-CREATE PROCEDURE sp_Escribano_ActualizarDatos
-    @IdUsuario INT,
-    @NumCajaProf VARCHAR(50),
-    @DireccionEstudio VARCHAR(200)
-AS
-BEGIN
-    UPDATE Escribano
-    SET NumCajaProf = @NumCajaProf,
+create proc sp_Escribano_ActualizarDatos
+@IdUsuario int,
+@NumCajaProf varchar(50),
+@DireccionEstudio varchar(200)
+as
+begin
+
+    update Escribano
+    set NumCajaProf = @NumCajaProf,
         DireccionEstudio = @DireccionEstudio
-    WHERE IdUsuario = @IdUsuario;
-END
-GO
+    where IdUsuario = @IdUsuario;
+end
+go
 
 -- Obtener Cliente por Id (para Gestionar Perfil)
-CREATE PROCEDURE sp_Cliente_ObtenerPorId
-    @IdUsuario INT
-AS
-BEGIN
-    SELECT U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, U.FechaAceptacionTerminos, C.Cedula
-    FROM Usuario U
-    INNER JOIN Cliente C ON U.IdUsuario = C.IdUsuario
-    WHERE U.IdUsuario = @IdUsuario;
-END
-GO
+create proc sp_Cliente_ObtenerPorId
+@IdUsuario int
+as
+begin
+
+    select U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, U.FechaAceptacionTerminos, C.Cedula
+    from Usuario U
+    inner join Cliente C on U.IdUsuario = C.IdUsuario
+    where U.IdUsuario = @IdUsuario;
+end
+go
 
 -- Obtener Escribano por Id (para Gestionar Perfil)
-CREATE PROCEDURE sp_Escribano_ObtenerPorId
-    @IdUsuario INT
-AS
-BEGIN
-    SELECT U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, U.FechaAceptacionTerminos, E.NumCajaProf, E.DireccionEstudio
-    FROM Usuario U
-    INNER JOIN Escribano E ON U.IdUsuario = E.IdUsuario
-    WHERE U.IdUsuario = @IdUsuario;
-END
-GO
+create proc sp_Escribano_ObtenerPorId
+@IdUsuario int
+as
+begin
+
+    select U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, U.FechaAceptacionTerminos, E.NumCajaProf, E.DireccionEstudio
+    from Usuario U
+    inner join Escribano E on U.IdUsuario = E.IdUsuario
+    where U.IdUsuario = @IdUsuario;
+end
+go
 
 -- Modificar Vehículo (Solo si no está en proceso de venta)
-CREATE PROCEDURE sp_Vehiculo_Modificar
-    @IdVehiculo INT,
-    @Precio DECIMAL(10,2),
-    @Kilometraje INT,
-    @Descripcion VARCHAR(MAX)
-AS
-BEGIN
+create proc sp_Vehiculo_Modificar
+@IdVehiculo int,
+@Precio decimal(10,2),
+@Kilometraje int,
+@Descripcion varchar(max)
+as
+begin
+
     -- Verificamos que no haya una solicitud notarial activa/aceptada
-    IF NOT EXISTS (SELECT 1 FROM SolicitudNotarial WHERE IdVehiculo = @IdVehiculo AND EstadoSolicitud IN (1, 2))
-    BEGIN
-        UPDATE Vehiculo 
-        SET Precio = @Precio, 
+    if not exists (select 1 from SolicitudNotarial where IdVehiculo = @IdVehiculo and EstadoSolicitud in (1, 2))
+    begin
+        update Vehiculo 
+        set Precio = @Precio, 
             Kilometraje = @Kilometraje, 
             Descripcion = @Descripcion 
-        WHERE IdVehiculo = @IdVehiculo;
-    END
-    ELSE
-    BEGIN
-        RAISERROR ('No se puede modificar un vehículo con un proceso de venta en curso.', 16, 1);
-    END
-END
-GO
+        where IdVehiculo = @IdVehiculo;
+    end
+    else
+    begin
+        raiserror ('No se puede modificar un vehículo con un proceso de venta en curso.', 16, 1);
+    end
+end
+go
 
 -- Inactivar Publicación (Baja Lógica)
-CREATE PROCEDURE sp_Vehiculo_Inactivar
-    @IdVehiculo INT
-AS
-BEGIN
-    UPDATE Vehiculo SET Publicado = 0 WHERE IdVehiculo = @IdVehiculo;
-END
-GO
+create proc sp_Vehiculo_Inactivar
+@IdVehiculo int
+as
+begin
+
+    update Vehiculo set Publicado = 0 where IdVehiculo = @IdVehiculo;
+end
+go
 
 -- Obtener un Vehículo completo con sus fotos
-CREATE PROCEDURE sp_Vehiculo_ObtenerDetalle
-    @IdVehiculo INT
-AS
-BEGIN
-    SELECT V.*, M.NombreModelo, MA.NombreMarca
-    FROM Vehiculo V
-    JOIN Modelo M ON V.IdModelo = M.IdModelo
-    JOIN Marca MA ON M.IdMarca = MA.IdMarca
-    WHERE V.IdVehiculo = @IdVehiculo;
+create proc sp_Vehiculo_ObtenerDetalle
+@IdVehiculo int
+as
+begin
 
-    SELECT UrlFoto FROM FotoVehiculo WHERE IdVehiculo = @IdVehiculo;
-END
-GO
+    select V.*, M.NombreModelo, MA.NombreMarca
+    from Vehiculo V
+    join Modelo M on V.IdModelo = M.IdModelo
+    join Marca MA on M.IdMarca = MA.IdMarca
+    where V.IdVehiculo = @IdVehiculo;
+
+    select UrlFoto from FotoVehiculo where IdVehiculo = @IdVehiculo;
+end
+go
 
 -- Listar Escribanos aprobados (Para que el cliente elija uno)
-CREATE PROCEDURE sp_Escribano_ListarActivos
-AS
-BEGIN
-    SELECT U.IdUsuario, U.NombreCompleto, E.DireccionEstudio, E.NumCajaProf
-    FROM Usuario U
-    JOIN Escribano E ON U.IdUsuario = E.IdUsuario
-    WHERE U.Estado = 1;
-END
-GO
+create proc sp_Escribano_ListarActivos
+as
+begin
+
+    select U.IdUsuario, U.NombreCompleto, E.DireccionEstudio, E.NumCajaProf
+    from Usuario U
+    join Escribano E on U.IdUsuario = E.IdUsuario
+    where U.Estado = 1;
+end
+go
 
 -- Índice para la búsqueda por ubicación (Latitud/Longitud) y estado de publicación
 CREATE INDEX IX_Vehiculo_Ubicacion_Publicado ON Vehiculo (Publicado, Latitud, Longitud);
