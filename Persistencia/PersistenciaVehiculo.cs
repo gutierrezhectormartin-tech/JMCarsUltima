@@ -88,10 +88,12 @@ namespace Persistencia
 
             try
             {
+                oComando.Parameters.AddWithValue("@IdUsuario", Convert.ToInt32(idUsuario));
+
                 oConexion.Open();
 
                 SqlDataReader lector = oComando.ExecuteReader();
-                oComando.Parameters.AddWithValue("@IdUsuario", Convert.ToInt32(idUsuario));
+               
 
                 while (lector.Read())
                 {

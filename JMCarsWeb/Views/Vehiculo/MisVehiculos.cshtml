@@ -1,0 +1,147 @@
+﻿@model List<Modelo.Vehiculo>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2>Mis Vehículos Publicados</h2>
+            <p class="text-muted mb-0">Acá podés gestionar las publicaciones de tus automóviles en JM Card.</p>
+        </div>
+        <a asp-controller="Vehiculo" asp-action="Crear" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Nueva Publicación
+        </a>
+    </div>
+
+    <hr />
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i> Todavía no tenés ningún vehículo publicado en la plataforma.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Año</th>
+                        <th>Caja</th>
+                        <th>Motor</th>
+                        <th>Kilometraje</th>
+                        <th>Precio</th>
+                        <th class="text-center">Ubicación</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var vehiculo in Model)
+                    {
+                        <tr>
+                            <td><strong>#@vehiculo.IdVehiculo</strong></td>
+                            <td>@vehiculo.Modelo.Marca.NombreMarca</td>
+                            <td>@vehiculo.Modelo.Modelo</td>
+                            <td>@vehiculo.Anio</td>
+                            <td>@vehiculo.CajaCambios</td>
+                            <td>@vehiculo.Motorizacion</td>
+                            <td>@vehiculo.Km.ToString("N0") Km</td>
+                            <td><span class="text-success fw-bold">U$S @vehiculo.Precio.ToString("N0")</span></td>
+
+                            <td class="text-center">
+                                @if (vehiculo.Latitud.HasValue && vehiculo.Longitud.HasValue)
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-info btn-sm"
+                                            onclick="verUbicacion(@vehiculo.Latitud.Value.ToString().Replace(",", "."), @vehiculo.Longitud.Value.ToString().Replace(",", "."), '@vehiculo.Modelo.Marca.NombreMarca @vehiculo.Modelo.Modelo')"
+                                            title="Ver Ubicación">
+                                        <i class="bi bi-geo-alt-fill text-danger"></i> Ver Mapa
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">No asignada</span>
+                                }
+                            </td>
+
+                            <td class="text-center">
+                                @if (vehiculo.Publicado)
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i> Inactivo</span>
+                                }
+                            </td>
+
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@vehiculo.IdVehiculo" class="btn btn-outline-info" title="Ver Detalle">
+                                        <i class="bi bi-eye"></i> Detalle
+                                    </a>
+                                    <a asp-controller="Vehiculo" asp-action="Editar" asp-route-id="@vehiculo.IdVehiculo" class="btn btn-outline-primary" title="Editar">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <a asp-controller="Vehiculo" asp-action="Inactivar" asp-route-id="@vehiculo.IdVehiculo" class="btn btn-outline-danger" title="Inactivar">
+                                        <i class="bi bi-x-circle"></i> Inactivar
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="modalMapa" tabindex="-1" aria-labelledby="modalMapaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalMapaLabel">Ubicación del Vehículo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="mapaVer" style="height: 450px; width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var mapa = null;
+    var marcador = null;
+    var miModal = null;
+
+    function verUbicacion(lat, lon, infoAuto) {
+        if (!miModal) {
+            miModal = new bootstrap.Modal(document.getElementById('modalMapa'));
+        }
+        miModal.show();
+
+        setTimeout(function () {
+            if (mapa === null) {
+                mapa = L.map('mapaVer').setView([lat, lon], 15);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(mapa);
+
+                marcador = L.marker([lat, lon]).addTo(mapa)
+                    .bindPopup(infoAuto)
+                    .openPopup();
+            } else {
+                mapa.setView([lat, lon], 15);
+                marcador.setLatLng([lat, lon]);
+                marcador.setPopupContent(infoAuto).openPopup();
+            }
+
+            mapa.invalidateSize();
+        }, 300);
+    }
+</script>

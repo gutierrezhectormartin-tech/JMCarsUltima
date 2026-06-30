@@ -24,5 +24,26 @@ namespace JMCarsWeb.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> MisVehiculos()
+        {
+            // 1. Lo leemos como INT porque así se guardó en el Login
+            int? idUsuarioInt = HttpContext.Session.GetInt32("IdUsuario");
+
+            // 2. Si es nulo (o sea, no hay sesión activa), al Login derecho viejo
+            if (idUsuarioInt == null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            // 3. Lo pasamos a string para poder mandárselo a tu servicio de la API
+            string idUsuarioStr = idUsuarioInt.Value.ToString();
+
+            // 4. Llamamos a la API pasándole el ID correcto
+            List<Vehiculo> misVehiculos = await _vehiculoService.ListarMisVehiculos(idUsuarioStr);
+
+            return View(misVehiculos);
+        }
     }
 }

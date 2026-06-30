@@ -34,6 +34,7 @@
                         @if (idRol == (int)Rol.Cliente)
                         {
                             @Html.ActionLink("Mi perfil", "Perfil", "Cliente", null, new { @class = "btn btn-outline-light me-2" })
+                            @Html.ActionLink("Mis Vehículos", "MisVehiculos", "Vehiculo", null, new { @class = "btn btn-light me-2" })
                         }
                         else if (idRol == (int)Rol.Escribano)
                         {
