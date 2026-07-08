@@ -372,8 +372,9 @@ begin
 end
 go
 
--- Crear Vehículo
-create proc sp_Vehiculo_Crear
+
+
+CREATE PROC sp_Vehiculo_Crear
 @Precio decimal(10,2),
 @Kilometraje int,
 @Ano int,
@@ -382,16 +383,49 @@ create proc sp_Vehiculo_Crear
 @Desc varchar(max),
 @Lat decimal(9,6),
 @Lon decimal(9,6),
-@IdModelo int,
+@NombreMarca varchar(50),
+@NombreModelo varchar(50),
 @IdVendedor int
-as
-begin
+AS
+BEGIN
+    SET NOCOUNT ON;
 
-    insert into Vehiculo (Precio, Kilometraje, Ano, CajaDeCambios, Motorizacion, Descripcion, Publicado, Latitud, Longitud, IdModelo, IdUsuarioVendedor)
-    values (@Precio, @Kilometraje, @Ano, @Caja, @Motor, @Desc, 0, @Lat, @Lon, @IdModelo, @IdVendedor);
-    select SCOPE_IDENTITY() as IdVehiculo;
-end
-go
+    DECLARE @IdMarcaActual INT;
+    DECLARE @IdModeloActual INT;
+
+    -- 1. Buscamos si la marca ya existe (evitamos duplicados)
+    SELECT @IdMarcaActual = IdMarca 
+    FROM Marca 
+    WHERE NombreMarca = @NombreMarca;
+    
+    -- Si no existe, la creamos en el momento
+    IF (@IdMarcaActual IS NULL)
+    BEGIN
+        INSERT INTO Marca (NombreMarca) VALUES (@NombreMarca);
+        SET @IdMarcaActual = SCOPE_IDENTITY();
+    END
+
+    -- 2. Buscamos si el modelo ya existe para esa marca específica
+    SELECT @IdModeloActual = IdModelo 
+    FROM Modelo 
+    WHERE NombreModelo = @NombreModelo AND IdMarca = @IdMarcaActual;
+
+    -- Si no existe, lo creamos asociado a la marca encontrada/creada
+    IF (@IdModeloActual IS NULL)
+    BEGIN
+        INSERT INTO Modelo (NombreModelo, IdMarca) VALUES (@NombreModelo, @IdMarcaActual);
+        SET @IdModeloActual = SCOPE_IDENTITY();
+    END
+
+    -- 3. Insertamos el vehículo apuntando al IdModelo correcto y real
+    INSERT INTO Vehiculo (Precio, Kilometraje, Ano, CajaDeCambios, Motorizacion, Descripcion, Publicado, Latitud, Longitud, IdModelo, IdUsuarioVendedor)
+    VALUES (@Precio, @Kilometraje, @Ano, @Caja, @Motor, @Desc, 0, @Lat, @Lon, @IdModeloActual, @IdVendedor);
+    
+    -- Devolvemos el ID del vehículo recién creado
+    SELECT SCOPE_IDENTITY() as IdVehiculo;
+END
+GO
+
 
 -- Listar Vehículos con datos de Marca/Modelo
 create proc sp_Vehiculo_Listar

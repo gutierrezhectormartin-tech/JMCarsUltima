@@ -42,7 +42,6 @@ namespace WebAPI.Controllers
         {
             try
             {
-                // Validación básica de que nos manden un ID
                 if (string.IsNullOrEmpty(idUsuario))
                 {
                     return BadRequest(new { mensaje = "El ID de usuario es requerido." });
@@ -60,6 +59,26 @@ namespace WebAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPost("registrar")]
+        public IActionResult RegistrarVehiculo([FromBody] Vehiculo pVehiculo)
+        {
+            try
+            {
+                if (pVehiculo == null)
+                {
+                    return BadRequest(new { mensaje = "Los datos del vehículo no son válidos o vienen vacíos." });
+                }
+
+                _logicaVehiculo.Registrar(pVehiculo);
+
+                return Ok(new { mensaje = "Vehículo registrado con éxito" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
     }

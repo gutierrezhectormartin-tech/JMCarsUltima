@@ -193,6 +193,72 @@ namespace Persistencia
                 oConexion.Close();
             }
         }
+
+        public void Registrar(Vehiculo pVehiculo)
+        {
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Vehiculo_Crear", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            // --- PRECIO: Especificamos DECIMAL(10,2) ---
+            SqlParameter paramPrecio = new SqlParameter("@Precio", SqlDbType.Decimal);
+            paramPrecio.Precision = 10;
+            paramPrecio.Scale = 2;
+            paramPrecio.Value = pVehiculo.Precio;
+            oComando.Parameters.Add(paramPrecio);
+
+            oComando.Parameters.AddWithValue("@Kilometraje", pVehiculo.Km);
+            oComando.Parameters.AddWithValue("@Ano", pVehiculo.Anio);
+            oComando.Parameters.AddWithValue("@Caja", pVehiculo.CajaCambios);
+            oComando.Parameters.AddWithValue("@Motor", pVehiculo.Motorizacion);
+            oComando.Parameters.AddWithValue("@Desc", pVehiculo.Descripcion ?? (object)DBNull.Value);
+
+            // --- NUEVO: Mandamos los textos libres para que el SP resuelva la lógica ---
+            oComando.Parameters.AddWithValue("@NombreMarca", pVehiculo.Modelo.Marca.NombreMarca);
+            oComando.Parameters.AddWithValue("@NombreModelo", pVehiculo.Modelo.Modelo);
+            oComando.Parameters.AddWithValue("@IdVendedor", pVehiculo.Vendedor.IdUsuario);
+
+            // --- LATITUD: Especificamos DECIMAL(9,6) ---
+            SqlParameter paramLat = new SqlParameter("@Lat", SqlDbType.Decimal);
+            paramLat.Precision = 9;
+            paramLat.Scale = 6;
+            if (pVehiculo.Latitud.HasValue)
+                paramLat.Value = pVehiculo.Latitud.Value;
+            else
+                paramLat.Value = DBNull.Value;
+            oComando.Parameters.Add(paramLat);
+
+            // --- LONGITUD: Especificamos DECIMAL(9,6) ---
+            SqlParameter paramLon = new SqlParameter("@Lon", SqlDbType.Decimal);
+            paramLon.Precision = 9;
+            paramLon.Scale = 6;
+            if (pVehiculo.Longitud.HasValue)
+                paramLon.Value = pVehiculo.Longitud.Value;
+            else
+                paramLon.Value = DBNull.Value;
+            oComando.Parameters.Add(paramLon);
+
+            try
+            {
+                oConexion.Open();
+
+                object resultado = oComando.ExecuteScalar();
+
+                if (resultado != null && resultado != DBNull.Value)
+                {
+                    pVehiculo.IdVehiculo = Convert.ToInt32(resultado);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
     }
 }
    

@@ -150,5 +150,43 @@ namespace Modelo
             Fotografia = pFotografia;
         }
         public Vehiculo() {}
+
+        public void Validar()
+        {
+            if (Precio <= 0)
+            {
+                throw new Exception("El precio debe ser un valor mayor a cero.");
+            }
+
+            if (Km < 0)
+            {
+                throw new Exception("El kilometraje no puede ser negativo.");
+            }
+
+            if (Anio <= 1900 || Anio > DateTime.Now.Year + 1)
+            {
+                throw new Exception("El año ingresado no es válido.");
+            }
+
+            if (string.IsNullOrWhiteSpace(CajaCambios))
+            {
+                throw new Exception("Debe especificar la caja de cambios.");
+            }
+
+            if (string.IsNullOrWhiteSpace(Motorizacion))
+            {
+                throw new Exception("Debe especificar la motorización.");
+            }
+
+            if (Modelo == null || Modelo.IdModelo <= 0)
+            {
+                throw new Exception("El vehículo debe tener un modelo asociado.");
+            }
+
+            if (Vendedor == null || Vendedor.IdUsuario <= 0)
+            {
+                throw new Exception("El vehículo debe tener un vendedor asociado.");
+            }
+        }
     }
 }

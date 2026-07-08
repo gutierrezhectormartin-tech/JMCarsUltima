@@ -1,0 +1,124 @@
+﻿@model Modelo.Vehiculo
+@{
+    ViewData["Title"] = "Publicar Vehículo";
+}
+
+<div class="container mt-4" style="max-width: 800px;">
+    <h2>Publicar un nuevo vehículo</h2>
+    <p class="text-muted">Ingresá los detalles del auto, subí una foto y seleccioná su ubicación exacta en el mapa.</p>
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>⚠️ Atención:</strong> @ViewBag.Error
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="Crear" method="post" enctype="multipart/form-data" class="shadow p-4 bg-white rounded">
+
+        <input type="hidden" id="latitudInput" name="Latitud" />
+        <input type="hidden" id="longitudInput" name="Longitud" />
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label font-weight-bold">Precio (USD)</label>
+                <input type="number" name="Precio" class="form-control" placeholder="Ej: 14500" required />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label font-weight-bold">Kilómetros</label>
+                <input type="number" name="Km" class="form-control" placeholder="Ej: 65000" required />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-weight-bold">Motorización</label>
+                <input type="text" name="Motorizacion" class="form-control" placeholder="Ej: 1.4 TSI Nafta" required />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-weight-bold">Marca del Auto</label>
+                <input type="text" name="Marca.Nombre" class="form-control" placeholder="Ej: Toyota, Chevrolet, Fiat..." required />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-weight-bold">Modelo del Auto</label>
+                <input type="text" name="Modelo.Nombre" class="form-control" placeholder="Ej: Corolla, Gol, Cruze..." required />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label font-weight-bold">Año</label>
+                <input type="number" name="Anio" class="form-control" placeholder="Ej: 2020" required />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label font-weight-bold">Caja de Cambios</label>
+                <select name="CajaCambios" class="form-select" required>
+                    <option value="">Seleccione tipo...</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Automática">Automática</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label font-weight-bold">Foto del Vehículo</label>
+            <input type="file" name="fotoInput" class="form-control" accept="image/*" required />
+            <div class="form-text">Subí una imagen representativa del auto.</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label font-weight-bold">Descripción / Detalles adicionales</label>
+            <textarea name="Descripcion" class="form-control" rows="4" placeholder="Contale a los compradores el estado del auto, equipamiento, agregados..." required></textarea>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label text-primary font-weight-bold">📍 Ubicación de Entrega / Exhibición</label>
+            <p class="small text-muted m-0">Hacé un clic en el mapa para marcar el punto donde se encuentra el auto.</p>
+
+            <div id="map" class="border rounded mt-2 shadow-sm" style="height: 380px; background-color: #f8f9fa;"></div>
+
+            <div id="coordenadasInfo" class="text-success small mt-2 font-monospace fw-bold"></div>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-2">
+            <a asp-action="MisVehiculos" class="btn btn-outline-secondary px-4 me-md-2">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-5 fw-bold">Publicar Auto</button>
+        </div>
+    </form>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var map = L.map('map').setView([-34.85, -56.15], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marcadorActual;
+
+        map.on('click', function (evento) {
+            var latitud = evento.latlng.lat;
+            var longitud = evento.latlng.lng;
+
+            document.getElementById('latitudInput').value = latitud;
+            document.getElementById('longitudInput').value = longitud;
+
+            document.getElementById('coordenadasInfo').innerHTML = "✓ Ubicación seleccionada: Lat " + latitud.toFixed(6) + " | Lng " + longitud.toFixed(6);
+
+            if (marcadorActual) {
+                map.removeLayer(marcadorActual);
+            }
+
+            marcadorActual = L.marker([latitud, longitud]).addTo(map)
+                .bindPopup("<div class='text-center'><b>¡Auto ubicado!</b><br/>Guardamos estas coordenadas.</div>")
+                .openPopup();
+        });
+    });
+</script>

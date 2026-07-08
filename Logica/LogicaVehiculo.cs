@@ -34,5 +34,24 @@ namespace Logica
             return _persistenciaVehiculo.BuscarGeneral(pLatCli, pLonCli, pRadioKM, pIdMarca, pPrecioMax);
         }
 
+        public void Registrar(Vehiculo pVehiculo)
+        {
+            if (pVehiculo == null)
+            {
+                throw new Exception("El vehículo no puede ser nulo.");
+            }
+            pVehiculo.Validar();
+
+            try
+            {
+                _persistenciaVehiculo.Registrar(pVehiculo);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error en la lógica al registrar el vehículo: " + ex.Message);
+            }
+        }
     }
 }
+    
+

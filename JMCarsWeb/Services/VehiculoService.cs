@@ -21,6 +21,20 @@ namespace JMCarsWeb.Services
         {
             return await _httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/vehiculo/mis-vehiculos/{idUsuario}") ?? new List<Vehiculo>();
         }
+        public async Task<bool> RegistrarVehiculo(Vehiculo pVehiculo)
+        {
+            HttpResponseMessage respuesta = await _httpClient.PostAsJsonAsync("api/vehiculo/registrar", pVehiculo);
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                string error = await respuesta.Content.ReadAsStringAsync();
+                throw new Exception(error);
+            }
+        }
 
     }
 }

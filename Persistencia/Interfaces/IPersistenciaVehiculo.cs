@@ -13,5 +13,7 @@ namespace Persistencia.Interfaces
         List<Vehiculo> ListarMisVehiculos(string idUsuario);
 
         List<Vehiculo> BuscarGeneral(decimal pLatCli, decimal pLonCli, int pRadioKm, int? pIdMarca, decimal? pPrecioMax);
+
+        void Registrar(Vehiculo pVehiculo);
     }
 }
