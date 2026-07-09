@@ -1,0 +1,164 @@
+﻿@model List<Modelo.Vehiculo>
+@{
+    ViewData["Title"] = "Buscar Vehiculos";
+}
+
+<div class="row justify-content-center m-5">
+    <div class="col-md-10">
+        <h2>Buscar Vehiculos Cercanos</h2>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        @if (TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success">@TempData["Mensaje"]</div>
+        }
+
+        @if (ViewBag.Mensaje != null)
+        {
+            <div class="alert alert-success">@ViewBag.Mensaje</div>
+        }
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        @using (Html.BeginForm("Buscar", "Vehiculo", FormMethod.Post))
+        {
+            <div class="mb-3">
+                <label class="form-label">Tu Ubicacion</label>
+                <input type="text" id="inputDireccion" class="form-control" placeholder="Ej. Avda Rivera 2869, Montevideo"/>
+                <button type="button" id="btnBuscarDireccion" class="btn btn-secondary mt-2">Buscar en el Mapa</button>
+            </div>
+            
+            <div id="mapaBusqueda" style="height: 400px;" class="mb-3"></div>
+            <input type="hidden" id="inputLatCli" name="latCli" value="@ViewBag.LatCli" />
+            <input type="hidden" id="inputLonCli" name="lonCli" value="@ViewBag.LonCli" />
+            <input type="hidden" id="inputDireccionHidden" name="direccion" value="@ViewBag.Direccion" />
+
+            <div class="mb-3">
+                <label class="form-label">Radio de Busqueda</label>
+                <input type="number" name="radioKM" class="form-control" value="5" min="1" max="100" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Buscar Vahiculos</button>
+        }
+    </div>
+</div>
+<script>
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    });
+
+    var latInicial = @((ViewBag.LatCli ?? (decimal)-34.9011).ToString(System.Globalization.CultureInfo.InvariantCulture));
+    var lonInicial = @((ViewBag.LonCli ?? (decimal)-56.1645).ToString(System.Globalization.CultureInfo.InvariantCulture));
+    var radioInicial = @(ViewBag.RadioKM ?? 5);
+
+
+    var mapa = L.map('mapaBusqueda').setView([latInicial, lonInicial], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy;OpenStreetMap constributiors'}).addTo(mapa);
+
+    var marcadorUsuario = L.marker([latInicial, lonInicial], {draggable: true}).addTo(mapa);
+    var direccionGuardada = '@ViewBag.Direccion';
+    if (direccionGuardada) 
+        {
+            document.getElementById('inputDireccion').value = direccionGuardada;
+        }
+    var circulo = L.circle([latInicial, lonInicial], {radius: radioInicial * 1000, color: 'blue', fillOpacity: 0.1}).addTo(mapa);
+</script>
+<script>
+    document.getElementById('btnBuscarDireccion').addEventListener('click', function (){
+        var direccion = document.getElementById('inputDireccion').value;
+
+        if(!direccion)
+        {
+            alert ('Por favor ingrese una direccion');
+            return;
+        }
+        var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(direccion);
+        fetch(url).then(function(respuesta) {return respuesta.json();})
+        .then(function(resultados) {
+            if(resultados.length === 0)
+            {
+                alert('No se encontro la direccion');
+                return;
+            }
+
+            var lat = parseFloat(resultados[0].lat);
+            var lon = parseFloat(resultados[0].lon);
+
+            actualizarUbicacion(lat, lon);
+        });
+    });
+
+    function actualizarUbicacion(lat, lon)
+    {
+        mapa.setView([lat,lon], 14);
+        marcadorUsuario.setLatLng([lat,lon]);
+        circulo.setLatLng([lat,lon]);
+
+        document.getElementById('inputLatCli').value = lat;
+        document.getElementById('inputLonCli').value = lon;
+        document.getElementById('inputDireccionHidden').value = document.getElementById('inputDireccion').value;
+    }
+</script>
+<script>
+    marcadorUsuario.on('dragend', function(evento){
+        
+        var posicion = evento.target.getLatLng();
+
+        actualizarUbicacion(posicion.lat, posicion.lng);
+
+        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + posicion.lat + '&lon=' + posicion.lng)
+        .then(function (respuesta) {return respuesta.json(); })
+        .then(function (resultado) 
+        {
+            if(resultado.display_name)
+            {
+                document.getElementById('inputDireccion').value = resultado.display_name;
+            }
+        });
+    });
+    document.getElementById('inputDireccionHidden').value = resultado.display_name;
+    document.querySelector('input[name="radioKM"]').addEventListener('input', function() 
+    {
+        var radioKM = parseFloat(this.value);
+        if(!isNaN(radioKM) && radioKM > 0)
+        {
+            circulo.setRadius(radioKM * 1000); //lo transformamos en metros, porque es lo que usa leaflet
+        }
+    });
+</script>
+
+@if(Model != null && Model.Any())
+{
+    <script>
+        var vehiculos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(v => new
+            {
+                id = v.IdVehiculo,
+                lat = v.Latitud,
+                lon = v.Longitud,
+                marca = v.Modelo.Marca.NombreMarca,
+                modelo = v.Modelo.Modelo,
+                precio = v.Precio,
+                km = v.Km
+            }))
+        );
+        vehiculos.forEach(function (v)
+        {
+            if(v.lat && v.lon)
+            {
+                var marcador = L.marker([v.lat, v.lon]).addTo(mapa);
+                marcador.bindPopup('<b>' + v.marca + '' + v.modelo + '</b><br></br>' + 'Precio: $' + v.precio + '<br>' + 'Km: ' + v.km);
+            }
+        });
+    </script>
+}

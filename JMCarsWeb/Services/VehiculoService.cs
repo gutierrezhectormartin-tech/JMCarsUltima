@@ -36,5 +36,42 @@ namespace JMCarsWeb.Services
             }
         }
 
+        public async Task<List<Vehiculo>> BuscarGeneral(decimal latCli, decimal lonCli, int radioKM, int? idMarca = null, decimal? precioMax = null)
+        {
+            try
+            {
+                var url = $"api/vehiculo/buscar?latCli={latCli}&lonCli={lonCli}&radioKM{radioKM}&";
+
+                if (idMarca.HasValue)
+                {
+                    url += $"&idMarca={idMarca.Value}";
+                }
+
+                if (precioMax.HasValue)
+                {
+                    url += $"precioMax={precioMax.Value}";
+                }
+
+                var respuesta = await _httpClient.GetAsync(url);
+
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<List<Vehiculo>>() ?? new List<Vehiculo>();
+                }
+
+                if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return new List<Vehiculo>();
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+        }
+
     }
 }

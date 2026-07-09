@@ -81,5 +81,25 @@ namespace WebAPI.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        [HttpGet]
+        public IActionResult BuscarGeneral(decimal latCli, decimal lonCli, int radioKM, int? idMarca = null, decimal? precioMax = null)
+        {
+            try
+            {
+                List<Vehiculo> vehiculos = _logicaVehiculo.BuscarGeneral(latCli, lonCli, radioKM, idMarca, precioMax);
+
+                if(vehiculos == null || !vehiculos.Any())
+                {
+                    return NotFound(new { mensaje = "No se encontraron vehiculos con las condiciones de busqueda ingresadas" });
+                }
+
+                return Ok(vehiculos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
     }
 }

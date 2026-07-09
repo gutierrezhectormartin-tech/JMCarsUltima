@@ -1,6 +1,7 @@
 ﻿using JMCarsWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 using Modelo;
+using System.Security.Cryptography.X509Certificates;
 
 namespace JMCarsWeb.Controllers
 {
@@ -155,6 +156,45 @@ namespace JMCarsWeb.Controllers
             {
                 ViewBag.Error = "Atención: Ocurrió un error al intentar comunicar con la API: " + ex.Message;
                 return View(vehiculo);
+            }
+
+        }
+
+        [HttpGet]
+        public IActionResult Buscar()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Buscar(decimal latCli, decimal lonCli, int radioKM, string? direccion = null, int? idMarca = null, decimal? precioMax = null)
+        {
+            ViewBag.LatCli = latCli.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            ViewBag.LonCli = lonCli.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            ViewBag.RadioKM = radioKM;
+            ViewBag.Direccion = direccion;
+
+            try
+            {
+                List<Vehiculo> vehiculos = await _vehiculoService.BuscarGeneral(latCli, lonCli, radioKM, idMarca, precioMax);
+
+                if (vehiculos == null)
+                {
+                    ViewBag.Error = "Ocurrió un error al realizar la busqueda. Intente nuevamnte";
+                }
+
+                if (!vehiculos!.Any())
+                {
+                    ViewBag.Mensaje = "No se encontraron vehiculos en este radio";
+                    return View(new List<Vehiculo>());
+                }
+
+                return View(vehiculos);
+            }
+            catch (Exception)
+            {
+                ViewBag.Error = "Ocurrio un error inesperado intente nuevamente";
+                return View();
             }
         }
     }
