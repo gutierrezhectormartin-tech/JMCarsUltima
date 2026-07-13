@@ -82,7 +82,8 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpGet]
+
+        [HttpGet("buscar")]
         public IActionResult BuscarGeneral(decimal latCli, decimal lonCli, int radioKM, int? idMarca = null, decimal? precioMax = null)
         {
             try

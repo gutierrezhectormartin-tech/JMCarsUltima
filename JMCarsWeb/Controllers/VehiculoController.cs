@@ -167,20 +167,29 @@ namespace JMCarsWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Buscar(decimal latCli, decimal lonCli, int radioKM, string? direccion = null, int? idMarca = null, decimal? precioMax = null)
+        public async Task<IActionResult> Buscar(string latCli, string lonCli, int radioKM, string? direccion = null, int? idMarca = null, decimal? precioMax = null)
         {
-            ViewBag.LatCli = latCli.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            ViewBag.LonCli = lonCli.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            if(latCli == null || lonCli == null)
+            {
+                ViewBag.Error = "Debe de seleccionar una direccion correcta.";
+                return View();
+            }
+            decimal lat = decimal.Parse(latCli, System.Globalization.CultureInfo.InvariantCulture);
+            decimal lon = decimal.Parse(lonCli, System.Globalization.CultureInfo.InvariantCulture);
+
+            ViewBag.LatCli = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            ViewBag.LonCli = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
             ViewBag.RadioKM = radioKM;
             ViewBag.Direccion = direccion;
 
             try
             {
-                List<Vehiculo> vehiculos = await _vehiculoService.BuscarGeneral(latCli, lonCli, radioKM, idMarca, precioMax);
+                List<Vehiculo> vehiculos = await _vehiculoService.BuscarGeneral(lat, lon, radioKM, idMarca, precioMax);
 
                 if (vehiculos == null)
                 {
                     ViewBag.Error = "Ocurrió un error al realizar la busqueda. Intente nuevamnte";
+                    return View();
                 }
 
                 if (!vehiculos!.Any())

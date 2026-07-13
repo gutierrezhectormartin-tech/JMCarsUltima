@@ -1,4 +1,5 @@
 ﻿using Modelo;
+using System.Globalization;
 using System.Net.Http.Json;
 
 namespace JMCarsWeb.Services
@@ -40,7 +41,7 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                var url = $"api/vehiculo/buscar?latCli={latCli}&lonCli={lonCli}&radioKM{radioKM}&";
+                var url = $"api/vehiculo/buscar?latCli={latCli.ToString(CultureInfo.InvariantCulture)}&lonCli={lonCli.ToString(CultureInfo.InvariantCulture)}&radioKM={radioKM}";
 
                 if (idMarca.HasValue)
                 {
@@ -49,7 +50,7 @@ namespace JMCarsWeb.Services
 
                 if (precioMax.HasValue)
                 {
-                    url += $"precioMax={precioMax.Value}";
+                    url += $"&precioMax={precioMax.Value}";
                 }
 
                 var respuesta = await _httpClient.GetAsync(url);
