@@ -32,7 +32,8 @@
                         <th>Caja</th>
                         <th>Motor</th>
                         <th>Kilometraje</th>
-                        <th>Precio</th>
+                        <th>Foto</th>
+                        <th>Precio</th>                      
                         <th class="text-center">Ubicación</th>
                         <th class="text-center">Estado</th>
                         <th class="text-center">Acciones</th>
@@ -49,6 +50,16 @@
                             <td>@vehiculo.CajaCambios</td>
                             <td>@vehiculo.Motorizacion</td>
                             <td>@vehiculo.Km.ToString("N0") Km</td>
+                            <td>
+                                @if (vehiculo.Fotografia != null && vehiculo.Fotografia.Any())
+                                {
+                                    <img src="/@vehiculo.Fotografia.FirstOrDefault()" alt="Foto vehículo" style="width: 80px; height: auto;" class="img-thumbnail" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Sin foto</span>
+                                }
+                            </td>
                             <td><span class="text-success fw-bold">U$S @vehiculo.Precio.ToString("N0")</span></td>
 
                             <td class="text-center">

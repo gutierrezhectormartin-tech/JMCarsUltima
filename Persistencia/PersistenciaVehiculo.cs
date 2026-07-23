@@ -5,6 +5,7 @@ using Persistencia.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Transactions;
 
 namespace Persistencia
 {
@@ -247,7 +248,18 @@ namespace Persistencia
 
                 if (resultado != null && resultado != DBNull.Value)
                 {
+                    int idVehiculoGenerado = Convert.ToInt32(resultado);
                     pVehiculo.IdVehiculo = Convert.ToInt32(resultado);
+                    if (pVehiculo.Fotografia != null && pVehiculo.Fotografia.Count > 0)
+                    {
+                        foreach (string url in pVehiculo.Fotografia)
+                        {
+                            SqlCommand cmdFoto = new SqlCommand("INSERT INTO FotoVehiculo (UrlFoto, IdVehiculo) VALUES (@Url, @Id)", oConexion);
+                            cmdFoto.Parameters.AddWithValue("@Url", url);
+                            cmdFoto.Parameters.AddWithValue("@Id", idVehiculoGenerado);
+                            cmdFoto.ExecuteNonQuery();
+                        }
+                    }
                 }
             }
             catch (Exception ex)

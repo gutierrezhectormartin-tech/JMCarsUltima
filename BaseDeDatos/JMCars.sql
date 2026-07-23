@@ -468,10 +468,9 @@ go
 
 -- Listar Vehículos de un Usuario específico (Mis Vehículos)
 create proc sp_Vehiculo_ListarMisVehiculos
-@IdUsuario int
+    @IdUsuario int
 as
 begin
-
     select 
         V.IdVehiculo,
         V.Precio,
@@ -491,21 +490,16 @@ begin
         MA.NombreMarca,
  
         U.IdUsuario,
-        U.NombreCompleto
+        U.NombreCompleto,
+        
+        isnull(FV.UrlFoto, 'images/sin-foto.jpg') AS UrlFoto
  
     from Vehiculo V
- 
-    inner join Modelo M
-        on V.IdModelo = M.IdModelo
- 
-    inner join Marca MA
-        on M.IdMarca = MA.IdMarca
- 
-    inner join Usuario U
-        on V.IdUsuarioVendedor = U.IdUsuario
-    where
-        U.IdUsuario = @IdUsuario
- 
+    INNER JOIN Modelo M on V.IdModelo = M.IdModelo
+    INNER JOIN Marca MA on M.IdMarca = MA.IdMarca
+    INNER JOIN Usuario U on V.IdUsuarioVendedor = U.IdUsuario
+    LEFT JOIN FotoVehiculo FV on V.IdVehiculo = FV.IdVehiculo
+    where U.IdUsuario = @IdUsuario
 end
 go
 
