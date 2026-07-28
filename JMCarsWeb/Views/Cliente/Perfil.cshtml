@@ -29,7 +29,7 @@
 
         @using (Html.BeginForm("Perfil", "Cliente", FormMethod.Post))
         {
-            @Html.HiddenFor(m => m.Email)
+            @Html.HiddenFor(m => m.Email) //quitar, resolver en controller con session
             @Html.HiddenFor(m => m.Cedula)
 
             <div class="mb-3">
