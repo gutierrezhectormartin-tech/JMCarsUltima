@@ -62,6 +62,31 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpGet("detalle/{id}")]
+        public IActionResult DetalleVehiculo(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest(new { mensaje = "El ID del vehículo debe ser un número válido." });
+                }
+
+                Vehiculo vehiculo = _logicaVehiculo.DetalleVehiculo(id);
+
+                if (vehiculo == null)
+                {
+                    return NotFound(new { mensaje = "No se encontró el vehículo solicitado." });
+                }
+
+                return Ok(vehiculo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         [HttpPost("registrar")]
         public IActionResult RegistrarVehiculo([FromBody] Vehiculo pVehiculo)
         {

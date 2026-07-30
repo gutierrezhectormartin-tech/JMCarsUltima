@@ -1,0 +1,164 @@
+﻿@model Modelo.Vehiculo
+
+<div class="container mt-4">
+    @if (Model == null)
+    {
+        <div class="alert alert-warning text-center" role="alert">
+            <i class="bi bi-exclamation-triangle fs-3"></i>
+            <h4 class="mt-2">Vehículo no encontrado</h4>
+            <p>El vehículo que estás intentando ver no existe o fue eliminado.</p>
+            <a asp-controller="Vehiculo" asp-action="MisVehiculos" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Volver a Mis Vehículos
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2>@Model.Modelo?.Marca?.NombreMarca @Model.Modelo?.Modelo</h2>
+                <p class="text-muted mb-0">Publicación #@Model.IdVehiculo</p>
+            </div>
+            <a asp-controller="Vehiculo" asp-action="MisVehiculos" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+
+        <hr />
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body p-2 text-center bg-light rounded">
+                        @if (Model.Fotografia != null && Model.Fotografia.Any())
+                        {
+                            <img src="/@Model.Fotografia.FirstOrDefault()"
+                                 alt="Foto @Model.Modelo?.Modelo"
+                                 class="img-fluid rounded max-vh-50"
+                                 style="max-height: 400px; object-fit: contain;" />
+                        }
+                        else
+                        {
+                            <div class="py-5 text-muted">
+                                <i class="bi bi-image fs-1 d-block"></i>
+                                <span>Sin fotografía disponible</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <i class="bi bi-geo-alt-fill text-danger"></i> Ubicación del Vehículo
+                    </div>
+                    <div class="card-body p-0">
+                        @if (Model.Latitud.HasValue && Model.Longitud.HasValue)
+                        {
+                            <div id="mapaDetalle" style="height: 300px; width: 100%;" class="rounded-bottom"></div>
+                        }
+                        else
+                        {
+                            <div class="p-3 text-muted text-center">
+                                <i class="bi bi-geo-alt fs-4 d-block"></i>
+                                Ubicación no especificada para este vehículo.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card mb-4 shadow-sm border-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="text-success fw-bold mb-0">U$S @Model.Precio.ToString("N0")</h2>
+                            @if (Model.Publicado)
+                            {
+                                <span class="badge bg-success fs-6"><i class="bi bi-check-circle"></i> Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary fs-6"><i class="bi bi-slash-circle"></i> Inactivo</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-light fw-bold">
+                        <i class="bi bi-card-list"></i> Ficha Técnica
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Marca:</span>
+                            <strong>@Model.Modelo?.Marca?.NombreMarca</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Modelo:</span>
+                            <strong>@Model.Modelo?.Modelo</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Año:</span>
+                            <strong>@Model.Anio</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Kilometraje:</span>
+                            <strong>@Model.Km.ToString("N0") Km</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Caja de Cambios:</span>
+                            <strong>@Model.CajaCambios</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Motorización:</span>
+                            <strong>@Model.Motorizacion</strong>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-light fw-bold">
+                        <i class="bi bi-file-text"></i> Descripción
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            @(string.IsNullOrWhiteSpace(Model.Descripcion) ? "Sin descripción detallada." : Model.Descripcion)
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-info">
+                    <div class="card-header bg-info text-white fw-bold">
+                        <i class="bi bi-person-badge"></i> Información del Vendedor
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Nombre:</strong> @(Model.Vendedor?.NombreCompleto ?? "No disponible")</p>
+                        <p class="mb-1"><strong>Email:</strong> @(Model.Vendedor?.Email ?? "No disponible")</p>
+                        <p class="mb-0"><strong>Teléfono:</strong> @(Model.Vendedor?.Telefono ?? "No disponible")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (Model != null && Model.Latitud.HasValue && Model.Longitud.HasValue)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var lat = @Model.Latitud.Value.ToString().Replace(",", ".");
+            var lon = @Model.Longitud.Value.ToString().Replace(",", ".");
+            var titulo = "@Model.Modelo?.Marca?.NombreMarca @Model.Modelo?.Modelo";
+
+            var mapa = L.map('mapaDetalle').setView([lat, lon], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(mapa);
+
+            L.marker([lat, lon]).addTo(mapa)
+                .bindPopup(titulo)
+                .openPopup();
+        });
+    </script>
+}

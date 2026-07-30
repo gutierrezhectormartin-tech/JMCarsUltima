@@ -40,7 +40,25 @@ namespace JMCarsWeb.Controllers
 
             List<Vehiculo> misVehiculos = await _vehiculoService.ListarMisVehiculos(idUsuarioStr);
 
+
             return View(misVehiculos);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Detalle(int id)
+        {
+            if (id <= 0)
+            {
+                return RedirectToAction("MisVehiculos");
+            }
+
+            Vehiculo vehiculo = await _vehiculoService.DetalleVehiculo(id);
+
+            if (vehiculo == null)
+            {
+                return RedirectToAction("MisVehiculos");
+            }
+
+            return View("DetalleVehiculo",vehiculo);
         }
 
         [HttpGet]

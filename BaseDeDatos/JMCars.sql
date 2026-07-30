@@ -503,6 +503,45 @@ begin
 end
 go
 
+--Lista de vehiculo(Detalle)
+CREATE PROC sp_Vehiculo_ObtenerPorId
+    @IdVehiculo INT
+AS
+BEGIN
+    SELECT 
+        V.IdVehiculo,
+        V.Precio,
+        V.Kilometraje,
+        V.Ano,
+        V.CajaDeCambios,
+        V.Motorizacion,
+        V.Descripcion,
+        V.Publicado,
+        V.Latitud,
+        V.Longitud,
+ 
+        M.IdModelo,
+        M.NombreModelo,
+ 
+        MA.IdMarca,
+        MA.NombreMarca,
+ 
+        U.IdUsuario,
+        U.NombreCompleto,
+        U.Email,       
+        U.Telefono,
+        
+        ISNULL(FV.UrlFoto, 'images/sin-foto.jpg') AS UrlFoto
+ 
+    FROM Vehiculo V
+    INNER JOIN Modelo M ON V.IdModelo = M.IdModelo
+    INNER JOIN Marca MA ON M.IdMarca = MA.IdMarca
+    INNER JOIN Usuario U ON V.IdUsuarioVendedor = U.IdUsuario
+    LEFT JOIN FotoVehiculo FV ON V.IdVehiculo = FV.IdVehiculo
+    WHERE V.IdVehiculo = @IdVehiculo
+END
+GO
+
 -- Búsqueda por Radio (Geolocalización)
 create proc sp_Vehiculo_BuscarGeneral
 @LatCli decimal(9,6),

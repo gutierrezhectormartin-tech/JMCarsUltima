@@ -51,6 +51,11 @@ namespace Logica
                 throw new Exception("Error en la lógica al registrar el vehículo: " + ex.Message);
             }
         }
+
+        public Vehiculo DetalleVehiculo(int pIdVehiculo)
+        {
+            return _persistenciaVehiculo.DetalleVehiculo(pIdVehiculo);
+        }
     }
 }
     

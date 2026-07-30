@@ -109,6 +109,10 @@ namespace Persistencia
 
 
                     List<string> fotos = new List<string>();
+                    if (lector["UrlFoto"] != DBNull.Value)
+                    {
+                        fotos.Add(lector["UrlFoto"].ToString());
+                    }
                     decimal? latitud = lector["Latitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Latitud"]);
                     decimal? longitud = lector["Longitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Longitud"]);
 
@@ -270,6 +274,88 @@ namespace Persistencia
             {
                 oConexion.Close();
             }
+        }
+
+        public Vehiculo DetalleVehiculo(int idVehiculo)
+        {
+            Vehiculo unVehiculo = null;
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+            SqlCommand oComando = new SqlCommand("sp_Vehiculo_ObtenerPorId", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            try
+            {
+                oComando.Parameters.AddWithValue("@IdVehiculo", idVehiculo);
+
+                oConexion.Open();
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                // Usamos IF porque solo esperamos 1 registro
+                if (lector.Read())
+                {
+                    Marcas unaMarca = new Marcas(
+                        Convert.ToInt32(lector["IdMarca"]),
+                        lector["NombreMarca"].ToString()
+                    );
+
+                    Modelos unModelo = new Modelos(
+                        Convert.ToInt32(lector["IdModelo"]),
+                        lector["NombreModelo"].ToString(),
+                        unaMarca
+                    );
+
+                    Cliente unCliente = new Cliente(
+                        Convert.ToInt32(lector["IdUsuario"]),
+                        lector["NombreCompleto"].ToString() ?? string.Empty,
+                        lector["Email"].ToString() ?? string.Empty,
+                        lector["Telefono"].ToString() ?? string.Empty,
+                        "", true, Rol.Cliente, null, ""
+                    );
+
+                    // Cargamos la foto que viene del SP
+                    List<string> fotos = new List<string>();
+                    if (lector["UrlFoto"] != DBNull.Value)
+                    {
+                        fotos.Add(lector["UrlFoto"].ToString());
+                    }
+
+                    decimal? latitud = lector["Latitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Latitud"]);
+                    decimal? longitud = lector["Longitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Longitud"]);
+
+                    unVehiculo = new Vehiculo(
+                        Convert.ToInt32(lector["IdVehiculo"]),
+                        Convert.ToDecimal(lector["Precio"]),
+                        Convert.ToInt32(lector["Kilometraje"]),
+                        Convert.ToInt32(lector["Ano"]),
+                        lector["CajaDeCambios"].ToString() ?? string.Empty,
+                        lector["Motorizacion"].ToString() ?? string.Empty,
+                        lector["Descripcion"].ToString() ?? string.Empty,
+                        Convert.ToBoolean(lector["Publicado"]),
+                        latitud,
+                        longitud,
+                        unModelo,
+                        unCliente,
+                        fotos
+                    );
+                }
+
+                lector.Close();
+                return unVehiculo;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public List<Vehiculo> Detalle(int pIdVehiculo)
+        {
+            throw new NotImplementedException();
         }
     }
 }
