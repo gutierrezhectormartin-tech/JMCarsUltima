@@ -1,4 +1,4 @@
-﻿@model Modelo.Vehiculo
+﻿@model JMCarsWeb.DTOs.VehiculoDTO
 
 <div class="container mt-4">
     @if (Model == null)
@@ -146,8 +146,10 @@
 {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            var lat = @Model.Latitud.Value.ToString().Replace(",", ".");
-            var lon = @Model.Longitud.Value.ToString().Replace(",", ".");
+@*             var lat = @Model.Latitud.Value.ToString().Replace(",", ".");
+            var lon = @Model.Longitud.Value.ToString().Replace(",", "."); *@
+            var lat = @Model.Latitud.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var lon = @Model.Longitud.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
             var titulo = "@Model.Modelo?.Marca?.NombreMarca @Model.Modelo?.Modelo";
 
             var mapa = L.map('mapaDetalle').setView([lat, lon], 15);

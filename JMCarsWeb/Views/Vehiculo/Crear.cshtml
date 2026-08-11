@@ -1,4 +1,4 @@
-﻿@model Modelo.Vehiculo
+﻿@model JMCarsWeb.DTOs.VehiculoDTO
 @{
     ViewData["Title"] = "Publicar Vehículo";
 }
@@ -89,8 +89,9 @@
     </form>
 </div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+@* <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> *@
+@*esto ya lo carga donde yo lo deje en Layout*@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

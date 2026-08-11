@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Modelo;
+using JMCarsWeb.DTOs;
 using JMCarsWeb.Services;
 
 namespace WebApi.Controllers
@@ -20,7 +20,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Registro(Escribano escribanoPasado, bool aceptaTerminos)
+        public async Task<IActionResult> Registro(EscribanoDTO escribanoPasado, bool aceptaTerminos)
         {
 
             if (!ModelState.IsValid)
@@ -58,30 +58,33 @@ namespace WebApi.Controllers
             // chequeo de autorizacion: tiene que estar logueado y ser escribano (rol = 2)
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             int? idRol = HttpContext.Session.GetInt32("IdRol");
-            if (idUsuario == null || idRol != (int)Rol.Escribano)
+            if (idUsuario == null || idRol != 2)
             {
                 return RedirectToAction("Index", "Login");
             }
 
 
             // cargo los datos actuales del escribano desde la base
-            Escribano? escribano = await _escribanoService.ObtenerPorId(idUsuario.Value);
+            EscribanoDTO? escribano = await _escribanoService.ObtenerPorId(idUsuario.Value);
 
             if (escribano == null)
             {
                 return RedirectToAction("Index", "Login");
             }
 
+            HttpContext.Session.SetString("EmailEscribano", escribano.Email);
+            HttpContext.Session.SetString("NumeroCajaEscribano", escribano.NumeroCaja);
+
             return View(escribano);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Perfil(Escribano escribanoPasado)
+        public async Task<IActionResult> Perfil(EscribanoDTO escribanoPasado)
         {
             // chequeo de autorizacion: tiene que estar logueado y ser escribano (rol = 2)
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             int? idRol = HttpContext.Session.GetInt32("IdRol");
-            if (idUsuario == null || idRol != (int)Rol.Escribano)
+            if (idUsuario == null || idRol != 2)
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -95,6 +98,8 @@ namespace WebApi.Controllers
             try
             {
                 escribanoPasado.IdUsuario = idUsuario.Value;
+                escribanoPasado.Email = HttpContext.Session.GetString("EmailEscribano");
+                escribanoPasado.NumeroCaja = HttpContext.Session.GetString("NumeroCajaEscribano");
                 await _escribanoService.ActualizarPerfil(escribanoPasado);
                 HttpContext.Session.SetString("NombreCompleto", escribanoPasado.NombreCompleto);
                 ViewBag.Mensaje = "Perfil actualizado correectamente";
@@ -112,7 +117,7 @@ namespace WebApi.Controllers
             // chequeo de autorizacion: tiene que estar logueado y ser escribano (rol = 2)
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             int? idRol = HttpContext.Session.GetInt32("IdRol");
-            if (idUsuario == null || idRol != (int)Rol.Escribano)
+            if (idUsuario == null || idRol != 2)
             {
                 return RedirectToAction("Index", "Login");
             }

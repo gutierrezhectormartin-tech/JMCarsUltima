@@ -1,6 +1,6 @@
-﻿using JMCarsWeb.Services;
+﻿using JMCarsWeb.DTOs;
+using JMCarsWeb.Services;
 using Microsoft.AspNetCore.Mvc;
-using Modelo;
 
 namespace JMCarsWeb.Controllers
 {
@@ -15,7 +15,7 @@ namespace JMCarsWeb.Controllers
 
         public async Task<IActionResult> Index(string marca)
         {
-            List<Vehiculo> lista = await _vehiculoService.ListarVehiculos();
+            List<VehiculoDTO> lista = await _vehiculoService.ListarVehiculos();
 
             if (!string.IsNullOrEmpty(marca))
             {

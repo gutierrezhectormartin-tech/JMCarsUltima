@@ -1,6 +1,6 @@
 ﻿using JMCarsWeb.Services;
 using Microsoft.AspNetCore.Mvc;
-using Modelo;
+using JMCarsWeb.DTOs;
 using System.Security.Cryptography.X509Certificates;
 
 namespace JMCarsWeb.Controllers
@@ -16,7 +16,7 @@ namespace JMCarsWeb.Controllers
 
         public async Task<IActionResult> Listar()
         {
-            List<Vehiculo> vehiculos = await _vehiculoService.ListarVehiculos();
+            List<VehiculoDTO> vehiculos = await _vehiculoService.ListarVehiculos();
             return View(vehiculos);
         }
 
@@ -38,7 +38,7 @@ namespace JMCarsWeb.Controllers
 
             string idUsuarioStr = idUsuarioInt.Value.ToString();
 
-            List<Vehiculo> misVehiculos = await _vehiculoService.ListarMisVehiculos(idUsuarioStr);
+            List<VehiculoDTO> misVehiculos = await _vehiculoService.ListarMisVehiculos(idUsuarioStr);
 
 
             return View(misVehiculos);
@@ -51,7 +51,7 @@ namespace JMCarsWeb.Controllers
                 return RedirectToAction("MisVehiculos");
             }
 
-            Vehiculo vehiculo = await _vehiculoService.DetalleVehiculo(id);
+            VehiculoDTO vehiculo = await _vehiculoService.DetalleVehiculo(id);
 
             if (vehiculo == null)
             {
@@ -75,7 +75,7 @@ namespace JMCarsWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Crear(Vehiculo vehiculo, IFormFile fotoInput)
+        public async Task<IActionResult> Crear(VehiculoDTO vehiculo, IFormFile fotoInput)
         {
             int? idUsuarioSession = HttpContext.Session.GetInt32("IdUsuario");
             if (idUsuarioSession == null)
@@ -121,7 +121,7 @@ namespace JMCarsWeb.Controllers
                 vehiculo.Fotografia = new List<string> { "images/" + nombreArchivo };
 
                 // Armado del Vendedor
-                vehiculo.Vendedor = new Cliente
+                vehiculo.Vendedor = new ClienteDTO
                 {
                     IdUsuario = idUsuarioSession.Value,
                     NombreCompleto = HttpContext.Session.GetString("NombreUsuario") ?? "Vendedor Test",
@@ -134,11 +134,11 @@ namespace JMCarsWeb.Controllers
                 string nombreModeloEscrito = Request.Form["Modelo.Nombre"];
                 string nombreMarcaEscrito = Request.Form["Marca.Nombre"];
 
-                vehiculo.Modelo = new Modelos
+                vehiculo.Modelo = new ModeloDTO
                 {
                     IdModelo = 1,
                     Modelo = !string.IsNullOrEmpty(nombreModeloEscrito) ? nombreModeloEscrito : "No especificado",
-                    Marca = new Marcas
+                    Marca = new MarcaDTO
                     {
                         IdMarca = 1,
                         NombreMarca = !string.IsNullOrEmpty(nombreMarcaEscrito) ? nombreMarcaEscrito : "No especificada"
@@ -191,7 +191,7 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                List<Vehiculo> vehiculos = await _vehiculoService.BuscarGeneral(lat, lon, radioKM, idMarca, precioMax);
+                List<VehiculoDTO> vehiculos = await _vehiculoService.BuscarGeneral(lat, lon, radioKM, idMarca, precioMax);
 
                 if (vehiculos == null)
                 {
@@ -201,8 +201,8 @@ namespace JMCarsWeb.Controllers
 
                 if (!vehiculos!.Any())
                 {
-                    ViewBag.Mensaje = "No se encontraron vehiculos en este radio";
-                    return View(new List<Vehiculo>());
+                    TempData["Error"] = "No se encontraron vehiculos en este radio";
+                    return View(new List<VehiculoDTO>());
                 }
 
                 return View(vehiculos);

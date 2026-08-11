@@ -1,4 +1,4 @@
-﻿using Modelo;
+﻿using JMCarsWeb.DTOs;
 using System.Globalization;
 using System.Net.Http.Json;
 
@@ -13,28 +13,28 @@ namespace JMCarsWeb.Services
             _httpClient = httpClientFactory.CreateClient("JMCarsAPI");
         }
 
-        public async Task<List<Vehiculo>> ListarVehiculos()
+        public async Task<List<VehiculoDTO>> ListarVehiculos()
         {
-            return await _httpClient.GetFromJsonAsync<List<Vehiculo>>("api/vehiculo/listar") ?? new List<Vehiculo>();
+            return await _httpClient.GetFromJsonAsync<List<VehiculoDTO>>("api/vehiculo/listar") ?? new List<VehiculoDTO>();
         }
 
-        public async Task<List<Vehiculo>> ListarMisVehiculos(string idUsuario)
+        public async Task<List<VehiculoDTO>> ListarMisVehiculos(string idUsuario)
         {
-            return await _httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/vehiculo/mis-vehiculos/{idUsuario}") ?? new List<Vehiculo>();
+            return await _httpClient.GetFromJsonAsync<List<VehiculoDTO>>($"api/vehiculo/mis-vehiculos/{idUsuario}") ?? new List<VehiculoDTO>();
         }
 
-        public async Task<Vehiculo?> DetalleVehiculo(int idVehiculo)
+        public async Task<VehiculoDTO?> DetalleVehiculo(int idVehiculo)
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<Vehiculo>($"api/vehiculo/detalle/{idVehiculo}");
+                return await _httpClient.GetFromJsonAsync<VehiculoDTO>($"api/vehiculo/detalle/{idVehiculo}");
             }
             catch (Exception)
             {
                 return null;
             }
         }
-        public async Task<bool> RegistrarVehiculo(Vehiculo pVehiculo)
+        public async Task<bool> RegistrarVehiculo(VehiculoDTO pVehiculo)
         {
             HttpResponseMessage respuesta = await _httpClient.PostAsJsonAsync("api/vehiculo/registrar", pVehiculo);
 
@@ -49,7 +49,7 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<List<Vehiculo>> BuscarGeneral(decimal latCli, decimal lonCli, int radioKM, int? idMarca = null, decimal? precioMax = null)
+        public async Task<List<VehiculoDTO>> BuscarGeneral(decimal latCli, decimal lonCli, int radioKM, int? idMarca = null, decimal? precioMax = null)
         {
             try
             {
@@ -69,12 +69,12 @@ namespace JMCarsWeb.Services
 
                 if (respuesta.IsSuccessStatusCode)
                 {
-                    return await respuesta.Content.ReadFromJsonAsync<List<Vehiculo>>() ?? new List<Vehiculo>();
+                    return await respuesta.Content.ReadFromJsonAsync<List<VehiculoDTO>>() ?? new List<VehiculoDTO>();
                 }
 
                 if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    return new List<Vehiculo>();
+                    return new List<VehiculoDTO>();
                 }
 
                 return null;

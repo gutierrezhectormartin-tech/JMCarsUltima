@@ -1,6 +1,6 @@
 using JMCarsWeb.Services;
 using Microsoft.AspNetCore.Mvc;
-using Modelo;
+using JMCarsWeb.DTOs;
 
 namespace WebApi.Controllers
 {
@@ -20,7 +20,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Registro(Cliente clientePasado, bool aceptaTerminos)
+        public async Task<IActionResult> Registro(ClienteDTO clientePasado, bool aceptaTerminos)
         {
            
             if (!ModelState.IsValid)
@@ -60,33 +60,39 @@ namespace WebApi.Controllers
             // chequeo de autorizacion: tiene que estar logueado y ser cliente (rol = 3)
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             int? idRol = HttpContext.Session.GetInt32("IdRol");
-            if (idUsuario == null || idRol != (int)Rol.Cliente)
+            if (idUsuario == null || idRol != 3)
             {
                 return RedirectToAction("Index", "Login");
             }
 
 
-            Cliente? cliente = await _clienteService.ObtenerPorId(idUsuario.Value);
+            ClienteDTO? cliente = await _clienteService.ObtenerPorId(idUsuario.Value);
 
             if (cliente == null)
             {
                 return RedirectToAction("Index", "Login");
             }
 
+            HttpContext.Session.SetString("EmailCliente", cliente.Email);
+            HttpContext.Session.SetString("CedulaCliente", cliente.Cedula);
+
             return View(cliente);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Perfil(Cliente clientePasado)
+        public async Task<IActionResult> Perfil(ClienteDTO clientePasado)
         {
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             int? idRol = HttpContext.Session.GetInt32("IdRol");
-            if (idUsuario == null || idRol != (int)Rol.Cliente)
+            if (idUsuario == null || idRol != 3)
             {
                 return RedirectToAction("Index", "Login");
             }
 
-            ModelState.Remove(nameof(Cliente.Contrasena));
+            ModelState.Remove("Contrasena");
+
+            clientePasado.Email = HttpContext.Session.GetString("EmailCliente");
+            clientePasado.Contrasena = HttpContext.Session.GetString("CedulaCliente");
 
             if (!ModelState.IsValid)
             {
@@ -120,7 +126,7 @@ namespace WebApi.Controllers
         {
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             int? idRol = HttpContext.Session.GetInt32("IdRol");
-            if (idUsuario == null || idRol != (int)Rol.Cliente)
+            if (idUsuario == null || idRol != 3)
             {
                 return RedirectToAction("Index", "Login");
             }

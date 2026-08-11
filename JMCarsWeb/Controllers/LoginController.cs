@@ -1,7 +1,7 @@
 using JMCarsWeb.Services;
 using JMCarsWeb.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Modelo;
+using JMCarsWeb.DTOs;
 
 namespace WebApi.Controllers
 {
@@ -31,7 +31,7 @@ namespace WebApi.Controllers
             }
 
             // Martin cambiamos la llamaada a la logica, para desacoplar por el servicio de usuarios
-            Usuario usuarioLogueado = await _usuarioService.Login(model.Email, model.Contrasena);
+            UsuarioDTO? usuarioLogueado = await _usuarioService.Login(model.Email, model.Contrasena);
 
             if (usuarioLogueado == null)
             {
@@ -48,9 +48,9 @@ namespace WebApi.Controllers
             // redirijo segun el rol (todos a Home por ahora)
             switch (usuarioLogueado.RolUsu)
             {
-                case Rol.Administrador:
+                case 1:
                     return RedirectToAction("Index", "Home");
-                case Rol.Escribano:
+                case 2:
                     return RedirectToAction("Index", "Home");
                 default:
                     return RedirectToAction("Index", "Home");

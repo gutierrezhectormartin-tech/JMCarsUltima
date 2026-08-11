@@ -1,4 +1,4 @@
-@model Modelo.Escribano
+@model JMCarsWeb.DTOs.EscribanoDTO
 @{
     ViewData["Title"] = "Mi perfil";
 }
@@ -19,9 +19,6 @@
 
         @using (Html.BeginForm("Perfil", "Escribano", FormMethod.Post))
         {
-            @Html.HiddenFor(m => m.Email)
-            @Html.HiddenFor(m => m.NumeroCaja)
-
             <div class="mb-3">
                 @Html.LabelFor(m => m.NombreCompleto, "Nombre completo", new { @class = "form-label" })
                 @Html.TextBoxFor(m => m.NombreCompleto, new { @class = "form-control" })

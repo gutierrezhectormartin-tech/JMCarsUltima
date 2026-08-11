@@ -1,4 +1,4 @@
-@model Modelo.Cliente
+@model JMCarsWeb.DTOs.ClienteDTO
 @{
     ViewData["Title"] = "Mi perfil";
 }
@@ -29,9 +29,6 @@
 
         @using (Html.BeginForm("Perfil", "Cliente", FormMethod.Post))
         {
-            @Html.HiddenFor(m => m.Email) //quitar, resolver en controller con session
-            @Html.HiddenFor(m => m.Cedula)
-
             <div class="mb-3">
                 @Html.LabelFor(m => m.NombreCompleto, "Nombre completo", new { @class = "form-label" })
                 @Html.TextBoxFor(m => m.NombreCompleto, new { @class = "form-control" })

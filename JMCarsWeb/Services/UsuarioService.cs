@@ -1,4 +1,4 @@
-﻿using Modelo;
+﻿using JMCarsWeb.DTOs;
 using System.Net.Http.Json;
 
 namespace JMCarsWeb.Services
@@ -12,7 +12,7 @@ namespace JMCarsWeb.Services
             _httpClient = httpClientFactory.CreateClient("JMCarsAPI");
         }
 
-        public async Task<Usuario> Login (string email, string contrasena)
+        public async Task<UsuarioDTO?> Login (string email, string contrasena)
         {
             var request = new { Email = email, Contrasena = contrasena };
             var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/login", request);
@@ -21,7 +21,7 @@ namespace JMCarsWeb.Services
 
             if (respuesta.IsSuccessStatusCode)
             {
-                return await respuesta.Content.ReadFromJsonAsync<Usuario>();
+                return await respuesta.Content.ReadFromJsonAsync<UsuarioDTO>();
             }
 
             return null;

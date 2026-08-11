@@ -1,4 +1,4 @@
-﻿using Modelo;
+﻿using JMCarsWeb.DTOs;
 using System.Net.Http.Json;
 
 namespace JMCarsWeb.Services
@@ -12,19 +12,19 @@ namespace JMCarsWeb.Services
             _httpClient = httpClientFactory.CreateClient("JMCarsAPI");
         }
 
-        public async Task<bool> Registrar(Escribano escribano, bool aceptaTerminos)
+        public async Task<bool> Registrar(EscribanoDTO escribano, bool aceptaTerminos)
         {
             var request = new { Escribano = escribano, AceptaTerminos = aceptaTerminos };
-            var respuesta = await _httpClient.PostAsJsonAsync("api/escribano/registrar", escribano);
+            var respuesta = await _httpClient.PostAsJsonAsync("api/escribano/registrar", request);
             return respuesta.IsSuccessStatusCode;
         }
 
-        public async Task<Escribano> ObtenerPorId(int id)
+        public async Task<EscribanoDTO?> ObtenerPorId(int id)
         {
-            return await _httpClient.GetFromJsonAsync<Escribano>($"api/escribano/{id}");
+            return await _httpClient.GetFromJsonAsync<EscribanoDTO>($"api/escribano/{id}");
         }
 
-        public async Task ActualizarPerfil(Escribano escribano)
+        public async Task ActualizarPerfil(EscribanoDTO escribano)
         {
             await _httpClient.PutAsJsonAsync($"api/escribano/{escribano.IdUsuario}", escribano);
         }
