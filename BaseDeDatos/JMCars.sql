@@ -809,28 +809,55 @@ begin
 end
 go
 
--- Modificar Vehículo (Solo si no está en proceso de venta)
+-- Modificar Vehículo (Marca, Modelo, Año, Caja, Motor, Precio, Km, Descripción; bloqueado si hay venta en curso)
 create proc sp_Vehiculo_Modificar
 @IdVehiculo int,
 @Precio decimal(10,2),
 @Kilometraje int,
-@Descripcion varchar(max)
+@Ano int,
+@Caja varchar(30),
+@Motor varchar(30),
+@Desc varchar(max),
+@NombreMarca varchar(50),
+@NombreModelo varchar(50)
 as
 begin
 
     -- Verificamos que no haya una solicitud notarial activa/aceptada
-    if not exists (select 1 from SolicitudNotarial where IdVehiculo = @IdVehiculo and EstadoSolicitud in (1, 2))
-    begin
-        update Vehiculo 
-        set Precio = @Precio, 
-            Kilometraje = @Kilometraje, 
-            Descripcion = @Descripcion 
-        where IdVehiculo = @IdVehiculo;
-    end
-    else
+    if exists (select 1 from SolicitudNotarial where IdVehiculo = @IdVehiculo and EstadoSolicitud in (1, 2))
     begin
         raiserror ('No se puede modificar un vehículo con un proceso de venta en curso.', 16, 1);
+        return;
     end
+
+    declare @IdMarcaActual int;
+    declare @IdModeloActual int;
+
+    -- Buscamos si la marca ya existe (evitamos duplicados)
+    select @IdMarcaActual = IdMarca from Marca where NombreMarca = @NombreMarca;
+    if (@IdMarcaActual is null)
+    begin
+        insert into Marca (NombreMarca) values (@NombreMarca);
+        set @IdMarcaActual = SCOPE_IDENTITY();
+    end
+
+    -- Buscamos si el modelo ya existe para esa marca específica
+    select @IdModeloActual = IdModelo from Modelo where NombreModelo = @NombreModelo and IdMarca = @IdMarcaActual;
+    if (@IdModeloActual is null)
+    begin
+        insert into Modelo (NombreModelo, IdMarca) values (@NombreModelo, @IdMarcaActual);
+        set @IdModeloActual = SCOPE_IDENTITY();
+    end
+
+    update Vehiculo
+    set Precio = @Precio,
+        Kilometraje = @Kilometraje,
+        Ano = @Ano,
+        CajaDeCambios = @Caja,
+        Motorizacion = @Motor,
+        Descripcion = @Desc,
+        IdModelo = @IdModeloActual
+    where IdVehiculo = @IdVehiculo;
 end
 go
 

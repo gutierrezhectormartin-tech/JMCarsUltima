@@ -49,6 +49,21 @@ namespace JMCarsWeb.Services
             }
         }
 
+        public async Task<bool> ModificarVehiculo(VehiculoDTO pVehiculo)
+        {
+            HttpResponseMessage respuesta = await _httpClient.PutAsJsonAsync("api/vehiculo/modificar", pVehiculo);
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                string error = await respuesta.Content.ReadAsStringAsync();
+                throw new Exception(error);
+            }
+        }
+
         public async Task<List<VehiculoDTO>> BuscarGeneral(decimal latCli, decimal lonCli, int radioKM, int? idMarca = null, decimal? precioMax = null)
         {
             try

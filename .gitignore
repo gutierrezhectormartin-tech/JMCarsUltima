@@ -497,3 +497,4 @@ $RECYCLE.BIN/
 # Archivos de configuración con credenciales sensibles
 **/appsettings.json
 !**/appsettings.json.example
+CLAUDE.md

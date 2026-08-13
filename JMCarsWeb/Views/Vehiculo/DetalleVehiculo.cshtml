@@ -30,7 +30,31 @@
             <div class="col-lg-7">
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body p-2 text-center bg-light rounded">
-                        @if (Model.Fotografia != null && Model.Fotografia.Any())
+                        @if (Model.Fotografia != null && Model.Fotografia.Count > 1)
+                        {
+                            <div id="carruselFotos" class="carousel slide">
+                                <div class="carousel-inner">
+                                    @for (int i = 0; i < Model.Fotografia.Count; i++)
+                                    {
+                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                            <img src="/@Model.Fotografia[i]"
+                                                 class="d-block w-100"
+                                                 alt="Foto @(i + 1) de @Model.Modelo?.Modelo"
+                                                 style="max-height: 400px; object-fit: contain;" />
+                                        </div>
+                                    }
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carruselFotos" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Anterior</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carruselFotos" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Siguiente</span>
+                                </button>
+                            </div>
+                        }
+                        else if (Model.Fotografia != null && Model.Fotografia.Any())
                         {
                             <img src="/@Model.Fotografia.FirstOrDefault()"
                                  alt="Foto @Model.Modelo?.Modelo"

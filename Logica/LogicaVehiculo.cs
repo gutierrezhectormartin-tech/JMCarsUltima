@@ -56,6 +56,30 @@ namespace Logica
         {
             return _persistenciaVehiculo.DetalleVehiculo(pIdVehiculo);
         }
+
+        public void Modificar(Vehiculo pVehiculo)
+        {
+            if (pVehiculo == null)
+            {
+                throw new Exception("El vehículo no puede ser nulo.");
+            }
+
+            if (pVehiculo.IdVehiculo <= 0)
+            {
+                throw new Exception("El vehículo a modificar no es válido.");
+            }
+
+            pVehiculo.Validar();
+
+            try
+            {
+                _persistenciaVehiculo.Modificar(pVehiculo);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error en la lógica al modificar el vehículo: " + ex.Message);
+            }
+        }
     }
 }
     

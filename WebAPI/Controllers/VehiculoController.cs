@@ -108,6 +108,26 @@ namespace WebAPI.Controllers
         }
 
 
+        [HttpPut("modificar")]
+        public IActionResult ModificarVehiculo([FromBody] Vehiculo pVehiculo)
+        {
+            try
+            {
+                if (pVehiculo == null)
+                {
+                    return BadRequest(new { mensaje = "Los datos del vehículo no son válidos o vienen vacíos." });
+                }
+
+                _logicaVehiculo.Modificar(pVehiculo);
+
+                return Ok(new { mensaje = "Vehículo modificado con éxito" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
         [HttpGet("buscar")]
         public IActionResult BuscarGeneral(decimal latCli, decimal lonCli, int radioKM, int? idMarca = null, decimal? precioMax = null)
         {

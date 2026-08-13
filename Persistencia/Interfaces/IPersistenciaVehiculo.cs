@@ -17,5 +17,7 @@ namespace Persistencia.Interfaces
         List<Vehiculo> BuscarGeneral(decimal pLatCli, decimal pLonCli, int pRadioKm, int? pIdMarca, decimal? pPrecioMax);
 
         void Registrar(Vehiculo pVehiculo);
+
+        void Modificar(Vehiculo pVehiculo);
     }
 }

@@ -32,12 +32,15 @@ namespace Persistencia
 
             SqlParameter _direccion = new SqlParameter("@DireccionEstudio", pEscribano.Direccion);
 
+            SqlParameter _fecha = new SqlParameter("@FechaAceptacionTerminos", pEscribano.FechaAceptacionTerminos ?? (object)DateTime.Now);
+
             oComando.Parameters.Add(_nombre);
             oComando.Parameters.Add(_telefono);
             oComando.Parameters.Add(_email);
             oComando.Parameters.Add(_pass);
             oComando.Parameters.Add(_numCaja);
             oComando.Parameters.Add(_direccion);
+            oComando.Parameters.Add(_fecha);
 
             try
             {
@@ -110,10 +113,7 @@ namespace Persistencia
 
         public void ActualizarPerfil(Escribano pEscribano)
         {
-            // el perfil del escribano tiene campos en dos tablas:
-            // primero actualizo los datos de Usuario, despues los datos especificos del Escribano.
-            // El NumeroCaja se pasa tal cual viene en pEscribano (el controller lo carga desde la base
-            // antes de llamar, asi nunca confiamos en el valor del formulario).
+
             SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
 
             SqlCommand oComandoUsuario = new SqlCommand("sp_Usuario_ActualizarPerfil", oConexion);
@@ -166,7 +166,7 @@ namespace Persistencia
 
         public void Inactivar(int pIdUsuario)
         {
-            // reutilizo el SP de admin para setear Estado=0 sobre el Usuario
+
             SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
 
             SqlCommand oComando = new SqlCommand("sp_Admin_SetEstadoUsuario", oConexion);

@@ -90,8 +90,13 @@ namespace WebApi.Controllers
             }
 
 
+            ModelState.Remove("Email");
+            ModelState.Remove("NumeroCaja");
+
             if (!ModelState.IsValid)
             {
+                var errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                ViewBag.Error = string.Join(" | ", errores);
                 return View(escribanoPasado);
             }
 

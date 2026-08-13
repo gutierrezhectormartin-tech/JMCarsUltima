@@ -158,6 +158,11 @@ namespace Modelo
                 throw new Exception("El precio debe ser un valor mayor a cero.");
             }
 
+            if (Precio != Math.Floor(Precio))
+            {
+                throw new Exception("El precio no puede tener decimales.");
+            }
+
             if (Km < 0)
             {
                 throw new Exception("El kilometraje no puede ser negativo.");

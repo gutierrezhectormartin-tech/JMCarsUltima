@@ -24,7 +24,7 @@
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label font-weight-bold">Precio (USD)</label>
-                <input type="number" name="Precio" class="form-control" placeholder="Ej: 14500" required />
+                <input type="number" name="Precio" class="form-control" placeholder="Ej: 14500" step="1" min="0" required />
             </div>
             <div class="col-md-6 mb-3">
                 <label class="form-label font-weight-bold">Kilómetros</label>
@@ -64,7 +64,7 @@
 
         <div class="mb-3">
             <label class="form-label font-weight-bold">Foto del Vehículo</label>
-            <input type="file" name="fotoInput" class="form-control" accept="image/*" required />
+            <input type="file" name="fotoInput" class="form-control" accept="image/*" multiple required />
             <div class="form-text">Subí una imagen representativa del auto.</div>
         </div>
 

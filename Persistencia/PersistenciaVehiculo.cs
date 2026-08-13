@@ -95,10 +95,28 @@ namespace Persistencia
                 oConexion.Open();
 
                 SqlDataReader lector = oComando.ExecuteReader();
-               
+
+                // El SP hace LEFT JOIN con FotoVehiculo: un vehículo con varias fotos viene en varias filas.
+                // Agrupamos por IdVehiculo para no agregar tarjetas duplicadas, acumulando las fotos de cada fila.
+                Dictionary<int, Vehiculo> vistos = new Dictionary<int, Vehiculo>();
 
                 while (lector.Read())
                 {
+                    int idVehiculo = Convert.ToInt32(lector["IdVehiculo"]);
+
+                    // El SP devuelve 'images/sin-foto.jpg' como placeholder cuando no hay foto real
+                    string urlFoto = lector["UrlFoto"] != DBNull.Value ? lector["UrlFoto"].ToString() : null;
+                    bool esFotoReal = urlFoto != null && !urlFoto.EndsWith("sin-foto.jpg");
+
+                    if (vistos.TryGetValue(idVehiculo, out Vehiculo existente))
+                    {
+                        if (esFotoReal && !existente.Fotografia.Contains(urlFoto))
+                        {
+                            existente.Fotografia.Add(urlFoto);
+                        }
+                        continue;
+                    }
+
                     Marcas unaMarca = new Marcas(Convert.ToInt32(lector["IdMarca"]), lector["NombreMarca"].ToString());
 
                     Modelos unModelo = new Modelos(Convert.ToInt32(lector["IdModelo"]), lector["NombreModelo"].ToString(),
@@ -109,14 +127,14 @@ namespace Persistencia
 
 
                     List<string> fotos = new List<string>();
-                    if (lector["UrlFoto"] != DBNull.Value)
+                    if (esFotoReal)
                     {
-                        fotos.Add(lector["UrlFoto"].ToString());
+                        fotos.Add(urlFoto);
                     }
                     decimal? latitud = lector["Latitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Latitud"]);
                     decimal? longitud = lector["Longitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Longitud"]);
 
-                    Vehiculo unVehiculo = new Vehiculo(Convert.ToInt32(lector["IdVehiculo"]),
+                    Vehiculo unVehiculo = new Vehiculo(idVehiculo,
                         Convert.ToDecimal(lector["Precio"]),
                         Convert.ToInt32(lector["Kilometraje"]),
                         Convert.ToInt32(lector["Ano"]),
@@ -130,6 +148,7 @@ namespace Persistencia
                         unCliente,
                         fotos);
 
+                    vistos[idVehiculo] = unVehiculo;
                     lista.Add(unVehiculo);
                 }
 
@@ -276,6 +295,44 @@ namespace Persistencia
             }
         }
 
+        public void Modificar(Vehiculo pVehiculo)
+        {
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Vehiculo_Modificar", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            oComando.Parameters.AddWithValue("@IdVehiculo", pVehiculo.IdVehiculo);
+
+            SqlParameter paramPrecio = new SqlParameter("@Precio", SqlDbType.Decimal);
+            paramPrecio.Precision = 10;
+            paramPrecio.Scale = 2;
+            paramPrecio.Value = pVehiculo.Precio;
+            oComando.Parameters.Add(paramPrecio);
+
+            oComando.Parameters.AddWithValue("@Kilometraje", pVehiculo.Km);
+            oComando.Parameters.AddWithValue("@Ano", pVehiculo.Anio);
+            oComando.Parameters.AddWithValue("@Caja", pVehiculo.CajaCambios);
+            oComando.Parameters.AddWithValue("@Motor", pVehiculo.Motorizacion);
+            oComando.Parameters.AddWithValue("@Desc", pVehiculo.Descripcion ?? (object)DBNull.Value);
+            oComando.Parameters.AddWithValue("@NombreMarca", pVehiculo.Modelo.Marca.NombreMarca);
+            oComando.Parameters.AddWithValue("@NombreModelo", pVehiculo.Modelo.Modelo);
+
+            try
+            {
+                oConexion.Open();
+                oComando.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
         public Vehiculo DetalleVehiculo(int idVehiculo)
         {
             Vehiculo unVehiculo = null;
@@ -291,53 +348,65 @@ namespace Persistencia
                 oConexion.Open();
                 SqlDataReader lector = oComando.ExecuteReader();
 
-                // Usamos IF porque solo esperamos 1 registro
-                if (lector.Read())
+                // El SP hace LEFT JOIN con FotoVehiculo: viene una fila por cada foto.
+                // Armamos el Vehiculo una sola vez (primera fila) y acumulamos las fotos en cada vuelta.
+                List<string> fotos = new List<string>();
+                bool primeraFila = true;
+
+                while (lector.Read())
                 {
-                    Marcas unaMarca = new Marcas(
-                        Convert.ToInt32(lector["IdMarca"]),
-                        lector["NombreMarca"].ToString()
-                    );
-
-                    Modelos unModelo = new Modelos(
-                        Convert.ToInt32(lector["IdModelo"]),
-                        lector["NombreModelo"].ToString(),
-                        unaMarca
-                    );
-
-                    Cliente unCliente = new Cliente(
-                        Convert.ToInt32(lector["IdUsuario"]),
-                        lector["NombreCompleto"].ToString() ?? string.Empty,
-                        lector["Email"].ToString() ?? string.Empty,
-                        lector["Telefono"].ToString() ?? string.Empty,
-                        "", true, Rol.Cliente, null, ""
-                    );
-
-                    // Cargamos la foto que viene del SP
-                    List<string> fotos = new List<string>();
-                    if (lector["UrlFoto"] != DBNull.Value)
+                    if (primeraFila)
                     {
-                        fotos.Add(lector["UrlFoto"].ToString());
+                        Marcas unaMarca = new Marcas(
+                            Convert.ToInt32(lector["IdMarca"]),
+                            lector["NombreMarca"].ToString()
+                        );
+
+                        Modelos unModelo = new Modelos(
+                            Convert.ToInt32(lector["IdModelo"]),
+                            lector["NombreModelo"].ToString(),
+                            unaMarca
+                        );
+
+                        Cliente unCliente = new Cliente(
+                            Convert.ToInt32(lector["IdUsuario"]),
+                            lector["NombreCompleto"].ToString() ?? string.Empty,
+                            lector["Telefono"].ToString() ?? string.Empty,
+                            lector["Email"].ToString() ?? string.Empty,
+                            "", true, Rol.Cliente, null, ""
+                        );
+
+                        decimal? latitud = lector["Latitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Latitud"]);
+                        decimal? longitud = lector["Longitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Longitud"]);
+
+                        unVehiculo = new Vehiculo(
+                            Convert.ToInt32(lector["IdVehiculo"]),
+                            Convert.ToDecimal(lector["Precio"]),
+                            Convert.ToInt32(lector["Kilometraje"]),
+                            Convert.ToInt32(lector["Ano"]),
+                            lector["CajaDeCambios"].ToString() ?? string.Empty,
+                            lector["Motorizacion"].ToString() ?? string.Empty,
+                            lector["Descripcion"].ToString() ?? string.Empty,
+                            Convert.ToBoolean(lector["Publicado"]),
+                            latitud,
+                            longitud,
+                            unModelo,
+                            unCliente,
+                            fotos
+                        );
+
+                        primeraFila = false;
                     }
 
-                    decimal? latitud = lector["Latitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Latitud"]);
-                    decimal? longitud = lector["Longitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Longitud"]);
-
-                    unVehiculo = new Vehiculo(
-                        Convert.ToInt32(lector["IdVehiculo"]),
-                        Convert.ToDecimal(lector["Precio"]),
-                        Convert.ToInt32(lector["Kilometraje"]),
-                        Convert.ToInt32(lector["Ano"]),
-                        lector["CajaDeCambios"].ToString() ?? string.Empty,
-                        lector["Motorizacion"].ToString() ?? string.Empty,
-                        lector["Descripcion"].ToString() ?? string.Empty,
-                        Convert.ToBoolean(lector["Publicado"]),
-                        latitud,
-                        longitud,
-                        unModelo,
-                        unCliente,
-                        fotos
-                    );
+                    // El SP devuelve 'images/sin-foto.jpg' como placeholder cuando no hay foto real
+                    if (lector["UrlFoto"] != DBNull.Value)
+                    {
+                        string url = lector["UrlFoto"].ToString();
+                        if (!url.EndsWith("sin-foto.jpg"))
+                        {
+                            fotos.Add(url);
+                        }
+                    }
                 }
 
                 lector.Close();

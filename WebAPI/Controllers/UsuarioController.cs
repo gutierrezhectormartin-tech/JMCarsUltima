@@ -39,7 +39,8 @@ namespace WebAPI.Controllers
                     {
                         return Unauthorized(new { mensaje = "Email o Contraseña incorrectos" });
                     }
-                
+
+                usuario.Contrasena = null;
                 return Ok(usuario);
             }
             catch (Exception ex)
@@ -49,11 +50,11 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("existe-mail/{email}")]
-        public IActionResult ExisteMail(string mail)
+        public IActionResult ExisteMail(string email)
         {
             try
             {
-                bool existe = _logicaUsuario.ExisteEmail(mail);
+                bool existe = _logicaUsuario.ExisteEmail(email);
                 return Ok(new { existe });
             }
             catch (Exception ex)

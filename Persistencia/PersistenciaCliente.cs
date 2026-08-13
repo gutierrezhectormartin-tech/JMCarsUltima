@@ -30,11 +30,14 @@ namespace Persistencia
 
             SqlParameter _cedula = new SqlParameter("@Cedula", pCliente.Cedula);
 
+            SqlParameter _fecha = new SqlParameter("@FechaAceptacionTerminos", pCliente.FechaAceptacionTerminos ?? (object)DateTime.Now);
+
             oComando.Parameters.Add(_nombre);
             oComando.Parameters.Add(_telefono);
             oComando.Parameters.Add(_email);
             oComando.Parameters.Add(_pass);
             oComando.Parameters.Add(_cedula);
+            oComando.Parameters.Add(_fecha);
 
             try
             {
@@ -113,8 +116,7 @@ namespace Persistencia
 
         public void ActualizarPerfil(Cliente pCliente)
         {
-            // los campos editables del cliente viven todos en la tabla Usuario,
-            // por eso alcanza con un unico SP. La Cedula no es editable.
+
             SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
 
             SqlCommand oComando = new SqlCommand("sp_Usuario_ActualizarPerfil", oConexion);
@@ -152,7 +154,6 @@ namespace Persistencia
 
         public void Inactivar(int pIdUsuario)
         {
-            // reutilizo el SP de admin para setear Estado=0 sobre el Usuario
             SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
 
             SqlCommand oComando = new SqlCommand("sp_Admin_SetEstadoUsuario", oConexion);

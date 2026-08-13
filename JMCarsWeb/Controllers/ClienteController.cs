@@ -90,6 +90,7 @@ namespace WebApi.Controllers
             }
 
             ModelState.Remove("Contrasena");
+            ModelState.Remove("Email");
 
             clientePasado.Email = HttpContext.Session.GetString("EmailCliente");
             clientePasado.Contrasena = HttpContext.Session.GetString("CedulaCliente");

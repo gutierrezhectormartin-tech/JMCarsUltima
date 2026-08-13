@@ -1,11 +1,10 @@
 using JMCarsWeb.Services;
+using Microsoft.AspNetCore.StaticFiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// HttpClient apuntando a la API
 builder.Services.AddHttpClient("JMCarsAPI", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]!);
@@ -21,8 +20,6 @@ builder.Services.AddSession();
 
 var app = builder.Build();
 
-//A ver ahora si agarra el cambio
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -31,7 +28,16 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+
+var proveedorTiposDeArchivo = new FileExtensionContentTypeProvider();
+proveedorTiposDeArchivo.Mappings[".avif"] = "image/avif";
+proveedorTiposDeArchivo.Mappings[".webp"] = "image/webp";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = proveedorTiposDeArchivo
+});
 
 app.UseRouting();
 

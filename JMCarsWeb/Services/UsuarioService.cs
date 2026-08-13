@@ -27,9 +27,15 @@ namespace JMCarsWeb.Services
             return null;
         }
 
+        private class ExisteMailResponse
+        {
+            public bool Existe { get; set; }
+        }
+
         public async Task<bool> ExisteMail(string email)
         {
-            return await _httpClient.GetFromJsonAsync<bool>($"api/usuario/existe-mail/{email}");
+            var respuesta = await _httpClient.GetFromJsonAsync<ExisteMailResponse>($"api/usuario/existe-mail/{email}");
+            return respuesta?.Existe ?? false;
         }
 
         public async Task<bool> RecuperarContrasena(string email)

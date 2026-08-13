@@ -1,0 +1,80 @@
+@model JMCarsWeb.DTOs.VehiculoDTO
+@{
+    ViewData["Title"] = "Editar Vehículo";
+}
+
+<div class="container mt-4" style="max-width: 800px;">
+    <h2>Editar publicación</h2>
+    <p class="text-muted">Podés actualizar los datos de tu vehículo. La foto y la ubicación no se pueden modificar desde acá.</p>
+    <hr />
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>⚠️ Atención:</strong> @ViewBag.Error
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="Editar" asp-route-id="@Model.IdVehiculo" method="post" class="shadow p-4 bg-white rounded">
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-weight-bold">Marca del Auto</label>
+                <input type="text" name="Marca.Nombre" class="form-control" value="@Model.Modelo?.Marca?.NombreMarca" required />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-weight-bold">Modelo del Auto</label>
+                <input type="text" name="Modelo.Nombre" class="form-control" value="@Model.Modelo?.Modelo" required />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label font-weight-bold">Año</label>
+                <input type="number" name="Anio" class="form-control" value="@Model.Anio" required />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label font-weight-bold">Caja de Cambios</label>
+                <select name="CajaCambios" class="form-select" required>
+                    <option value="">Seleccione tipo...</option>
+                    <option value="Manual" selected="@(Model.CajaCambios == "Manual")">Manual</option>
+                    <option value="Automática" selected="@(Model.CajaCambios == "Automática")">Automática</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label font-weight-bold">Motorización</label>
+                <input type="text" name="Motorizacion" class="form-control" value="@Model.Motorizacion" required />
+            </div>
+        </div>
+
+        @if (Model.Fotografia != null && Model.Fotografia.Any())
+        {
+            <div class="mb-4">
+                <span class="text-muted d-block mb-2">Fotografía actual</span>
+                <img src="/@Model.Fotografia.FirstOrDefault()" alt="Foto del vehículo" class="img-fluid rounded" style="max-height: 250px; object-fit: contain;" />
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label font-weight-bold">Precio (USD)</label>
+                <input type="number" name="Precio" class="form-control" value="@((int)Model.Precio)" step="1" min="0" required />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label font-weight-bold">Kilómetros</label>
+                <input type="number" name="Km" class="form-control" value="@Model.Km" required />
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label font-weight-bold">Descripción / Detalles adicionales</label>
+            <textarea name="Descripcion" class="form-control" rows="4" required>@Model.Descripcion</textarea>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-2">
+            <a asp-action="Detalle" asp-route-id="@Model.IdVehiculo" class="btn btn-outline-secondary px-4 me-md-2">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-5 fw-bold">Guardar Cambios</button>
+        </div>
+    </form>
+</div>
