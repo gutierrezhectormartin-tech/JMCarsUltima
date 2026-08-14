@@ -80,6 +80,40 @@ namespace Logica
                 throw new Exception("Error en la lógica al modificar el vehículo: " + ex.Message);
             }
         }
+
+        public void Inactivar(int pIdVehiculo)
+        {
+            if (pIdVehiculo <= 0)
+            {
+                throw new Exception("El vehículo a inactivar no es válido.");
+            }
+
+            try
+            {
+                _persistenciaVehiculo.Inactivar(pIdVehiculo);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error en la lógica al inactivar el vehículo: " + ex.Message);
+            }
+        }
+
+        public void Activar(int pIdVehiculo)
+        {
+            if (pIdVehiculo <= 0)
+            {
+                throw new Exception("El vehículo a activar no es válido.");
+            }
+
+            try
+            {
+                _persistenciaVehiculo.Activar(pIdVehiculo);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error en la lógica al activar el vehículo: " + ex.Message);
+            }
+        }
     }
 }
     

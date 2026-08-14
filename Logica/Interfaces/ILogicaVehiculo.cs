@@ -19,5 +19,9 @@ namespace Logica.Interfaces
         void Registrar(Vehiculo pVehiculo);
 
         void Modificar(Vehiculo pVehiculo);
+
+        void Inactivar(int pIdVehiculo);
+
+        void Activar(int pIdVehiculo);
     }
 }

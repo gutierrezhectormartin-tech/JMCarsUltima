@@ -81,24 +81,30 @@
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@vehiculo.IdVehiculo" class="btn btn-outline-info" title="Ver Detalle">
-                                        <i class="bi bi-eye"></i> Detalle
+                                        <i class="bi bi-eye"></i>
                                     </a>
 
                                     <a asp-controller="Vehiculo" asp-action="Editar" asp-route-id="@vehiculo.IdVehiculo" class="btn btn-outline-primary" title="Editar">
-                                        <i class="bi bi-pencil"></i> Editar
+                                        <i class="bi bi-pencil"></i>
                                     </a>
 
                                     @if (vehiculo.Publicado)
                                     {
-                                        <a asp-controller="Vehiculo" asp-action="Inactivar" asp-route-id="@vehiculo.IdVehiculo" class="btn btn-outline-warning" title="Desactivar">
-                                            <i class="bi bi-toggle-on"></i> Inactivar
-                                        </a>
+                                        <form asp-controller="Vehiculo" asp-action="Inactivar" asp-route-id="@vehiculo.IdVehiculo" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-warning" title="Desactivar">
+                                                <i class="bi bi-toggle-on"></i>
+                                            </button>
+                                        </form>
                                     }
                                     else
                                     {
-                                        <a asp-controller="Vehiculo" asp-action="Inactivar" asp-route-id="@vehiculo.IdVehiculo" class="btn btn-outline-success" title="Activar">
-                                            <i class="bi bi-toggle-off"></i> Activar
-                                        </a>
+                                        <form asp-controller="Vehiculo" asp-action="Inactivar" asp-route-id="@vehiculo.IdVehiculo" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-success" title="Activar">
+                                                <i class="bi bi-toggle-off"></i>
+                                            </button>
+                                        </form>
                                     }
                                 </div>
                             </td>

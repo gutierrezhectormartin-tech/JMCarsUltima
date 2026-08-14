@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using JMCarsWeb.DTOs;
 using System.Security.Cryptography.X509Certificates;
+using ImageMagick;
 
 namespace JMCarsWeb.Controllers
 {
@@ -110,12 +111,14 @@ namespace JMCarsWeb.Controllers
                 var rutasGuardadas = new List<string>();
                 foreach (var archivo in fotoInput.Where(f => f.Length > 0))
                 {
-                    string nombreArchivo = $"{Guid.NewGuid():N}_{Path.GetFileName(archivo.FileName)}";
+                    string nombreArchivo = $"{Guid.NewGuid():N}.png";
                     string rutaCompleta = Path.Combine(rutaCarpeta, nombreArchivo);
 
-                    using (var stream = new FileStream(rutaCompleta, FileMode.Create))
+                    using (var streamOrigen = archivo.OpenReadStream())
+                    using (var imagen = new MagickImage(streamOrigen))
                     {
-                        await archivo.CopyToAsync(stream);
+                        imagen.Format = MagickFormat.Png;
+                        await imagen.WriteAsync(rutaCompleta);
                     }
 
                     rutasGuardadas.Add("images/" + nombreArchivo);
@@ -233,6 +236,42 @@ namespace JMCarsWeb.Controllers
                 ViewBag.Error = ex.Message;
                 return View(vehiculoActual);
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Inactivar(int id)
+        {
+            int? idUsuarioSession = HttpContext.Session.GetInt32("IdUsuario");
+            if (idUsuarioSession == null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            VehiculoDTO vehiculo = await _vehiculoService.DetalleVehiculo(id);
+
+            if (vehiculo == null || vehiculo.Vendedor?.IdUsuario != idUsuarioSession.Value)
+            {
+                return RedirectToAction("MisVehiculos");
+            }
+
+            try
+            {
+                if (vehiculo.Publicado)
+                {
+                    await _vehiculoService.InactivarVehiculo(id);
+                }
+                else
+                {
+                    await _vehiculoService.ActivarVehiculo(id);
+                }
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "No se pudo actualizar el estado del vehículo. Intente nuevamente.";
+            }
+
+            return RedirectToAction("MisVehiculos");
         }
 
         [HttpGet]

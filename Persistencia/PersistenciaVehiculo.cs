@@ -426,6 +426,52 @@ namespace Persistencia
         {
             throw new NotImplementedException();
         }
+
+        public void Inactivar(int pIdVehiculo)
+        {
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Vehiculo_Inactivar", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+            oComando.Parameters.AddWithValue("@IdVehiculo", pIdVehiculo);
+
+            try
+            {
+                oConexion.Open();
+                oComando.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public void Activar(int pIdVehiculo)
+        {
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Vehiculo_Activar", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+            oComando.Parameters.AddWithValue("@IdVehiculo", pIdVehiculo);
+
+            try
+            {
+                oConexion.Open();
+                oComando.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
     }
 }
    

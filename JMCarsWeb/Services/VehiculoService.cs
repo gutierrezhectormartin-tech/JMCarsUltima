@@ -64,6 +64,36 @@ namespace JMCarsWeb.Services
             }
         }
 
+        public async Task<bool> InactivarVehiculo(int idVehiculo)
+        {
+            HttpResponseMessage respuesta = await _httpClient.PutAsync($"api/vehiculo/inactivar/{idVehiculo}", null);
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                string error = await respuesta.Content.ReadAsStringAsync();
+                throw new Exception(error);
+            }
+        }
+
+        public async Task<bool> ActivarVehiculo(int idVehiculo)
+        {
+            HttpResponseMessage respuesta = await _httpClient.PutAsync($"api/vehiculo/activar/{idVehiculo}", null);
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                string error = await respuesta.Content.ReadAsStringAsync();
+                throw new Exception(error);
+            }
+        }
+
         public async Task<List<VehiculoDTO>> BuscarGeneral(decimal latCli, decimal lonCli, int radioKM, int? idMarca = null, decimal? precioMax = null)
         {
             try

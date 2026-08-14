@@ -43,6 +43,7 @@
             <th>Kilometraje</th>
             <th>Descripcion</th>
             <th>Precio</th>
+            <th class="text-center">Acciones</th>
         </tr>
     </thead>
 
@@ -59,6 +60,11 @@
                 <td>@v.Km.ToString("N0")</td>
                 <td>@v.Descripcion</td>
                 <td>@v.Precio.ToString("C")</td>
+                <td class="text-center">
+                    <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" class="btn btn-outline-info btn-sm" title="Ver Detalle">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </td>
             </tr>
         }
     </tbody>

@@ -128,6 +128,46 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpPut("inactivar/{id}")]
+        public IActionResult InactivarVehiculo(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest(new { mensaje = "El ID del vehículo debe ser un número válido." });
+                }
+
+                _logicaVehiculo.Inactivar(id);
+
+                return Ok(new { mensaje = "Vehículo inactivado con éxito" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpPut("activar/{id}")]
+        public IActionResult ActivarVehiculo(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest(new { mensaje = "El ID del vehículo debe ser un número válido." });
+                }
+
+                _logicaVehiculo.Activar(id);
+
+                return Ok(new { mensaje = "Vehículo activado con éxito" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
         [HttpGet("buscar")]
         public IActionResult BuscarGeneral(decimal latCli, decimal lonCli, int radioKM, int? idMarca = null, decimal? precioMax = null)
         {

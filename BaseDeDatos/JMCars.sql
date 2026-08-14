@@ -871,6 +871,16 @@ begin
 end
 go
 
+-- Reactivar Publicación
+create proc sp_Vehiculo_Activar
+@IdVehiculo int
+as
+begin
+
+    update Vehiculo set Publicado = 1 where IdVehiculo = @IdVehiculo;
+end
+go
+
 -- Obtener un Vehículo completo con sus fotos
 create proc sp_Vehiculo_ObtenerDetalle
 @IdVehiculo int
