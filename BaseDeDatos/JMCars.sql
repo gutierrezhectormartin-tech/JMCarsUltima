@@ -528,15 +528,17 @@ BEGIN
  
         U.IdUsuario,
         U.NombreCompleto,
-        U.Email,       
+        U.Email,
         U.Telefono,
-        
+        C.Cedula,
+
         ISNULL(FV.UrlFoto, 'images/sin-foto.jpg') AS UrlFoto
- 
+
     FROM Vehiculo V
     INNER JOIN Modelo M ON V.IdModelo = M.IdModelo
     INNER JOIN Marca MA ON M.IdMarca = MA.IdMarca
     INNER JOIN Usuario U ON V.IdUsuarioVendedor = U.IdUsuario
+    INNER JOIN Cliente C ON U.IdUsuario = C.IdUsuario
     LEFT JOIN FotoVehiculo FV ON V.IdVehiculo = FV.IdVehiculo
     WHERE V.IdVehiculo = @IdVehiculo
 END
@@ -819,7 +821,9 @@ create proc sp_Vehiculo_Modificar
 @Motor varchar(30),
 @Desc varchar(max),
 @NombreMarca varchar(50),
-@NombreModelo varchar(50)
+@NombreModelo varchar(50),
+@Lat decimal(9,6) = null,
+@Lon decimal(9,6) = null
 as
 begin
 
@@ -856,7 +860,9 @@ begin
         CajaDeCambios = @Caja,
         Motorizacion = @Motor,
         Descripcion = @Desc,
-        IdModelo = @IdModeloActual
+        IdModelo = @IdModeloActual,
+        Latitud = @Lat,
+        Longitud = @Lon
     where IdVehiculo = @IdVehiculo;
 end
 go

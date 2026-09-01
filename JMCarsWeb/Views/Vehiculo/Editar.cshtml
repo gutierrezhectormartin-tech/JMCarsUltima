@@ -5,7 +5,7 @@
 
 <div class="container mt-4" style="max-width: 800px;">
     <h2>Editar publicación</h2>
-    <p class="text-muted">Podés actualizar los datos de tu vehículo. La foto y la ubicación no se pueden modificar desde acá.</p>
+    <p class="text-muted">Podés actualizar los datos de tu vehículo, cambiar la foto y reubicarlo en el mapa.</p>
     <hr />
 
     @if (ViewBag.Error != null)
@@ -16,7 +16,10 @@
         </div>
     }
 
-    <form asp-action="Editar" asp-route-id="@Model.IdVehiculo" method="post" class="shadow p-4 bg-white rounded">
+    <form asp-action="Editar" asp-route-id="@Model.IdVehiculo" method="post" enctype="multipart/form-data" class="shadow p-4 bg-white rounded">
+
+        <input type="hidden" id="latitudInput" name="Latitud" value="@Model.Latitud?.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+        <input type="hidden" id="longitudInput" name="Longitud" value="@Model.Longitud?.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
 
         <div class="row">
             <div class="col-md-4 mb-3">
@@ -50,11 +53,28 @@
 
         @if (Model.Fotografia != null && Model.Fotografia.Any())
         {
-            <div class="mb-4">
-                <span class="text-muted d-block mb-2">Fotografía actual</span>
-                <img src="/@Model.Fotografia.FirstOrDefault()" alt="Foto del vehículo" class="img-fluid rounded" style="max-height: 250px; object-fit: contain;" />
+            <div class="mb-3">
+                <span class="text-muted d-block mb-2">Fotos actuales — destildá las que querés sacar</span>
+                <div class="d-flex flex-wrap gap-3">
+                    @for (int i = 0; i < Model.Fotografia.Count; i++)
+                    {
+                        <div class="text-center">
+                            <img src="/@Model.Fotografia[i]" alt="Foto del vehículo" class="img-thumbnail" style="height: 120px; object-fit: contain;" />
+                            <div class="form-check mt-1">
+                                <input class="form-check-input" type="checkbox" name="fotosExistentes" value="@Model.Fotografia[i]" id="foto-@i" checked />
+                                <label class="form-check-label small" for="foto-@i">Mantener</label>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         }
+
+        <div class="mb-3">
+            <label class="form-label font-weight-bold">Agregar fotos nuevas</label>
+            <input type="file" name="fotoInput" class="form-control" accept="image/*" multiple />
+            <div class="form-text">Opcional. Se suman a las fotos que dejes marcadas arriba.</div>
+        </div>
 
         <div class="row">
             <div class="col-md-6 mb-3">
@@ -72,9 +92,51 @@
             <textarea name="Descripcion" class="form-control" rows="4" required>@Model.Descripcion</textarea>
         </div>
 
+        <div class="mb-4">
+            <label class="form-label text-primary font-weight-bold">📍 Ubicación de Entrega / Exhibición</label>
+            <p class="small text-muted m-0">Hacé un clic en el mapa para actualizar el punto donde se encuentra el auto.</p>
+
+            <div id="map" class="border rounded mt-2 shadow-sm" style="height: 380px; background-color: #f8f9fa;"></div>
+
+            <div id="coordenadasInfo" class="text-success small mt-2 font-monospace fw-bold"></div>
+        </div>
+
         <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-2">
             <a asp-action="Detalle" asp-route-id="@Model.IdVehiculo" class="btn btn-outline-secondary px-4 me-md-2">Cancelar</a>
             <button type="submit" class="btn btn-primary px-5 fw-bold">Guardar Cambios</button>
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var latInicial = @(Model.Latitud?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "-34.85");
+        var lngInicial = @(Model.Longitud?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "-56.15");
+
+        var map = L.map('map').setView([latInicial, lngInicial], 14);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marcadorActual = L.marker([latInicial, lngInicial]).addTo(map);
+        document.getElementById('coordenadasInfo').innerHTML = "✓ Ubicación actual: Lat " + latInicial.toFixed(6) + " | Lng " + lngInicial.toFixed(6);
+
+        map.on('click', function (evento) {
+            var latitud = evento.latlng.lat;
+            var longitud = evento.latlng.lng;
+
+            document.getElementById('latitudInput').value = latitud;
+            document.getElementById('longitudInput').value = longitud;
+
+            document.getElementById('coordenadasInfo').innerHTML = "✓ Ubicación seleccionada: Lat " + latitud.toFixed(6) + " | Lng " + longitud.toFixed(6);
+
+            map.removeLayer(marcadorActual);
+
+            marcadorActual = L.marker([latitud, longitud]).addTo(map)
+                .bindPopup("<div class='text-center'><b>¡Auto reubicado!</b><br/>Guardamos estas coordenadas.</div>")
+                .openPopup();
+        });
+    });
+</script>

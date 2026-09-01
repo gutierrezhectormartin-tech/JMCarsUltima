@@ -1,4 +1,25 @@
 ﻿@model JMCarsWeb.DTOs.VehiculoDTO
+@{
+    bool vieneDeHome = string.Equals(ViewBag.Origen as string, "home", StringComparison.OrdinalIgnoreCase);
+    string volverAccion = vieneDeHome ? "Index" : "MisVehiculos";
+    string volverControlador = vieneDeHome ? "Home" : "Vehiculo";
+    string volverTexto = vieneDeHome ? "Volver al Inicio" : "Volver a Mis Vehículos";
+}
+
+<style>
+    #carruselFotos .carousel-control-prev-icon,
+    #carruselFotos .carousel-control-next-icon {
+        background-color: rgba(0, 0, 0, 0.45);
+        border-radius: 50%;
+        padding: 1.4rem;
+        background-size: 55%;
+    }
+
+    #carruselFotos .carousel-control-prev,
+    #carruselFotos .carousel-control-next {
+        width: 10%;
+    }
+</style>
 
 <div class="container mt-4">
     @if (Model == null)
@@ -7,8 +28,8 @@
             <i class="bi bi-exclamation-triangle fs-3"></i>
             <h4 class="mt-2">Vehículo no encontrado</h4>
             <p>El vehículo que estás intentando ver no existe o fue eliminado.</p>
-            <a asp-controller="Vehiculo" asp-action="MisVehiculos" class="btn btn-outline-primary">
-                <i class="bi bi-arrow-left"></i> Volver a Mis Vehículos
+            <a asp-controller="@volverControlador" asp-action="@volverAccion" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> @volverTexto
             </a>
         </div>
     }
@@ -19,8 +40,8 @@
                 <h2>@Model.Modelo?.Marca?.NombreMarca @Model.Modelo?.Modelo</h2>
                 <p class="text-muted mb-0">Publicación #@Model.IdVehiculo</p>
             </div>
-            <a asp-controller="Vehiculo" asp-action="MisVehiculos" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Volver
+            <a asp-controller="@volverControlador" asp-action="@volverAccion" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> @volverTexto
             </a>
         </div>
 
@@ -37,10 +58,11 @@
                                     @for (int i = 0; i < Model.Fotografia.Count; i++)
                                     {
                                         <div class="carousel-item @(i == 0 ? "active" : "")">
-                                            <img src="/@Model.Fotografia[i]"
-                                                 class="d-block w-100"
-                                                 alt="Foto @(i + 1) de @Model.Modelo?.Modelo"
-                                                 style="max-height: 400px; object-fit: contain;" />
+                                            <div class="d-flex align-items-center justify-content-center" style="height: 400px;">
+                                                <img src="/@Model.Fotografia[i]"
+                                                     alt="Foto @(i + 1) de @Model.Modelo?.Modelo"
+                                                     style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                                            </div>
                                         </div>
                                     }
                                 </div>

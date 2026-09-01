@@ -61,7 +61,7 @@
                 <td>@v.Descripcion</td>
                 <td>@v.Precio.ToString("C")</td>
                 <td class="text-center">
-                    <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" class="btn btn-outline-info btn-sm" title="Ver Detalle">
+                    <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" asp-route-origen="home" class="btn btn-outline-info btn-sm" title="Ver Detalle">
                         <i class="bi bi-eye"></i>
                     </a>
                 </td>

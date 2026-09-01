@@ -318,10 +318,37 @@ namespace Persistencia
             oComando.Parameters.AddWithValue("@NombreMarca", pVehiculo.Modelo.Marca.NombreMarca);
             oComando.Parameters.AddWithValue("@NombreModelo", pVehiculo.Modelo.Modelo);
 
+            SqlParameter paramLat = new SqlParameter("@Lat", SqlDbType.Decimal);
+            paramLat.Precision = 9;
+            paramLat.Scale = 6;
+            paramLat.Value = pVehiculo.Latitud.HasValue ? pVehiculo.Latitud.Value : (object)DBNull.Value;
+            oComando.Parameters.Add(paramLat);
+
+            SqlParameter paramLon = new SqlParameter("@Lon", SqlDbType.Decimal);
+            paramLon.Precision = 9;
+            paramLon.Scale = 6;
+            paramLon.Value = pVehiculo.Longitud.HasValue ? pVehiculo.Longitud.Value : (object)DBNull.Value;
+            oComando.Parameters.Add(paramLon);
+
             try
             {
                 oConexion.Open();
                 oComando.ExecuteNonQuery();
+
+                if (pVehiculo.Fotografia != null && pVehiculo.Fotografia.Count > 0)
+                {
+                    SqlCommand cmdBorrarFotos = new SqlCommand("DELETE FROM FotoVehiculo WHERE IdVehiculo = @Id", oConexion);
+                    cmdBorrarFotos.Parameters.AddWithValue("@Id", pVehiculo.IdVehiculo);
+                    cmdBorrarFotos.ExecuteNonQuery();
+
+                    foreach (string url in pVehiculo.Fotografia)
+                    {
+                        SqlCommand cmdFoto = new SqlCommand("INSERT INTO FotoVehiculo (UrlFoto, IdVehiculo) VALUES (@Url, @Id)", oConexion);
+                        cmdFoto.Parameters.AddWithValue("@Url", url);
+                        cmdFoto.Parameters.AddWithValue("@Id", pVehiculo.IdVehiculo);
+                        cmdFoto.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -373,7 +400,7 @@ namespace Persistencia
                             lector["NombreCompleto"].ToString() ?? string.Empty,
                             lector["Telefono"].ToString() ?? string.Empty,
                             lector["Email"].ToString() ?? string.Empty,
-                            "", true, Rol.Cliente, null, ""
+                            "", true, Rol.Cliente, null, lector["Cedula"].ToString() ?? string.Empty
                         );
 
                         decimal? latitud = lector["Latitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Latitud"]);

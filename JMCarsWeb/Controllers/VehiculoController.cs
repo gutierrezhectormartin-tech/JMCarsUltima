@@ -45,7 +45,7 @@ namespace JMCarsWeb.Controllers
             return View(misVehiculos);
         }
         [HttpGet]
-        public async Task<IActionResult> Detalle(int id)
+        public async Task<IActionResult> Detalle(int id, string? origen = null)
         {
             if (id <= 0)
             {
@@ -58,6 +58,8 @@ namespace JMCarsWeb.Controllers
             {
                 return RedirectToAction("MisVehiculos");
             }
+
+            ViewBag.Origen = origen;
 
             return View("DetalleVehiculo",vehiculo);
         }
@@ -101,30 +103,7 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                string rutaCarpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-
-                if (!Directory.Exists(rutaCarpeta))
-                {
-                    Directory.CreateDirectory(rutaCarpeta);
-                }
-
-                var rutasGuardadas = new List<string>();
-                foreach (var archivo in fotoInput.Where(f => f.Length > 0))
-                {
-                    string nombreArchivo = $"{Guid.NewGuid():N}.png";
-                    string rutaCompleta = Path.Combine(rutaCarpeta, nombreArchivo);
-
-                    using (var streamOrigen = archivo.OpenReadStream())
-                    using (var imagen = new MagickImage(streamOrigen))
-                    {
-                        imagen.Format = MagickFormat.Png;
-                        await imagen.WriteAsync(rutaCompleta);
-                    }
-
-                    rutasGuardadas.Add("images/" + nombreArchivo);
-                }
-
-                vehiculo.Fotografia = rutasGuardadas;
+                vehiculo.Fotografia = await GuardarFotos(fotoInput);
 
                 vehiculo.Vendedor = new ClienteDTO
                 {
@@ -192,7 +171,7 @@ namespace JMCarsWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Editar(int id, VehiculoDTO vehiculo)
+        public async Task<IActionResult> Editar(int id, VehiculoDTO vehiculo, List<IFormFile>? fotoInput)
         {
             int? idUsuarioSession = HttpContext.Session.GetInt32("IdUsuario");
             if (idUsuarioSession == null)
@@ -209,6 +188,14 @@ namespace JMCarsWeb.Controllers
 
             string nombreModeloEscrito = Request.Form["Modelo.Nombre"];
             string nombreMarcaEscrito = Request.Form["Marca.Nombre"];
+            string latRaw = Request.Form["Latitud"];
+            string lngRaw = Request.Form["Longitud"];
+
+            if (string.IsNullOrEmpty(latRaw) || string.IsNullOrEmpty(lngRaw))
+            {
+                ViewBag.Error = "Debe seleccionar una ubicación válida en el mapa.";
+                return View(vehiculoActual);
+            }
 
             vehiculoActual.Precio = vehiculo.Precio;
             vehiculoActual.Km = vehiculo.Km;
@@ -218,16 +205,28 @@ namespace JMCarsWeb.Controllers
             vehiculoActual.Descripcion = vehiculo.Descripcion;
             vehiculoActual.Modelo.Modelo = !string.IsNullOrEmpty(nombreModeloEscrito) ? nombreModeloEscrito : vehiculoActual.Modelo.Modelo;
             vehiculoActual.Modelo.Marca.NombreMarca = !string.IsNullOrEmpty(nombreMarcaEscrito) ? nombreMarcaEscrito : vehiculoActual.Modelo.Marca.NombreMarca;
+            vehiculoActual.Latitud = Math.Round(decimal.Parse(latRaw, System.Globalization.CultureInfo.InvariantCulture), 6);
+            vehiculoActual.Longitud = Math.Round(decimal.Parse(lngRaw, System.Globalization.CultureInfo.InvariantCulture), 6);
 
-
-            if (string.IsNullOrEmpty(vehiculoActual.Vendedor.Cedula))
-            {
-                vehiculoActual.Vendedor.Cedula = "12345678";
-            }
             vehiculoActual.Vendedor.Contrasena = null;
 
             try
             {
+                List<string> fotosFinal = Request.Form["fotosExistentes"].Where(f => !string.IsNullOrEmpty(f)).ToList()!;
+
+                if (fotoInput != null && fotoInput.Any(f => f.Length > 0))
+                {
+                    fotosFinal.AddRange(await GuardarFotos(fotoInput));
+                }
+
+                if (fotosFinal.Count == 0)
+                {
+                    ViewBag.Error = "El vehículo debe tener al menos una fotografía.";
+                    return View(vehiculoActual);
+                }
+
+                vehiculoActual.Fotografia = fotosFinal;
+
                 await _vehiculoService.ModificarVehiculo(vehiculoActual);
                 return RedirectToAction("Detalle", new { id });
             }
@@ -319,6 +318,34 @@ namespace JMCarsWeb.Controllers
                 ViewBag.Error = "Ocurrio un error inesperado intente nuevamente";
                 return View();
             }
+        }
+
+        private async Task<List<string>> GuardarFotos(List<IFormFile> fotoInput)
+        {
+            string rutaCarpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+
+            if (!Directory.Exists(rutaCarpeta))
+            {
+                Directory.CreateDirectory(rutaCarpeta);
+            }
+
+            var rutasGuardadas = new List<string>();
+            foreach (var archivo in fotoInput.Where(f => f.Length > 0))
+            {
+                string nombreArchivo = $"{Guid.NewGuid():N}.png";
+                string rutaCompleta = Path.Combine(rutaCarpeta, nombreArchivo);
+
+                using (var streamOrigen = archivo.OpenReadStream())
+                using (var imagen = new MagickImage(streamOrigen))
+                {
+                    imagen.Format = MagickFormat.Png;
+                    await imagen.WriteAsync(rutaCompleta);
+                }
+
+                rutasGuardadas.Add("images/" + nombreArchivo);
+            }
+
+            return rutasGuardadas;
         }
     }
 }
