@@ -164,7 +164,8 @@
             if(v.lat && v.lon)
             {
                 var marcador = L.marker([v.lat, v.lon]).addTo(mapa)
-                marcador.bindPopup('<b>' + v.marca + '' + v.modelo + '</b><br></br>' + 'Precio: $' + v.precio + '<br>' + 'Km: ' + v.km);
+                marcador.bindPopup('<b>' + v.marca + '' + v.modelo + '</b><br></br>' + 'Precio: $' + v.precio + '<br>' + 'Km: ' + v.km
+                + '<br><br>' + '<a href="/vehiculo/Detalle?id=' + v.id + '&origen=buscar">' + 'Ver Vehiculo' + '</a>');
             }
         });
     </script>

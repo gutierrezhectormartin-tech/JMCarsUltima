@@ -49,14 +49,16 @@ namespace JMCarsWeb.Controllers
         {
             if (id <= 0)
             {
-                return RedirectToAction("MisVehiculos");
+                TempData["Error"] = "Error";
+                return RedirectToAction("Index", "Home");
             }
 
             VehiculoDTO vehiculo = await _vehiculoService.DetalleVehiculo(id);
 
             if (vehiculo == null)
             {
-                return RedirectToAction("MisVehiculos");
+                TempData["Error"] = "Error";
+                return RedirectToAction("Index", "Home");
             }
 
             ViewBag.Origen = origen;

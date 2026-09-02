@@ -10,23 +10,47 @@
     <div class="alert alert-success">@TempData["Mensaje"]</div>
 }
 
+@{
+    var marcas = Model.Where(v => v.Modelo?.Marca != null).Select(v => new { Id = v.Modelo.Marca.IdMarca, Nombre = v.Modelo.Marca.NombreMarca })
+            .Distinct().OrderBy(x => x.Nombre).ToList();
+}
+
+@{
+    var modelos = Model.Where(v => v.Modelo != null && v.Modelo.Marca != null).Select(v => new
+    {
+        idMarca = v.Modelo.Marca.IdMarca,
+        idModelo = v.Modelo.IdModelo,
+        Nombre = v.Modelo.Modelo
+    }).Distinct().OrderBy(x => x.Nombre).ToList();
+}
+
 <h1>Vehículos publicados</h1>
 
 <form method="get" class="d-flex align-items-center gap-2 my-3">
 
-    <input type="text"
-           name="marca"
-           placeholder="Buscar por marca"
-           value="@Context.Request.Query["marca"]" 
-           class="form-control"
-    />
+    <select name="marca" class="form-select">
+        <option value="">Lista de Marcas</option>
 
-    <button type="submit" class="btn btn-primary">
-        Buscar
-    </button>
+        @foreach (var marca in marcas)
+            {
+                <option value="@marca.Id">
+                    @marca.Nombre
+                </option>
+            }
+    </select>
+    <select name="modelo" class="form-select">
+        <option value="">Lista de Modelos</option>
+
+        @foreach (var modelo in modelos)
+            {
+                <option value="@modelo.idModelo" data-marca="@modelo.idMarca">
+                    @modelo.Nombre
+                </option>
+            }
+        </select> 
 
     <a href="/" class="btn btn-outline-dark" role="button">
-        ← Volver
+        Limpiar
     </a>
 
 </form>
@@ -50,7 +74,7 @@
     <tbody>
         @foreach (var v in Model)
         {
-            <tr>
+            <tr data-marca="@v.Modelo.Marca.IdMarca" data-modelo="@v.Modelo.IdModelo">
                 <td>@v.IdVehiculo</td>
                 <td>@v.Modelo.Marca.NombreMarca</td>
                 <td>@v.Modelo.Modelo</td>
@@ -69,3 +93,46 @@
         }
     </tbody>
 </table>
+
+<script>
+    document.querySelector('select[name="marca"]')
+    .addEventListener('change', function ()
+    {
+        const marcaSeleccionada = this.value;
+
+            const ddlModelo = document.querySelector('select[name="modelo"]');
+
+            ddlModelo.value = '';
+            ddlModelo.querySelectorAll('option').forEach(function(option) 
+            {
+                if (!option.value) 
+                    {
+                        return;
+                    }
+
+                option.style.display = !marcaSeleccionada || option.dataset.marca === marcaSeleccionada ? '' : 'none';
+            });
+
+        document.querySelectorAll('tbody tr').forEach(function (fila)
+        {
+            const idMarca = fila.dataset.marca;
+
+            
+
+            fila.style.display = !marcaSeleccionada || idMarca === marcaSeleccionada ? '' : 'none';
+        }
+        );
+    });
+
+    document.querySelector('select[name="modelo"]').addEventListener('change', function ()
+        {
+            const modeloSeleccionado = this.value;
+
+            document.querySelectorAll('tbody tr').forEach(function (fila)
+                {
+                    const idModelo = fila.dataset.modelo;
+
+                    fila.style.display = !modeloSeleccionado || idModelo === modeloSeleccionado ? '' : 'none';
+                });
+        });
+</script>
