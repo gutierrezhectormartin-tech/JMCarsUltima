@@ -42,5 +42,10 @@ namespace Logica
         {
             persistenciaEscribano.Inactivar(pIdUsuario);
         }
+
+        public List<Escribano> ListarActivos()
+        {
+            return persistenciaEscribano.ListarActivos();
+        }
     }
 }

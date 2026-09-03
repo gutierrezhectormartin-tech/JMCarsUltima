@@ -45,5 +45,10 @@ namespace Persistencia
             return new PersistenciaTokenRecuperacion();
         }
 
+        public IPersistenciaSolicitudNotarial GetPersistenciaSolicitudNotarial()
+        {
+            return new PersistenciaSolicitudNotarial();
+        }
+
     }
 }

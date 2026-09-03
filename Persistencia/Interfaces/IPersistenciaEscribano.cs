@@ -16,5 +16,7 @@ namespace Persistencia.Interfaces
         void ActualizarPerfil(Escribano pEscribano);
 
         void Inactivar(int pIdUsuario);
+
+        List<Escribano> ListarActivos();
     }
 }

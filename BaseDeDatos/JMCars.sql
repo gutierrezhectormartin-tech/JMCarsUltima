@@ -681,10 +681,249 @@ begin
 
         commit transaction;
     end try
-    begin catch 
+    begin catch
         if @@TRANCOUNT > 0 rollback transaction;
-        throw; 
+        throw;
     end catch
+end
+go
+
+-- Aceptar Solicitud (solo el escribano asignado; rechaza automáticamente las demás solicitudes pendientes del mismo vehículo)
+create proc sp_Notarial_Aceptar
+@IdSolicitud int,
+@IdEscribano int
+as
+begin
+
+    begin transaction;
+    begin try
+        if not exists (select 1 from SolicitudEscribano where IdSolicitud = @IdSolicitud and IdUsuarioEscribano = @IdEscribano)
+        begin
+            raiserror ('No tienes permiso para aceptar esta solicitud.', 16, 1);
+        end
+
+        if not exists (select 1 from SolicitudNotarial where IdSolicitud = @IdSolicitud and EstadoSolicitud = 1)
+        begin
+            raiserror ('La solicitud no se encuentra en un estado válido para ser aceptada.', 16, 1);
+        end
+
+        declare @IdV int = (select IdVehiculo from SolicitudNotarial where IdSolicitud = @IdSolicitud);
+
+        -- Aceptamos esta solicitud
+        update SolicitudNotarial set EstadoSolicitud = 2 where IdSolicitud = @IdSolicitud;
+
+        -- Rechazamos automáticamente las demás solicitudes pendientes sobre el mismo vehículo
+        update SolicitudNotarial set EstadoSolicitud = 3 where IdVehiculo = @IdV and EstadoSolicitud = 1 and IdSolicitud <> @IdSolicitud;
+
+        commit transaction;
+    end try
+    begin catch
+        if @@TRANCOUNT > 0 rollback transaction;
+        throw;
+    end catch
+end
+go
+
+-- Rechazar Solicitud (solo el escribano asignado)
+create proc sp_Notarial_Rechazar
+@IdSolicitud int,
+@IdEscribano int
+as
+begin
+
+    if not exists (select 1 from SolicitudEscribano where IdSolicitud = @IdSolicitud and IdUsuarioEscribano = @IdEscribano)
+    begin
+        raiserror ('No tienes permiso para rechazar esta solicitud.', 16, 1);
+        return;
+    end
+
+    if not exists (select 1 from SolicitudNotarial where IdSolicitud = @IdSolicitud and EstadoSolicitud = 1)
+    begin
+        raiserror ('La solicitud no se encuentra en un estado válido para ser rechazada.', 16, 1);
+        return;
+    end
+
+    update SolicitudNotarial set EstadoSolicitud = 3 where IdSolicitud = @IdSolicitud;
+end
+go
+
+-- Obtener el detalle completo de una Solicitud (vehículo + cliente + escribano asignado)
+create proc sp_Notarial_ObtenerPorId
+@IdSolicitud int
+as
+begin
+
+    select
+        S.IdSolicitud,
+        S.FechaSolicitud,
+        S.EstadoSolicitud,
+        ES.NombreEstado,
+
+        V.IdVehiculo,
+        V.Precio,
+        V.Kilometraje,
+        V.Ano,
+        V.CajaDeCambios,
+        V.Motorizacion,
+        V.Descripcion,
+        V.Publicado,
+        V.Latitud,
+        V.Longitud,
+
+        M.IdModelo,
+        M.NombreModelo,
+
+        MA.IdMarca,
+        MA.NombreMarca,
+
+        UV.IdUsuario as IdVendedor,
+        UV.NombreCompleto as NombreVendedor,
+        UV.Telefono as TelefonoVendedor,
+        UV.Email as EmailVendedor,
+        CV.Cedula as CedulaVendedor,
+
+        UC.IdUsuario as IdCliente,
+        UC.NombreCompleto as NombreCliente,
+        UC.Telefono as TelefonoCliente,
+        UC.Email as EmailCliente,
+        C.Cedula,
+
+        UE.IdUsuario as IdEscribano,
+        UE.NombreCompleto as NombreEscribano,
+        UE.Telefono as TelefonoEscribano,
+        UE.Email as EmailEscribano,
+        E.NumCajaProf,
+        E.DireccionEstudio
+
+    from SolicitudNotarial S
+    join EstadosSolicitudNotarial ES on S.EstadoSolicitud = ES.IdEstadoSolicitud
+    join Vehiculo V on S.IdVehiculo = V.IdVehiculo
+    join Modelo M on V.IdModelo = M.IdModelo
+    join Marca MA on M.IdMarca = MA.IdMarca
+    join Cliente CV on V.IdUsuarioVendedor = CV.IdUsuario
+    join Usuario UV on CV.IdUsuario = UV.IdUsuario
+    join Cliente C on S.IdUsuarioCliente = C.IdUsuario
+    join Usuario UC on C.IdUsuario = UC.IdUsuario
+    join SolicitudEscribano SE on S.IdSolicitud = SE.IdSolicitud
+    join Escribano E on SE.IdUsuarioEscribano = E.IdUsuario
+    join Usuario UE on E.IdUsuario = UE.IdUsuario
+
+    where S.IdSolicitud = @IdSolicitud;
+end
+go
+
+-- Listar las Solicitudes de un Cliente (para "Mis Solicitudes")
+create proc sp_Notarial_ListarPorCliente
+@IdCliente int
+as
+begin
+
+    select
+        S.IdSolicitud,
+        S.FechaSolicitud,
+        S.EstadoSolicitud,
+        ES.NombreEstado,
+
+        V.IdVehiculo,
+        V.Precio,
+        V.Kilometraje,
+        V.Ano,
+        V.CajaDeCambios,
+        V.Motorizacion,
+        V.Descripcion,
+        V.Publicado,
+        V.Latitud,
+        V.Longitud,
+
+        M.IdModelo,
+        M.NombreModelo,
+
+        MA.IdMarca,
+        MA.NombreMarca,
+
+        UV.IdUsuario as IdVendedor,
+        UV.NombreCompleto as NombreVendedor,
+        UV.Telefono as TelefonoVendedor,
+        UV.Email as EmailVendedor,
+        CV.Cedula as CedulaVendedor,
+
+        UE.IdUsuario as IdEscribano,
+        UE.NombreCompleto as NombreEscribano,
+        UE.Telefono as TelefonoEscribano,
+        UE.Email as EmailEscribano,
+        E.NumCajaProf,
+        E.DireccionEstudio
+
+    from SolicitudNotarial S
+    join EstadosSolicitudNotarial ES on S.EstadoSolicitud = ES.IdEstadoSolicitud
+    join Vehiculo V on S.IdVehiculo = V.IdVehiculo
+    join Modelo M on V.IdModelo = M.IdModelo
+    join Marca MA on M.IdMarca = MA.IdMarca
+    join Cliente CV on V.IdUsuarioVendedor = CV.IdUsuario
+    join Usuario UV on CV.IdUsuario = UV.IdUsuario
+    join SolicitudEscribano SE on S.IdSolicitud = SE.IdSolicitud
+    join Escribano E on SE.IdUsuarioEscribano = E.IdUsuario
+    join Usuario UE on E.IdUsuario = UE.IdUsuario
+
+    where S.IdUsuarioCliente = @IdCliente
+    order by S.FechaSolicitud desc;
+end
+go
+
+-- Listar las Solicitudes asignadas a un Escribano (para "Solicitudes Pendientes")
+create proc sp_Notarial_ListarPorEscribano
+@IdEscribano int
+as
+begin
+
+    select
+        S.IdSolicitud,
+        S.FechaSolicitud,
+        S.EstadoSolicitud,
+        ES.NombreEstado,
+
+        V.IdVehiculo,
+        V.Precio,
+        V.Kilometraje,
+        V.Ano,
+        V.CajaDeCambios,
+        V.Motorizacion,
+        V.Descripcion,
+        V.Publicado,
+        V.Latitud,
+        V.Longitud,
+
+        M.IdModelo,
+        M.NombreModelo,
+
+        MA.IdMarca,
+        MA.NombreMarca,
+
+        UV.IdUsuario as IdVendedor,
+        UV.NombreCompleto as NombreVendedor,
+        UV.Telefono as TelefonoVendedor,
+        UV.Email as EmailVendedor,
+        CV.Cedula as CedulaVendedor,
+
+        UC.IdUsuario as IdCliente,
+        UC.NombreCompleto as NombreCliente,
+        UC.Telefono as TelefonoCliente,
+        UC.Email as EmailCliente,
+        C.Cedula
+
+    from SolicitudNotarial S
+    join EstadosSolicitudNotarial ES on S.EstadoSolicitud = ES.IdEstadoSolicitud
+    join Vehiculo V on S.IdVehiculo = V.IdVehiculo
+    join Modelo M on V.IdModelo = M.IdModelo
+    join Marca MA on M.IdMarca = MA.IdMarca
+    join Cliente CV on V.IdUsuarioVendedor = CV.IdUsuario
+    join Usuario UV on CV.IdUsuario = UV.IdUsuario
+    join Cliente C on S.IdUsuarioCliente = C.IdUsuario
+    join Usuario UC on C.IdUsuario = UC.IdUsuario
+    join SolicitudEscribano SE on S.IdSolicitud = SE.IdSolicitud
+
+    where SE.IdUsuarioEscribano = @IdEscribano
+    order by S.FechaSolicitud desc;
 end
 go
 

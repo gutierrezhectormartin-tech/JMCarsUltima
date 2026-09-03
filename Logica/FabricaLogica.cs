@@ -44,5 +44,10 @@ namespace Logica
         {
             return new LogicaVehiculo();
         }
+
+        public ILogicaSolicitudNotarial GetLogicaSolicitudNotarial()
+        {
+            return new LogicaSolicitudNotarial();
+        }
     }
 }

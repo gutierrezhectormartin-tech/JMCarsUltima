@@ -195,5 +195,47 @@ namespace Persistencia
                 oConexion.Close();
             }
         }
+
+        public List<Escribano> ListarActivos()
+        {
+            List<Escribano> lista = new List<Escribano>();
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Escribano_ListarActivos", oConexion);
+
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            try
+            {
+                oConexion.Open();
+
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                while (lector.Read())
+                {
+                    Escribano unEscribano = new Escribano(
+                        Convert.ToInt32(lector["IdUsuario"]),
+                        lector["NombreCompleto"].ToString() ?? string.Empty,
+                        "", "", "", true, Rol.Escribano, null,
+                        lector["NumCajaProf"].ToString() ?? string.Empty,
+                        lector["DireccionEstudio"].ToString() ?? string.Empty);
+
+                    lista.Add(unEscribano);
+                }
+
+                lector.Close();
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
     }
 }
