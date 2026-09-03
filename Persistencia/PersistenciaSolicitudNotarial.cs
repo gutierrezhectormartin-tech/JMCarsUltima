@@ -236,7 +236,6 @@ namespace Persistencia
                         unVendedor,
                         new List<string>());
 
-                    // Es "Mis Solicitudes" del propio cliente: no repetimos sus datos en cada fila.
                     Cliente unCliente = new Cliente(pIdCliente, string.Empty, string.Empty, string.Empty, "", true, Rol.Cliente, null, string.Empty);
 
                     SolicituNotarial unaSolicitud = new SolicituNotarial(
@@ -328,7 +327,6 @@ namespace Persistencia
                         unCliente,
                         unVehiculo);
 
-                    // Es "Solicitudes Pendientes" del propio escribano: no repetimos sus datos en cada fila.
                     Escribano unEscribano = new Escribano(pIdEscribano, string.Empty, string.Empty, string.Empty, "", true, Rol.Escribano, null, string.Empty, string.Empty);
 
                     lista.Add(new SolicitudEscribano(unaSolicitud, unEscribano));

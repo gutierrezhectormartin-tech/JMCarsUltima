@@ -46,6 +46,26 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpGet("activos")]
+        public IActionResult ListarActivos()
+        {
+            try
+            {
+                List<Escribano> escribanos = _logicaEscribano.ListarActivos();
+
+                if (escribanos == null || !escribanos.Any())
+                {
+                    return NotFound(new { mensaje = "No se han encontrado escribanos activos" });
+                }
+
+                return Ok(escribanos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
         public IActionResult ObtenerPorId(int id)
         {
