@@ -42,7 +42,11 @@
                             @Html.ActionLink("Mi perfil", "Perfil", "Escribano", null, new { @class = "btn btn-outline-light me-2" })
                             @Html.ActionLink("Buscar Vehículos", "Buscar", "Vehiculo", null, new { @class = "btn btn-outline-light me-2" })
                         }
-                        @Html.ActionLink("Cerrar sesión", "Logout", "Login", null, new { @class = "btn btn-outline-light" })
+                        else if (idRol == 1)
+                        {
+                            @Html.ActionLink("Mi perfil", "Perfil", "Escribano", null, new { @class = "btn btn-outline-light me-2" })
+                        }
+                        @Html.ActionLink("Panel de Vehiculos", "Vehiculos", "Admin", null, new { @class = "btn btn-outline-light me-2" })
                     }
                 </div>
             </div>
