@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Modelo
 {
-    public class Mansaje
+    public class Mensaje
     {
         private int idMensaje;
         private string contenido;
@@ -57,7 +57,7 @@ namespace Modelo
             }
         }
 
-        public Mansaje(int pIdMensaje, Chat pChat, Usuario pUsuarioEmisor, string pContenido, DateTime pFechaHora)
+        public Mensaje(int pIdMensaje, Chat pChat, Usuario pUsuarioEmisor, string pContenido, DateTime pFechaHora)
         {
             IdMensaje = pIdMensaje;
             Chat = pChat;

@@ -7,6 +7,7 @@
         public int IdUsuarioEmisor { get; set; }
         public string Contenido { get; set; }
         public DateTime FechaHora { get; set; }
+        public string NombreEmisor { get; set; }
 
     }
 }

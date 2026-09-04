@@ -50,5 +50,10 @@ namespace Persistencia
             return new PersistenciaSolicitudNotarial();
         }
 
+        public IPersistenciaChat GetPersistenciaChat()
+        {
+            return new PersistenciaChat();
+        }
+
     }
 }

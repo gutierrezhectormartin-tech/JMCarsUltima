@@ -47,7 +47,7 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Error: No se pudo completar el registro. Verifica tus datos";
+                ViewBag.Error = "Error: No se pudo completar el registro. Verifica tus datos" + ex.Message;
                 return View(escribanoPasado);
             }
         }
@@ -112,7 +112,7 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "No se pudo actualizar el perfil.";
+                ViewBag.Error = "No se pudo actualizar el perfil." + ex.Message;
                 return View(escribanoPasado);
             }
         }

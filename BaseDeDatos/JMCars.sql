@@ -641,6 +641,56 @@ begin
 end
 go
 
+-- Obtener chats de un usuario
+
+create proc sp_ListarChatPorUsuario
+@IdUsuario int
+as
+begin
+    select
+        C.IdChat,
+        C.FechaInicio,
+        V.IdVehiculo,
+        M.IdModelo,
+        M.NombreModelo,
+        MA.IdMarca,
+        MA.NombreMarca,
+        U.NombreCompleto as NombreOtroUsuario,
+        (select top 1 Contenido from Mensaje where IdChat = C.IdChat order by FechaHora desc) as UltimoMensaje,
+        (select top 1 FechaHora from Mensaje where IdChat = C.IdChat order by FechaHora desc) as FechaUltimoMensaje
+    from Chat C
+    inner join ChatParticipante P1 on C.IdChat = P1.IdChat and P1.IdUsuario = @IdUsuario
+    inner join ChatParticipante P2 on C.IdChat = P2.Idchat and P2.IdUsuario != @IdUsuario
+    inner join Usuario U on P2.IdUsuario = U.IdUsuario
+    inner join Vehiculo V on C.IdVehiculo = V.IdVehiculo
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    inner join Marca MA on M.IdMarca = MA.IdMarca
+    order by FechaUltimoMensaje desc
+end
+go
+
+-- obtener los mensajes de un chat
+
+create proc sp_Obtener_Mensajes_Chat
+@IdChat int,
+@IdUsuario int
+as
+begin
+    select
+        M.IdMensaje,
+        M.IdChat,
+        M.IdUsuarioEmisor,
+        U.NombreCompleto as NombreEmisor,
+        M.Contenido,
+        M.FechaHora
+    from Mensaje M
+    inner join Usuario U on M.IdUsuarioEmisor = U.IdUsuario
+    where M.IdChat = @IdChat and exists (select 1 from ChatParticipante where IdChat = @IdChat and IdUsuario = @IdUsuario)
+    order by M.FechaHora asc
+end
+go
+
+
 -- Solicitar Escribano
 create proc sp_Notarial_CrearSolicitud
 @IdCliente int,

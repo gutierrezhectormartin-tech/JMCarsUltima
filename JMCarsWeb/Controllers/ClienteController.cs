@@ -117,7 +117,7 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "No se pudo actualizar el perfil.";
+                ViewBag.Error = "No se pudo actualizar el perfil." + ex.Message;
                 return View(clientePasado);
             }
         }
