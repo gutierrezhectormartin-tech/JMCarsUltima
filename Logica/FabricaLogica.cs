@@ -49,5 +49,10 @@ namespace Logica
         {
             return new LogicaSolicitudNotarial();
         }
+
+        public ILogicaChat GetLogicaChat()
+        {
+            return new LogicaChat();
+        }
     }
 }

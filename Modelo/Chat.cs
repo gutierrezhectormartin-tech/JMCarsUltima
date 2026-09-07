@@ -46,7 +46,7 @@ namespace Modelo
             get { return nombreOtroUsuario; }
             set
             {
-                NombreOtroUsuario = value;
+                nombreOtroUsuario = value;
             }
         }
 
@@ -55,7 +55,7 @@ namespace Modelo
             get { return ultimoMensaje; }
             set
             {
-                UltimoMensaje = value;
+                ultimoMensaje = value;
             }
         }
 

@@ -44,6 +44,10 @@ namespace Modelo
             get { return contenido; }
             set
             {
+                if(string.IsNullOrEmpty(value))
+                    {
+                    throw new ArgumentException("El mensaje no puede estar vacio");
+                    }
                 contenido = value;
             }
         }
@@ -65,5 +69,7 @@ namespace Modelo
             Contenido = pContenido;
             FechaHora = pFechaHora;
         }
+
+        public Mensaje() { }
     }
 }

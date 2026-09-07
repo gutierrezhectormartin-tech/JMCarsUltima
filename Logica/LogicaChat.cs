@@ -31,6 +31,10 @@ namespace Logica
 
         public int ObtenerOCrearChat(int pIdVehiculo, int pIdComprador, int pIdVendedor)
         {
+            if(pIdComprador == pIdVendedor)
+            {
+                throw new Exception("No se puede crear una conversacion contigo mismo");
+            }
             return _persistenciaChat.ObtenerOCrearChat(pIdVehiculo, pIdComprador, pIdVendedor);
         }
 

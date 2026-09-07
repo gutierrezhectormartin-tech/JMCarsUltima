@@ -14,6 +14,7 @@ builder.Services.AddScoped<VehiculoService>();
 builder.Services.AddScoped<ClienteService>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<EscribanoService>();
+builder.Services.AddScoped<ChatService>();
 
 
 builder.Services.AddSession();
