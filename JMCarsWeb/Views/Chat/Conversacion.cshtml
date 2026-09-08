@@ -1,0 +1,83 @@
+﻿@model List<JMCarsWeb.DTOs.MensajeDTO>
+
+@{
+    ViewData["Title"] = "Mensajes";
+    int idChat = (int)ViewBag.IdChat;
+    int idUsuario = (int)ViewBag.IdUsuario;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2>Conversacion</h2>
+            <p class="text-muted mb-0">Chatea con el vendedor</p>
+        </div>
+        <a asp-controller="Chat" asp-action="Historial" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>Volver a mis Conversaciones
+        </a>
+    </div>
+
+    <hr />
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-body" style="height: 400px; overflow-y: auto" id="contenedorMensajes">
+            @if(Model == null || !Model.Any())
+            {
+                <p class="text-muted text-center mt-5">Aun no tienes mensajes en este chat</p>
+            }
+            else
+            {
+                @foreach (var mensaje in Model)
+                {
+                    @if(mensaje.UsuarioEmisor?.IdUsuario == idUsuario)
+                    {
+                        <div class="d-flex justify-content-end mb-2">
+                            <div class="bg-primary text-white p-2 rounded" style="max-width: 70%;">
+                                <div class="small fw-bold">Vos</div>
+                                <div>@mensaje.Contenido</div>
+                                <div class="small text-white-50">@mensaje.FechaHora.ToString("HH:mm")</div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-start mb-2">
+                            <div class="bg-light p-2 rounded" style="max-width: 70%";>
+                                <div class="small fw-bold">@mensaje.UsuarioEmisor?.NombreCompleto</div>
+                                <div>@mensaje.Contenido</div>
+                                <div class="small text-muted">@mensaje.FechaHora.ToString("HH:mm")</div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    </div>
+
+    @using (Html.BeginForm("EnviarMensaje", "Chat", FormMethod.Post))
+    {
+        <input type="hidden" name="idChat" value="@idChat"/>
+        <div class="input-group">
+            <input type="text" name="contenido" class="form-control" placeholder="Nuevo mensaje..." required/>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-send"></i> Enviar
+            </button>
+
+        </div>
+    }
+</div>
+
+<script>
+
+    //esto es el scroll automatico que hace que se lleve el chat al ultimo mensaje
+    var contenedor = document.getElementById('contenedorMensajes');
+    contenedor.scrollTop = contenedor.scrollHeight;
+
+    //recargamos la pagina cada 10 segundos por las dudas que la otra parte del chat envie mensajess y nosotros tengamos la pagina abierta
+    setTimeout(function () { location.reload();}, 10000);
+</script>

@@ -42,5 +42,9 @@ namespace Logica
         {
             _persistenciaChat.EnviarMensaje(pIdChat, pIdEmisor, pContenido);
         }
+        public List<Chat> ListarChatsPorVehiculo(int pIdVehiculo)
+        {
+            return _persistenciaChat.ListarChatsPorVehiculo(pIdVehiculo);
+        }
     }
 }

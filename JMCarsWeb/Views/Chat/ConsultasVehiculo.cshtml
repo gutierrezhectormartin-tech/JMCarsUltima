@@ -1,0 +1,62 @@
+﻿@model List<JMCarsWeb.DTOs.ChatDTO>
+@{
+    ViewData["Title"] = "Consultas del Vehiculo";
+    int idVehiculo = (int)ViewBag.IdVehiculo;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2>Consultas del vehiculo</h2>
+            <p class="text-muted mb-0">Compradores interesados en tu publicacion</p>
+        </div>
+        <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@idVehiculo" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>Volver al vehiculo
+        </a>
+    </div>
+
+    <hr />
+
+    @if(TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+    @if(TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if(Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>No hay consultas para este vehiculo aun
+        </div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach(var chat in Model)
+            {
+                <a href="@Url.Action("Conversacion", "Chat", new {idChat = chat.IdChat})" class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>@chat.NombreOtroUsuario</strong>
+                            @if(!string.IsNullOrEmpty(chat.UltimoMensaje))
+                            {
+                                <div class="text-muted small">@chat.UltimoMensaje</div>
+                            }
+                        </div>
+                        <div class="text-muted small">
+                            @if(chat.FechaUltimoMensaje.HasValue)
+                            {
+                                @chat.FechaUltimoMensaje.Value.ToString("dd/MM/yyyy HH:mm")
+                            }
+
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+
+
+</div>

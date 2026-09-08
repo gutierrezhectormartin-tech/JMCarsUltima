@@ -13,6 +13,7 @@ namespace Logica.Interfaces
         List<Mensaje> ObtenerMensajes(int pIdChat,int pIdUsuario);
         int ObtenerOCrearChat(int pIdVehiculo, int pIdComprador, int pVendedor);
         void EnviarMensaje(int pIdChat, int pIdEmisor, string pContenido);
+        List<Chat> ListarChatsPorVehiculo(int pIdVehiculo);
 
     }
 }

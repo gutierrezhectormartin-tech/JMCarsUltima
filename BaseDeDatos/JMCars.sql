@@ -621,6 +621,28 @@ begin
 end
 go
 
+-- ver chats asociados a un vehiculo
+
+create proc sp_Chat_ListarPorVehiculo
+@IdVehiculo int
+as
+begin
+
+    select  C.IdChat,
+            C.FechaInicio,
+            U.NombreCompleto as NombreComprador,
+            (select top 1 Contenido from Mensaje where IdChat = C.IdChat order by FechaHora desc) as UltimoMensaje,
+            (select top 1 FechaHora from Mensaje where IdChat = C.IdChat order by FechaHora desc) as FechaUltimoMensaje
+    from Chat C
+    inner join ChatParticipante CP on C.IdChat = CP.IdChat
+    inner join Usuario U on CP.IdUsuario = U.IdUsuario
+    inner join Vehiculo V on C.IdVehiculo = V.IdVehiculo
+    where C.IdVehiculo = @IdVehiculo
+    and U.IdUsuario != V.IdUsuarioVendedor
+    order by FechaUltimoMensaje desc
+end
+go
+
 -- Enviar Mensaje
 create proc sp_Mensaje_Enviar
 @IdChat int,
@@ -651,6 +673,7 @@ begin
         C.IdChat,
         C.FechaInicio,
         V.IdVehiculo,
+        V.Ano,
         M.IdModelo,
         M.NombreModelo,
         MA.IdMarca,
@@ -665,6 +688,7 @@ begin
     inner join Vehiculo V on C.IdVehiculo = V.IdVehiculo
     inner join Modelo M on V.IdModelo = M.IdModelo
     inner join Marca MA on M.IdMarca = MA.IdMarca
+    where V.IdUsuarioVendedor != @IdUsuario
     order by FechaUltimoMensaje desc
 end
 go

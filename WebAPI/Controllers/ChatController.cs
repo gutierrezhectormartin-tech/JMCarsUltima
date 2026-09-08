@@ -16,7 +16,7 @@ namespace WebAPI.Controllers
             _logicaChat = FabricaLogica.GetInstancia().GetLogicaChat();
         }
 
-        [HttpGet("listar/[idUsuario")]
+        [HttpGet("listar/{idUsuario}")]
         public IActionResult ListarChatsPorUsuario(int idUsuario)
         {
             try
@@ -37,13 +37,13 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{idChat}/mensajes/{idUsuario}")]
-        public IActionResult ObtenerMensajes (int idChat, int idUsuario)
+        public IActionResult ObtenerMensajes(int idChat, int idUsuario)
         {
             try
             {
                 List<Mensaje> mensajes = _logicaChat.ObtenerMensajes(idChat, idUsuario);
 
-                if(mensajes == null || !mensajes.Any())
+                if (mensajes == null || !mensajes.Any())
                 {
                     return NotFound(new { mensaje = "No existen mensajes en este chat" });
                 }
@@ -70,7 +70,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("{idChat}/mensajes")]
-        public IActionResult EnviarMensaje (int idChat, [FromBody] EnviarMensajeRquest request)
+        public IActionResult EnviarMensaje(int idChat, [FromBody] EnviarMensajeRquest request)
         {
             try
             {
@@ -83,6 +83,27 @@ namespace WebAPI.Controllers
                 throw;
             }
         }
+
+        [HttpGet("vehiculo/{idVehiculo}")]
+        public async Task<IActionResult> ListarChatsPorVehiculo(int idVehiculo)
+        {
+            try
+            {
+                List<Chat> chats = _logicaChat.ListarChatsPorVehiculo(idVehiculo);
+
+                if(chats == null || !chats.Any())
+                {
+                    return NotFound(new { mensaje = "No existen consultas para este vehiculo" });
+                }
+
+                return Ok(chats);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
     }
 
     public class ObtenerOCrearChatRequest

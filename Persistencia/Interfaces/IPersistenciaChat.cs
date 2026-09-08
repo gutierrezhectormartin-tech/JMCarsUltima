@@ -13,5 +13,6 @@ namespace Persistencia.Interfaces
         List<Mensaje> ObtenerMensajes(int pIdChat, int pIdUsuario);
         int ObtenerOCrearChat(int pIdVehiculo, int pIdComprador, int pIdVendedor);
         void EnviarMensaje(int pIdChat, int pIdEmisor, string pContenido);
+        List<Chat> ListarChatsPorVehiculo(int idVehiculo);
     }
 }

@@ -39,7 +39,7 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                var respuesta = await _httpClient.GetAsync($"api/chat/{idChat}/mensaje/{idUsuario}");
+                var respuesta = await _httpClient.GetAsync($"api/chat/{idChat}/mensajes/{idUsuario}");
 
                 if(respuesta.IsSuccessStatusCode)
                 {
@@ -87,6 +87,28 @@ namespace JMCarsWeb.Services
             catch (Exception)
             {
                 return false;
+            }
+        }
+
+        public async Task<List<ChatDTO>?> ListarChatsPorVehiculo(int idVehiculo)
+        {
+            try
+            {
+                var respuesta = await _httpClient.GetAsync($"api/chat/vehiculo/{idVehiculo}");
+
+                if(respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<List<ChatDTO>>();
+                }
+                if(respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return new List<ChatDTO>();
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
             }
         }
     }

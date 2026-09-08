@@ -88,6 +88,7 @@
                                         <i class="bi bi-pencil"></i>
                                     </a>
 
+
                                     @if (vehiculo.Publicado)
                                     {
                                         <form asp-controller="Vehiculo" asp-action="Inactivar" asp-route-id="@vehiculo.IdVehiculo" method="post" class="d-inline">
@@ -106,8 +107,13 @@
                                             </button>
                                         </form>
                                     }
+
+                                    <a asp-controller="Chat" asp-action="ConsultasVehiculo" asp-route-idvehiculo="@vehiculo.IdVehiculo" class="btn btn-outline-info btn-sm" title="Ver Consultas">
+                                        <i class="bi bi-chat-dots"></i>
+                                    </a>
                                 </div>
                             </td>
+                            
                         </tr>
                     }
                 </tbody>

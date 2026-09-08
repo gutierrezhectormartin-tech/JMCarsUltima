@@ -34,6 +34,7 @@ namespace Persistencia
                     Vehiculo vehiculo = new Vehiculo();
 
                     vehiculo.IdVehiculo = Convert.ToInt32(lector["IdVehiculo"]);
+                    vehiculo.Anio = Convert.ToInt32(lector["Ano"]);
                     vehiculo.Modelo = modelo;
                     DateTime ? fechaUltimo = lector["FechaUltimoMensaje"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechaUltimoMensaje"]);
 
@@ -137,6 +138,44 @@ namespace Persistencia
             {
                 oConexion.Open();
                 oComando.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public List<Chat> ListarChatsPorVehiculo(int pIdVehiculo)
+        {
+            List<Chat> lista = new List<Chat>();
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+            SqlCommand oComando = new SqlCommand("sp_Chat_ListarPorVehiculo", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+            oComando.Parameters.AddWithValue("@IdVehiculo", pIdVehiculo);
+
+            try
+            {
+                oConexion.Open();
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                while(lector.Read())
+                {
+                    DateTime? fechaUltimo = lector["FechaUltimoMensaje"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechaUltimoMensaje"]);
+                    Chat chat = new Chat(Convert.ToInt32(lector["IdChat"]),
+                                         Convert.ToDateTime(lector["FechaInicio"]),
+                                         null,
+                                         lector["NombreComprador"].ToString(),
+                                         lector["UltimoMensaje"] == DBNull.Value ? "" : lector["UltimoMensaje"].ToString(),
+                                         fechaUltimo
+                                        );
+                    lista.Add(chat);
+                }
+                return lista;
             }
             catch (Exception)
             {

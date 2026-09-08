@@ -183,6 +183,29 @@
                         <p class="mb-0"><strong>Teléfono:</strong> @(Model.Vendedor?.Telefono ?? "No disponible")</p>
                     </div>
                 </div>
+                @{
+                    int? idRolActual = Context.Session.GetInt32("IdRol");
+                    int? idUsuarioActual = Context.Session.GetInt32("IdUsuario");
+
+                }
+
+                @if(idRolActual == 3 && idUsuarioActual !=Model.Vendedor?.IdUsuario)
+                {
+                    <div class="card mt-3 shadow-sm border-success">
+                        <div class="card-body text-center">
+                            @using (Html.BeginForm("IniciarChat", "Chat", FormMethod.Post))
+                            {
+                                <input type="hidden" name="idVehiculo" value="@Model.IdVehiculo" />
+                                <input type="hidden" name="idVendedor" value="@Model.Vendedor?.IdUsuario" />
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-chat-dots"></i>Contactar Vendedor
+                                </button>
+                            }
+                        </div>
+
+                    </div>
+                }
+
             </div>
         </div>
     }

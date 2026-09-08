@@ -36,6 +36,7 @@
                             @Html.ActionLink("Mi perfil", "Perfil", "Cliente", null, new { @class = "btn btn-outline-light me-2" })
                             @Html.ActionLink("Mis Vehículos", "MisVehiculos", "Vehiculo", null, new { @class = "btn btn-outline-light me-2" })
                             @Html.ActionLink("Buscar Vehículos", "Buscar", "Vehiculo", null, new { @class = "btn btn-outline-light me-2" })
+                            @Html.ActionLink("Mis Chats", "Historial", "Chat", null, new {@class = "btn btn-outline-light me-2"})
                         }
                         else if (idRol == 2)
                         {
@@ -44,9 +45,10 @@
                         }
                         else if (idRol == 1)
                         {
-                            @Html.ActionLink("Mi perfil", "Perfil", "Escribano", null, new { @class = "btn btn-outline-light me-2" })
+                            @Html.ActionLink("Mi perfil", "Perfil", "Admin", null, new { @class = "btn btn-outline-light me-2" })
+                            @Html.ActionLink("Panel de Vehiculos", "Vehiculos", "Admin", null, new { @class = "btn btn-outline-light me-2" })
                         }
-                        @Html.ActionLink("Panel de Vehiculos", "Vehiculos", "Admin", null, new { @class = "btn btn-outline-light me-2" })
+                        
                     }
                 </div>
             </div>
