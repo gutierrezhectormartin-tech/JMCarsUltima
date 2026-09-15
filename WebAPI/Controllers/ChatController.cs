@@ -70,11 +70,11 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("{idChat}/mensajes")]
-        public IActionResult EnviarMensaje(int idChat, [FromBody] EnviarMensajeRquest request)
+        public IActionResult EnviarMensaje(int idChat, [FromBody] EnviarMensajeRequest request)
         {
             try
             {
-                _logicaChat.EnviarMensaje(idChat, request.idEmisor, request.Contenido);
+                _logicaChat.EnviarMensaje(idChat, request.IdEmisor, request.Contenido);
                 return Ok(new { mensaje = "El mensaje ha sido enviado correctamente al chat" });
             }
             catch (Exception ex)
@@ -114,9 +114,9 @@ namespace WebAPI.Controllers
 
     }
 
-    public class EnviarMensajeRquest
+    public class EnviarMensajeRequest
     {
-        public int idEmisor { get; set; }
+        public int IdEmisor { get; set; }
         public string Contenido { get; set; }
     }
 }

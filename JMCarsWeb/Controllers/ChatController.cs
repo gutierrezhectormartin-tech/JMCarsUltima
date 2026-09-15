@@ -67,7 +67,7 @@ namespace JMCarsWeb.Controllers
                 }
 
                 ViewBag.IdChat = idChat;
-                ViewBag.IdUsuario = idUsuario;
+                ViewBag.IdUsuario = idUsuario.Value;
                 return View(mensajes);
             }
             catch (Exception ex)
@@ -188,12 +188,52 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                List<>
+                List<MensajeDTO>? mensajes = await _chatService.ObtenerMensajes(idChat, idUsuario.Value);
+
+                if(mensajes == null)
+                {
+                    TempData["Error"] = "Ha ocurrido un error al cargar los mensajes de esta conversacion";
+                    return RedirectToAction("ConsultasVehiculo", new { idVehiculo });
+                }
+
+                ViewBag.IdChat = idChat;
+                ViewBag.IdUsuario = idUsuario.Value;
+                ViewBag.IdVehiculo = idVehiculo;
+                return View(mensajes);
             }
             catch (Exception ex)
             {
+                TempData["Error"] = "Ha ocurrido un error:" + ex.Message;
+                return RedirectToAction("ConsultasVehiculo", new { idVehiculo });
+            }
+        }
 
-                throw;
+        [HttpPost]
+        public async Task<IActionResult> EnviarMensajeVendedor(int idChat, int idVehiculo, string contenido)
+        {
+            int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+            int? idRol = HttpContext.Session.GetInt32("IdRol");
+
+            if (idUsuario == null || idRol != 3)
+            {
+                TempData["Error"] = "Debes iniciar sesion para enviar mensajes";
+                return RedirectToAction("Index", "Login");
+            }
+
+            try
+            {
+                bool exito = await _chatService.EnviarMensaje(idChat, idUsuario.Value, contenido);
+
+                if(!exito)
+                {
+                    TempData["Error"] = "No se pudo enviar el mensaje";
+                }
+                return RedirectToAction("ConversacionesVendedor", new { idChat, idVehiculo });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Ha ocurrido un error" + ex.Message;
+                return RedirectToAction("ConversacionesVendedor", new { idChat, idVehiculo });
             }
         }
     }

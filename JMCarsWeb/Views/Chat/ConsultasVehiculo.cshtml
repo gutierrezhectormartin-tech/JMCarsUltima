@@ -36,7 +36,7 @@
         <div class="list-group">
             @foreach(var chat in Model)
             {
-                <a href="@Url.Action("Conversacion", "Chat", new {idChat = chat.IdChat})" class="list-group-item list-group-item-action">
+                <a href="@Url.Action("ConversacionesVendedor", "Chat", new {idChat = chat.IdChat, idVehiculo = idVehiculo})" class="list-group-item list-group-item-action">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <strong>@chat.NombreOtroUsuario</strong>
