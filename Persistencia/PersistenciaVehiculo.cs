@@ -52,7 +52,7 @@ namespace Persistencia
                         lector["CajaDeCambios"].ToString() ??string.Empty,
                         lector["Motorizacion"].ToString() ?? string.Empty,
                         lector["Descripcion"].ToString() ?? string.Empty,
-                        Convert.ToBoolean(lector["Publicado"]),
+                        Convert.ToInt32(lector["IdEstadoPublicacion"]),
                         latitud,
                         longitud,
                         unModelo,
@@ -141,7 +141,7 @@ namespace Persistencia
                         lector["CajaDeCambios"].ToString() ?? string.Empty,
                         lector["Motorizacion"].ToString() ?? string.Empty,
                         lector["Descripcion"].ToString() ?? string.Empty,
-                        Convert.ToBoolean(lector["Publicado"]),
+                        Convert.ToInt32(lector["IdEstadoPublicacion"]),
                         latitud,
                         longitud,
                         unModelo,
@@ -202,7 +202,7 @@ namespace Persistencia
                     Vehiculo unVehiculo = new Vehiculo(Convert.ToInt32(lector["IdVehiculo"]), Convert.ToDecimal(lector["Precio"]),
                                                         Convert.ToInt32(lector["Kilometraje"]), Convert.ToInt32(lector["Ano"]),
                                                         lector["CajaDeCambios"].ToString(), lector["Motorizacion"].ToString(),
-                                                        lector["Descripcion"].ToString(), Convert.ToBoolean(lector["Publicado"]),
+                                                        lector["Descripcion"].ToString(), Convert.ToInt32(lector["IdEstadoPublicacion"]),
                                                         latitud, longitud, unModelo, unCliente, fotos);
                     listaV.Add(unVehiculo);
                 }
@@ -414,7 +414,7 @@ namespace Persistencia
                             lector["CajaDeCambios"].ToString() ?? string.Empty,
                             lector["Motorizacion"].ToString() ?? string.Empty,
                             lector["Descripcion"].ToString() ?? string.Empty,
-                            Convert.ToBoolean(lector["Publicado"]),
+                            Convert.ToInt32(lector["IdEstadoPublicacion"]),
                             latitud,
                             longitud,
                             unModelo,
@@ -454,43 +454,66 @@ namespace Persistencia
             throw new NotImplementedException();
         }
 
-        public void Inactivar(int pIdVehiculo)
+        //public void Inactivar(int pIdVehiculo)
+        //{
+        //    SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+        //    SqlCommand oComando = new SqlCommand("sp_Vehiculo_Inactivar", oConexion);
+        //    oComando.CommandType = CommandType.StoredProcedure;
+        //    oComando.Parameters.AddWithValue("@IdVehiculo", pIdVehiculo);
+
+        //    try
+        //    {
+        //        oConexion.Open();
+        //        oComando.ExecuteNonQuery();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+        //    finally
+        //    {
+        //        oConexion.Close();
+        //    }
+        //}
+
+        //public void Activar(int pIdVehiculo)
+        //{
+        //    SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+        //    SqlCommand oComando = new SqlCommand("sp_Vehiculo_Activar", oConexion);
+        //    oComando.CommandType = CommandType.StoredProcedure;
+        //    oComando.Parameters.AddWithValue("@IdVehiculo", pIdVehiculo);
+
+        //    try
+        //    {
+        //        oConexion.Open();
+        //        oComando.ExecuteNonQuery();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+        //    finally
+        //    {
+        //        oConexion.Close();
+        //    }
+        //}
+        public void CambiarEstado(int pIdVehiculo, int pIdEstado)
         {
             SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
 
-            SqlCommand oComando = new SqlCommand("sp_Vehiculo_Inactivar", oConexion);
+            SqlCommand oComando = new SqlCommand("sp_Vehiculo_CambiarEstado", oConexion);
             oComando.CommandType = CommandType.StoredProcedure;
-            oComando.Parameters.AddWithValue("@IdVehiculo", pIdVehiculo);
+            oComando.Parameters.AddWithValue("@Id", pIdVehiculo);
+            oComando.Parameters.AddWithValue("@IdEstadoPublicacion", pIdEstado);
 
             try
             {
                 oConexion.Open();
                 oComando.ExecuteNonQuery();
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
-                oConexion.Close();
-            }
-        }
-
-        public void Activar(int pIdVehiculo)
-        {
-            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
-
-            SqlCommand oComando = new SqlCommand("sp_Vehiculo_Activar", oConexion);
-            oComando.CommandType = CommandType.StoredProcedure;
-            oComando.Parameters.AddWithValue("@IdVehiculo", pIdVehiculo);
-
-            try
-            {
-                oConexion.Open();
-                oComando.ExecuteNonQuery();
-            }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

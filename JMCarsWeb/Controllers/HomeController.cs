@@ -17,7 +17,7 @@ namespace JMCarsWeb.Controllers
         {
             List<VehiculoDTO> lista = await _vehiculoService.ListarVehiculos();
 
-            lista = lista.Where(v => v.Publicado).ToList();
+            lista = lista.Where(v => v.IdEstadoPublicacion == 2).ToList();
 
             if (!string.IsNullOrEmpty(marca))
             {

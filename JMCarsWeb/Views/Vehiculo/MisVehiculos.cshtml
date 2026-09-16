@@ -67,13 +67,21 @@
 
                             <!-- Estado -->
                             <td class="text-center">
-                                @if (vehiculo.Publicado)
+                                @if (vehiculo.IdEstadoPublicacion == 1)
                                 {
-                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Activo</span>
+                                    <span class="badge bg-warning"><i class="bi bi-clock"></i>Pendiente</span>
                                 }
-                                else
+                                else if (vehiculo.IdEstadoPublicacion == 2)
                                 {
-                                    <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i> Inactivo</span>
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Aprobada</span>
+                                }
+                                else if (vehiculo.IdEstadoPublicacion == 3)
+                                {
+                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rechazada</span>
+                                }
+                                else if (vehiculo.IdEstadoPublicacion == 4)
+                                {
+                                    <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i> Inactiva</span>
                                 }
                             </td>
 
@@ -89,18 +97,18 @@
                                     </a>
 
 
-                                    @if (vehiculo.Publicado)
+                                    @if (vehiculo.IdEstadoPublicacion == 2)
                                     {
                                         <form asp-controller="Vehiculo" asp-action="Inactivar" asp-route-id="@vehiculo.IdVehiculo" method="post" class="d-inline">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-outline-warning" title="Desactivar">
+                                            <button type="submit" class="btn btn-outline-warning" title="Inactivar">
                                                 <i class="bi bi-toggle-on"></i>
                                             </button>
                                         </form>
                                     }
-                                    else
+                                    else if(vehiculo.IdEstadoPublicacion == 4)
                                     {
-                                        <form asp-controller="Vehiculo" asp-action="Inactivar" asp-route-id="@vehiculo.IdVehiculo" method="post" class="d-inline">
+                                        <form asp-controller="Vehiculo" asp-action="Activar" asp-route-id="@vehiculo.IdVehiculo" method="post" class="d-inline">
                                             @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-outline-success" title="Activar">
                                                 <i class="bi bi-toggle-off"></i>

@@ -9,7 +9,8 @@
         public string CajaCambios { get; set; }
         public string Motorizacion { get; set; }
         public string Descripcion { get; set; }
-        public bool Publicado { get; set; }
+        public int IdEstadoPublicacion { get; set; }
+        public string NombreEstado { get; set; }
         public decimal? Latitud { get; set; }
         public decimal? Longitud { get; set; }
         public ModeloDTO Modelo { get; set; }

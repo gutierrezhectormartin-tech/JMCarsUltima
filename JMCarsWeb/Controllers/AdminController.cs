@@ -45,7 +45,7 @@ namespace JMCarsWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CambiarEstado(int id, bool publicado)
+        public async Task<IActionResult> CambiarEstado(int id, int idEstado)
         {
             int? idRol = HttpContext.Session.GetInt32("IdRol");
 
@@ -57,14 +57,7 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                if(publicado)
-                {
-                    await _vehiculoService.InactivarVehiculo(id);
-                }
-                else
-                {
-                    await _vehiculoService.ActivarVehiculo(id);
-                }
+                await _vehiculoService.CambiarEstadoVehiculo(id, idEstado);
 
                 TempData["Mensaje"] = "El estado del vehiculo se ha cambiado exitosamente";
             }

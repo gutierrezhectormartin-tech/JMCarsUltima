@@ -28,7 +28,7 @@ namespace Logica
                 throw new Exception("El vehículo solicitado no existe.");
             }
 
-            if (!unVehiculo.Publicado)
+            if (unVehiculo.IdEstadoPublicacion != 2)
             {
                 throw new Exception("El vehículo no está publicado.");
             }

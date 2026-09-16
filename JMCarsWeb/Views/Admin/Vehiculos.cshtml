@@ -67,34 +67,69 @@
                             <td><span class="text-success fw-bold">U$S @v.Precio.ToString("N0")</span></td>
                             <td>@v.Km.ToString("N0")</td>
                             <td class="text-center">
-                                @if(v.Publicado)
+                                @if(v.IdEstadoPublicacion == 1)
                                 {
-                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i>Publicado</span>
+                                    <span class="badge bg-warning"><i class="bi bi-clock"></i>Pendiente</span>
                                 }
-                                else
+                                else if(v.IdEstadoPublicacion == 2)
                                 {
-                                    <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i>Inactivo</span>
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i>Aprobada</span>
+                                }
+                                else if(v.IdEstadoPublicacion == 3)
+                                {
+                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i>Rechazada</span>
+                                }
+                                else if (v.IdEstadoPublicacion == 4)
+                                {
+                                    <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i>Inactiva</span>
                                 }
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    @if(v.Publicado)
+                                    @if(v.IdEstadoPublicacion == 1) //hacemos de pendiente a aproar o rechazar
                                     {
                                         <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@v.IdVehiculo"/>
-                                            <input type="hidden" name="publicado" value="true"/>
-                                            <button type="submit" class="btn btn-outline-warning btn-sm" title="Rechazar">
+                                            <input type="hidden" name="idEstado" value="2"/>
+                                            <button type="submit" class="btn btn-outline-success btn-sm" title="Aprobar">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@v.IdVehiculo" />
+                                            <input type="hidden" name="idEstado" value="3" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Rechazar">
                                                 <i class="bi bi-x-circle"></i>
                                             </button>
                                         </form>
                                     }
-                                    else
+                                    else if(v.IdEstadoPublicacion == 2) // si esta aprobada o rechazamos o inactivamos
                                     {
                                         <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@v.IdVehiculo" />
-                                            <input type="hidden" name="publicado" value="false" />
+                                            <input type="hidden" name="idEstado" value="3" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Rechazar">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@v.IdVehiculo" />
+                                            <input type="hidden" name="idEstado" value="4" />
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm" title="Inactivar">
+                                                <i class="bi bi-slash-circle"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else //aca solo van a estar rechazadas o inactivas, solo debemos aprobarlas(activarlas)
+                                    {
+                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@v.IdVehiculo" />
+                                            <input type="hidden" name="idEstado" value="2" />
                                             <button type="submit" class="btn btn-outline-success btn-sm" title="Aprobar">
                                                 <i class="bi bi-check-circle"></i>
                                             </button>

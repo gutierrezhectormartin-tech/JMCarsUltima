@@ -13,7 +13,7 @@ namespace Modelo
         private string cajaCambios;
         private string motorizacion;
         private string descripcion;
-        private bool publicado;
+        private int idEstadoPublicacion;
         private decimal? latitud;
         private decimal? longitud;
         private Modelos modelo;
@@ -76,12 +76,12 @@ namespace Modelo
                 descripcion = value;
             }
         }
-        public bool Publicado
+        public int IdEstadoPublicacion
         {
-            get { return publicado; }
+            get { return idEstadoPublicacion; }
             set
             {
-                publicado = value;
+                idEstadoPublicacion = value;
             }
         }
         
@@ -132,7 +132,7 @@ namespace Modelo
             decimal pPrecio, int pKm, int pAnio,
             string pCaja, string pMotorizacion,
             string pDescripcion,
-            bool pPublicado, decimal? pLatitud, decimal? pLongitud,
+            int pIdEstadoPublicacion, decimal? pLatitud, decimal? pLongitud,
             Modelos pModelo, Cliente pVendedor, List<string> pFotografia)
         {
             IdVehiculo = pIdVehiculo;
@@ -142,7 +142,7 @@ namespace Modelo
             CajaCambios = pCaja;
             Motorizacion = pMotorizacion;
             Descripcion = pDescripcion;
-            Publicado = pPublicado;
+            IdEstadoPublicacion = pIdEstadoPublicacion;
             Latitud = pLatitud;
             Longitud = pLongitud;
             Modelo = pModelo;

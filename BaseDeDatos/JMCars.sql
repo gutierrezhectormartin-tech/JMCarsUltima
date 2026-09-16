@@ -78,7 +78,17 @@ CREATE TABLE Modelo
 )
 GO
 
-
+create table EstadoPublicacion
+(
+    IdEstadoPublicacion int not null primary key,
+    NombreEstado varchar(20)
+)
+insert into EstadoPublicacion values
+(1, 'Pendiente'),
+(2, 'Aprobada'),
+(3, 'Rechazada'),
+(4, 'Inactiva')
+go
 
 CREATE TABLE Vehiculo
 (
@@ -89,7 +99,7 @@ CREATE TABLE Vehiculo
 	CajaDeCambios VARCHAR(30) NOT NULL,
 	Motorizacion VARCHAR(30) NOT NULL,
 	Descripcion VARCHAR(MAX) NOT NULL,
-	Publicado BIT NOT NULL,
+	IdEstadoPublicacion int not null default 1,
 	--Ubicacion VARCHAR(100), ---- <<< si son coordenadas, nos conviene guardarlas separadas en 2 columnas de tipo POINT (ahi vemos en sql server el concepto de spatial)
 	Latitud DECIMAL(9,6),
 	Longitud DECIMAL(9,6),
@@ -97,7 +107,8 @@ CREATE TABLE Vehiculo
 	IdUsuarioVendedor INT NOT NULL,
 
 	CONSTRAINT VehiculoModelo FOREIGN KEY (IdModelo) REFERENCES Modelo(IdModelo),
-	CONSTRAINT VehiculoUsuario FOREIGN KEY (IdUsuarioVendedor) REFERENCES Cliente(IdUsuario)
+	CONSTRAINT VehiculoUsuario FOREIGN KEY (IdUsuarioVendedor) REFERENCES Cliente(IdUsuario),
+    constraint FK_Vehiculo_EstadoPublicacion foreign key (IdEstadoPublicacion) references EstadoPublicacion(IdEstadoPublicacion)
 )
 GO
 
@@ -220,6 +231,8 @@ CREATE TABLE TokenRecuperacion (
     CONSTRAINT FK_TokenRecuperacion_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario)
 );
 GO
+
+
 
 ---------------------- SP-------------------------
 
@@ -374,7 +387,7 @@ go
 
 
 
-CREATE PROC sp_Vehiculo_Crear
+create proc sp_Vehiculo_Crear
 @Precio decimal(10,2),
 @Kilometraje int,
 @Ano int,
@@ -383,48 +396,16 @@ CREATE PROC sp_Vehiculo_Crear
 @Desc varchar(max),
 @Lat decimal(9,6),
 @Lon decimal(9,6),
-@NombreMarca varchar(50),
-@NombreModelo varchar(50),
+@IdModelo int,
 @IdVendedor int
-AS
-BEGIN
-    SET NOCOUNT ON;
+as
+begin
 
-    DECLARE @IdMarcaActual INT;
-    DECLARE @IdModeloActual INT;
-
-    -- 1. Buscamos si la marca ya existe (evitamos duplicados)
-    SELECT @IdMarcaActual = IdMarca 
-    FROM Marca 
-    WHERE NombreMarca = @NombreMarca;
-    
-    -- Si no existe, la creamos en el momento
-    IF (@IdMarcaActual IS NULL)
-    BEGIN
-        INSERT INTO Marca (NombreMarca) VALUES (@NombreMarca);
-        SET @IdMarcaActual = SCOPE_IDENTITY();
-    END
-
-    -- 2. Buscamos si el modelo ya existe para esa marca específica
-    SELECT @IdModeloActual = IdModelo 
-    FROM Modelo 
-    WHERE NombreModelo = @NombreModelo AND IdMarca = @IdMarcaActual;
-
-    -- Si no existe, lo creamos asociado a la marca encontrada/creada
-    IF (@IdModeloActual IS NULL)
-    BEGIN
-        INSERT INTO Modelo (NombreModelo, IdMarca) VALUES (@NombreModelo, @IdMarcaActual);
-        SET @IdModeloActual = SCOPE_IDENTITY();
-    END
-
-    -- 3. Insertamos el vehículo apuntando al IdModelo correcto y real
-    INSERT INTO Vehiculo (Precio, Kilometraje, Ano, CajaDeCambios, Motorizacion, Descripcion, Publicado, Latitud, Longitud, IdModelo, IdUsuarioVendedor)
-    VALUES (@Precio, @Kilometraje, @Ano, @Caja, @Motor, @Desc, 0, @Lat, @Lon, @IdModeloActual, @IdVendedor);
-    
-    -- Devolvemos el ID del vehículo recién creado
-    SELECT SCOPE_IDENTITY() as IdVehiculo;
-END
-GO
+    insert into Vehiculo (Precio, Kilometraje, Ano, CajaDeCambios, Motorizacion, Descripcion, IdEstadoPublicacion, Latitud, Longitud, IdModelo, IdUsuarioVendedor)
+    values (@Precio, @Kilometraje, @Ano, @Caja, @Motor, @Desc, 1, @Lat, @Lon, @IdModelo, @IdVendedor);
+    select SCOPE_IDENTITY() as IdVehiculo;
+end
+go
 
 
 -- Listar Vehículos con datos de Marca/Modelo
@@ -440,7 +421,8 @@ begin
         V.CajaDeCambios,
         V.Motorizacion,
         V.Descripcion,
-        V.Publicado,
+        V.IdEstadoPublicacion,
+        EP.NombreEstado as NombreEstadoPublicacion,
         V.Latitud,
         V.Longitud,
 
@@ -455,22 +437,19 @@ begin
 
     from Vehiculo V
 
-    inner join Modelo M
-        on V.IdModelo = M.IdModelo
-
-    inner join Marca MA
-        on M.IdMarca = MA.IdMarca
-
-    inner join Usuario U
-        on V.IdUsuarioVendedor = U.IdUsuario
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    inner join Marca MA on M.IdMarca = MA.IdMarca
+    inner join Usuario U on V.IdUsuarioVendedor = U.IdUsuario
+    inner join EstadoPublicacion EP on V.IdEstadoPublicacion = EP.IdEstadoPublicacion
 end
 go
 
 -- Listar Vehículos de un Usuario específico (Mis Vehículos)
 create proc sp_Vehiculo_ListarMisVehiculos
-    @IdUsuario int
+@IdUsuario int
 as
 begin
+
     select 
         V.IdVehiculo,
         V.Precio,
@@ -479,36 +458,41 @@ begin
         V.CajaDeCambios,
         V.Motorizacion,
         V.Descripcion,
-        V.Publicado,
+        V.IdEstadoPublicacion,
+        EP.NombreEstado as NombreEstadoPublicacion,
         V.Latitud,
         V.Longitud,
- 
+
         M.IdModelo,
         M.NombreModelo,
- 
+
         MA.IdMarca,
         MA.NombreMarca,
- 
+
         U.IdUsuario,
         U.NombreCompleto,
         
-        isnull(FV.UrlFoto, 'images/sin-foto.jpg') AS UrlFoto
- 
+        isnull(FV.UrlFoto, 'images/sin-foto.jpg') as UrlFoto
+
     from Vehiculo V
-    INNER JOIN Modelo M on V.IdModelo = M.IdModelo
-    INNER JOIN Marca MA on M.IdMarca = MA.IdMarca
-    INNER JOIN Usuario U on V.IdUsuarioVendedor = U.IdUsuario
-    LEFT JOIN FotoVehiculo FV on V.IdVehiculo = FV.IdVehiculo
+
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    inner join Marca MA on M.IdMarca = MA.IdMarca
+    inner join Usuario U on V.IdUsuarioVendedor = U.IdUsuario
+    inner join EstadoPublicacion EP on V.IdEstadoPublicacion = EP.IdEstadoPublicacion
+    left join FotoVehiculo FV on V.IdVehiculo = FV.IdVehiculo
     where U.IdUsuario = @IdUsuario
+
 end
 go
 
 --Lista de vehiculo(Detalle)
-CREATE PROC sp_Vehiculo_ObtenerPorId
-    @IdVehiculo INT
-AS
-BEGIN
-    SELECT 
+create proc sp_Vehiculo_ObtenerPorId
+@IdVehiculo int
+as
+begin
+
+    select 
         V.IdVehiculo,
         V.Precio,
         V.Kilometraje,
@@ -516,33 +500,35 @@ BEGIN
         V.CajaDeCambios,
         V.Motorizacion,
         V.Descripcion,
-        V.Publicado,
+        V.IdEstadoPublicacion,
+        EP.NombreEstado as NombreEstadoPublicacion,
         V.Latitud,
         V.Longitud,
- 
+
         M.IdModelo,
         M.NombreModelo,
- 
+
         MA.IdMarca,
         MA.NombreMarca,
- 
+
         U.IdUsuario,
         U.NombreCompleto,
         U.Email,
         U.Telefono,
         C.Cedula,
 
-        ISNULL(FV.UrlFoto, 'images/sin-foto.jpg') AS UrlFoto
+        isnull(FV.UrlFoto, 'images/sin-foto.jpg') as UrlFoto
 
-    FROM Vehiculo V
-    INNER JOIN Modelo M ON V.IdModelo = M.IdModelo
-    INNER JOIN Marca MA ON M.IdMarca = MA.IdMarca
-    INNER JOIN Usuario U ON V.IdUsuarioVendedor = U.IdUsuario
-    INNER JOIN Cliente C ON U.IdUsuario = C.IdUsuario
-    LEFT JOIN FotoVehiculo FV ON V.IdVehiculo = FV.IdVehiculo
-    WHERE V.IdVehiculo = @IdVehiculo
-END
-GO
+    from Vehiculo V
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    inner join Marca MA on M.IdMarca = MA.IdMarca
+    inner join Usuario U on V.IdUsuarioVendedor = U.IdUsuario
+    inner join Cliente C on U.IdUsuario = C.IdUsuario
+    inner join EstadoPublicacion EP on V.IdEstadoPublicacion = EP.IdEstadoPublicacion
+    left join FotoVehiculo FV on V.IdVehiculo = FV.IdVehiculo
+    where V.IdVehiculo = @IdVehiculo
+end
+go
 
 -- Búsqueda por Radio (Geolocalización)
 create proc sp_Vehiculo_BuscarGeneral
@@ -562,7 +548,8 @@ begin
         V.CajaDeCambios,
         V.Motorizacion,
         V.Descripcion,
-        V.Publicado,
+        V.IdEstadoPublicacion,
+        EP.NombreEstado,
         V.Latitud,
         V.Longitud,
 
@@ -581,8 +568,9 @@ begin
     inner join Modelo M on V.IdModelo = M.IdModelo
     inner join Marca MA on M.IdMarca = MA.IdMarca
     inner join Usuario U on V.IdUsuarioVendedor = U.IdUsuario
+    inner join EstadoPublicacion EP on V.IdEstadoPublicacion = EP.IdEstadoPublicacion
 
-    where V.Publicado = 1
+    where V.IdEstadoPublicacion = 2
     and (@IdMarca is null or MA.IdMarca = @IdMarca)
     and (@PrecioMax is null or V.Precio <= @PrecioMax)
     and (6371 * acos(cos(radians(@LatCli)) * cos(radians(V.Latitud)) * cos(radians(V.Longitud) - radians(@LonCli)) + sin(radians(@LatCli)) * sin(radians(V.Latitud)))) <= @RadioKM
@@ -751,7 +739,7 @@ begin
         
         -- Quitamos el auto de la venta pública
         declare @IdV int = (select IdVehiculo from SolicitudNotarial where IdSolicitud = @IdSolicitud);
-        update Vehiculo set Publicado = 0 where IdVehiculo = @IdV;
+        update Vehiculo set IdEstadoPublicacion = 4 where IdVehiculo = @IdV;
 
         commit transaction;
     end try
@@ -840,7 +828,8 @@ begin
         V.CajaDeCambios,
         V.Motorizacion,
         V.Descripcion,
-        V.Publicado,
+        V.IdEstadoPublicacion,
+        EP.NombreEstado as NombreEstadoPublicacion,
         V.Latitud,
         V.Longitud,
 
@@ -881,7 +870,7 @@ begin
     join SolicitudEscribano SE on S.IdSolicitud = SE.IdSolicitud
     join Escribano E on SE.IdUsuarioEscribano = E.IdUsuario
     join Usuario UE on E.IdUsuario = UE.IdUsuario
-
+    join EstadoPublicacion EP on V.IdEstadoPublicacion = EP.IdEstadoPublicacion
     where S.IdSolicitud = @IdSolicitud;
 end
 go
@@ -905,7 +894,8 @@ begin
         V.CajaDeCambios,
         V.Motorizacion,
         V.Descripcion,
-        V.Publicado,
+        V.IdEstadoPublicacion,
+        EP.NombreEstado as NombreEstadoPublicacion,
         V.Latitud,
         V.Longitud,
 
@@ -938,7 +928,7 @@ begin
     join SolicitudEscribano SE on S.IdSolicitud = SE.IdSolicitud
     join Escribano E on SE.IdUsuarioEscribano = E.IdUsuario
     join Usuario UE on E.IdUsuario = UE.IdUsuario
-
+    join EstadoPublicacion EP on V.IdEstadoPublicacion = EP.IdEstadoPublicacion
     where S.IdUsuarioCliente = @IdCliente
     order by S.FechaSolicitud desc;
 end
@@ -963,7 +953,8 @@ begin
         V.CajaDeCambios,
         V.Motorizacion,
         V.Descripcion,
-        V.Publicado,
+        V.IdEstadoPublicacion,
+        EP.NombreEstado as NombreEstadoPublicacion,
         V.Latitud,
         V.Longitud,
 
@@ -995,20 +986,19 @@ begin
     join Cliente C on S.IdUsuarioCliente = C.IdUsuario
     join Usuario UC on C.IdUsuario = UC.IdUsuario
     join SolicitudEscribano SE on S.IdSolicitud = SE.IdSolicitud
-
+    join EstadoPublicacion EP on V.IdEstadoPublicacion = EP.IdEstadoPublicacion
     where SE.IdUsuarioEscribano = @IdEscribano
     order by S.FechaSolicitud desc;
 end
 go
 
 -- Moderar Publicación
-create proc sp_Admin_AprobarVehiculo
+create proc sp_Vehiculo_CambiarEstado
 @Id int,
-@Publicado bit
+@IdEstadoPublicacion int
 as
 begin
-
-    update Vehiculo set Publicado = @Publicado where IdVehiculo = @Id
+    update Vehiculo set IdEstadoPublicacion = @IdEstadoPublicacion where IdVehiculo = @Id
 end
 go
 
@@ -1181,24 +1171,24 @@ end
 go
 
 -- Inactivar Publicación (Baja Lógica)
-create proc sp_Vehiculo_Inactivar
-@IdVehiculo int
-as
-begin
+--create proc sp_Vehiculo_Inactivar
+--@IdVehiculo int
+--as
+--begin
 
-    update Vehiculo set Publicado = 0 where IdVehiculo = @IdVehiculo;
-end
-go
+--    update Vehiculo set IdEstadoPublicacion = 4 where IdVehiculo = @IdVehiculo;
+--end
+--go
 
--- Reactivar Publicación
-create proc sp_Vehiculo_Activar
-@IdVehiculo int
-as
-begin
+--create proc sp_Vehiculo_Activar
+--@IdVehiculo int
+--as
+--begin
 
-    update Vehiculo set Publicado = 1 where IdVehiculo = @IdVehiculo;
-end
-go
+--    update Vehiculo set IdEstadoPublicacion = 2 where IdVehiculo = @IdVehiculo;
+--end
+--go
+
 
 -- Obtener un Vehículo completo con sus fotos
 create proc sp_Vehiculo_ObtenerDetalle
@@ -1206,10 +1196,26 @@ create proc sp_Vehiculo_ObtenerDetalle
 as
 begin
 
-    select V.*, M.NombreModelo, MA.NombreMarca
+    select 
+        V.IdVehiculo,
+        V.Precio,
+        V.Kilometraje,
+        V.Ano,
+        V.CajaDeCambios,
+        V.Motorizacion,
+        V.Descripcion,
+        V.IdEstadoPublicacion,
+        EP.NombreEstado as NombreEstadoPublicacion,
+        V.Latitud,
+        V.Longitud,
+        V.IdModelo,
+        V.IdUsuarioVendedor,
+        M.NombreModelo,
+        MA.NombreMarca
     from Vehiculo V
     join Modelo M on V.IdModelo = M.IdModelo
     join Marca MA on M.IdMarca = MA.IdMarca
+    join EstadoPublicacion EP on V.IdEstadoPublicacion = EP.IdEstadoPublicacion
     where V.IdVehiculo = @IdVehiculo;
 
     select UrlFoto from FotoVehiculo where IdVehiculo = @IdVehiculo;
@@ -1229,10 +1235,10 @@ end
 go
 
 -- Índice para la búsqueda por ubicación (Latitud/Longitud) y estado de publicación
-CREATE INDEX IX_Vehiculo_Ubicacion_Publicado ON Vehiculo (Publicado, Latitud, Longitud);
+CREATE INDEX IX_Vehiculo_Ubicacion_Publicado ON Vehiculo (IdEstadoPublicacion, Latitud, Longitud);
 
 -- Índice para filtrar por precio rápidamente
-CREATE INDEX IX_Vehiculo_Precio ON Vehiculo (Precio) WHERE Publicado = 1;
+CREATE INDEX IX_Vehiculo_Precio ON Vehiculo (Precio) WHERE IdEstadoPublicacion = 2;
 
 -- Índice en la tabla Usuario para el Login (Email es lo que más se busca)
 CREATE UNIQUE INDEX IX_Usuario_Email ON Usuario (Email) WHERE Estado = 1;
@@ -1400,7 +1406,7 @@ INSERT INTO Vehiculo
     CajaDeCambios,
     Motorizacion,
     Descripcion,
-    Publicado,
+    IdEstadoPublicacion,
     Latitud,
     Longitud,
     IdModelo,
@@ -1414,14 +1420,13 @@ VALUES
     'Automatica',
     'Gas Oil',
     'Toyota Corolla en excelente estado.',
-    1,
+    2,
     -34.9011,
     -56.1645,
     1,
     2
 )
 GO
-
 
 -- Maria vende Onix
 INSERT INTO Vehiculo
@@ -1432,7 +1437,7 @@ INSERT INTO Vehiculo
     CajaDeCambios,
     Motorizacion,
     Descripcion,
-    Publicado,
+    IdEstadoPublicacion,
     Latitud,
     Longitud,
     IdModelo,
@@ -1446,14 +1451,13 @@ VALUES
     'Manual',
     'Nafta',
     'Chevrolet Onix muy economico.',
-    1,
+    2,
     -34.9032,
     -56.1881,
     3,
     3
 )
 GO
-
 
 -- Carlos vende Ranger
 INSERT INTO Vehiculo
@@ -1464,7 +1468,7 @@ INSERT INTO Vehiculo
     CajaDeCambios,
     Motorizacion,
     Descripcion,
-    Publicado,
+    IdEstadoPublicacion,
     Latitud,
     Longitud,
     IdModelo,
@@ -1478,7 +1482,7 @@ VALUES
     'Automatica',
     'Electrico',
     'Ford Ranger doble cabina.',
-    1,
+    2,
     -34.8870,
     -56.1312,
     10,
@@ -1487,46 +1491,44 @@ VALUES
 GO
 
 INSERT INTO Vehiculo
-(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,Publicado,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
+(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,IdEstadoPublicacion,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
 VALUES
-(19500,45000,2021,'Automatica','Nafta','Toyota Corolla SEG.',1,-34.901,-56.164,1,7);
+(19500,45000,2021,'Automatica','Nafta','Toyota Corolla SEG.',2,-34.901,-56.164,1,7);
 
 INSERT INTO Vehiculo
-(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,Publicado,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
+(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,IdEstadoPublicacion,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
 VALUES
-(28000,60000,2020,'Manual','Gas Oil','Toyota Hilux SR.',1,-34.902,-56.165,2,8);
+(28000,60000,2020,'Manual','Gas Oil','Toyota Hilux SR.',2,-34.902,-56.165,2,8);
 
 INSERT INTO Vehiculo
-(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,Publicado,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
+(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,IdEstadoPublicacion,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
 VALUES
-(15500,30000,2022,'Manual','Nafta','Chevrolet Onix LT.',1,-34.903,-56.166,3,9);
+(15500,30000,2022,'Manual','Nafta','Chevrolet Onix LT.',2,-34.903,-56.166,3,9);
 
 INSERT INTO Vehiculo
-(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,Publicado,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
+(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,IdEstadoPublicacion,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
 VALUES
-(21000,55000,2020,'Automatica','Nafta','Chevrolet Cruze LTZ.',1,-34.904,-56.167,4,10);
+(21000,55000,2020,'Automatica','Nafta','Chevrolet Cruze LTZ.',2,-34.904,-56.167,4,10);
 
 INSERT INTO Vehiculo
-(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,Publicado,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
+(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,IdEstadoPublicacion,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
 VALUES
-(14500,70000,2019,'Manual','Nafta','Volkswagen Gol Trend.',1,-34.905,-56.168,5,11);
+(14500,70000,2019,'Manual','Nafta','Volkswagen Gol Trend.',2,-34.905,-56.168,5,11);
 
 INSERT INTO Vehiculo
-(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,Publicado,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
+(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,IdEstadoPublicacion,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
 VALUES
-(23000,50000,2021,'Automatica','Nafta','Volkswagen Vento Comfortline.',1,-34.906,-56.169,6,12);
+(23000,50000,2021,'Automatica','Nafta','Volkswagen Vento Comfortline.',2,-34.906,-56.169,6,12);
 
 INSERT INTO Vehiculo
-(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,Publicado,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
+(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,IdEstadoPublicacion,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
 VALUES
-(17500,42000,2022,'Manual','Nafta','Hyundai HB20 impecable.',1,-34.907,-56.170,7,13);
+(17500,42000,2022,'Manual','Nafta','Hyundai HB20 impecable.',2,-34.907,-56.170,7,13);
 
 INSERT INTO Vehiculo
-(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,Publicado,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
+(Precio,Kilometraje,Ano,CajaDeCambios,Motorizacion,Descripcion,IdEstadoPublicacion,Latitud,Longitud,IdModelo,IdUsuarioVendedor)
 VALUES
-(32000,35000,2022,'Automatica','Nafta','Hyundai Tucson Full.',1,-34.908,-56.171,8,14);
-
-
+(32000,35000,2022,'Automatica','Nafta','Hyundai Tucson Full.',2,-34.908,-56.171,8,14);
 
 
 

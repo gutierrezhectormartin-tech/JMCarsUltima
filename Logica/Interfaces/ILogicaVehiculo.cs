@@ -20,8 +20,9 @@ namespace Logica.Interfaces
 
         void Modificar(Vehiculo pVehiculo);
 
-        void Inactivar(int pIdVehiculo);
+        //void Inactivar(int pIdVehiculo);
 
-        void Activar(int pIdVehiculo);
+        //void Activar(int pIdVehiculo);
+        void CambiarEstado(int pIdVehiculo, int pIdEstado);
     }
 }
