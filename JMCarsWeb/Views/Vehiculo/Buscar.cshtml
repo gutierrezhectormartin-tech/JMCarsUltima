@@ -44,12 +44,39 @@
                 <label class="form-label">Radio de Busqueda</label>
                 <input type="number" name="radioKM" class="form-control" value="@(ViewBag.RadioKM ?? 5)" min="1" max="100" />
             </div>
+            <div id="filtros" style="display:none;">
+    <div class="row mt-3">
+        <div class="col-md-3 mb-3">
+            <select class="form-select" id="filtroMarca">
+                <option value="">Todas las marcas</option>
+            </select>
+        </div>
+        <div class="col-md-3 mb-3">
+            <select class="form-select" id="filtroModelo">
+                <option value="">Todos los modelos</option>
+            </select>
+        </div>
+        <div class="col-md-3 mb-3">
+            <select class="form-select" id="filtroAnio">
+                <option value="">Todos los años</option>
+            </select>
+        </div>
+        <div class="col-md-3 mb-3">
+            <select class="form-select" id="filtroOrden">
+                <option value="asc">Precio: menor a mayor</option>
+                <option value="desc">Precio: mayor a menor</option>
+            </select>
+        </div>
+    </div>
+</div>
+
 
             <button type="submit" class="btn btn-primary">Buscar Vahiculos</button>
         }
     </div>
 </div>
 <script>
+
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -148,25 +175,83 @@
 @if(Model != null && Model.Any())
 {
     <script>
+        document.getElementById('filtros').style.display = 'block';
         var vehiculos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(v => new
             {
                 id = v.IdVehiculo,
                 lat = v.Latitud,
                 lon = v.Longitud,
                 marca = v.Modelo.Marca.NombreMarca,
+                idMarca = v.Modelo.Marca.IdMarca,
                 modelo = v.Modelo.Modelo,
+                idModelo = v.Modelo.IdModelo,
+                anio = v.Anio,
                 precio = v.Precio,
                 km = v.Km
             }))
         );
-        vehiculos.forEach(function (v)
-        {
-            if(v.lat && v.lon)
-            {
-                var marcador = L.marker([v.lat, v.lon]).addTo(mapa)
-                marcador.bindPopup('<b>' + v.marca + '' + v.modelo + '</b><br></br>' + 'Precio: $' + v.precio + '<br>' + 'Km: ' + v.km
-                + '<br><br>' + '<a href="/vehiculo/Detalle?id=' + v.id + '&origen=buscar">' + 'Ver Vehiculo' + '</a>');
+
+        // Poblar filtros con valores únicos
+        var marcasUnicas = [...new Map(vehiculos.map(v => [v.idMarca, v.marca])).entries()];
+        marcasUnicas.sort((a, b) => a[1].localeCompare(b[1]));
+        marcasUnicas.forEach(function([id, nombre]) {
+            document.getElementById('filtroMarca').innerHTML += `<option value="${id}">${nombre}</option>`;
+        });
+
+        var modelosUnicos = [...new Map(vehiculos.map(v => [v.idModelo, {nombre: v.modelo, idMarca: v.idMarca}])).entries()];
+        modelosUnicos.sort((a, b) => a[1].nombre.localeCompare(b[1].nombre));
+        modelosUnicos.forEach(function([id, data]) {
+            document.getElementById('filtroModelo').innerHTML += `<option value="${id}" data-marca="${data.idMarca}">${data.nombre}</option>`;
+        });
+
+        var aniosUnicos = [...new Set(vehiculos.map(v => v.anio))].sort((a, b) => b - a);
+        aniosUnicos.forEach(function(anio) {
+            document.getElementById('filtroAnio').innerHTML += `<option value="${anio}">${anio}</option>`;
+        });
+
+        // Crear marcadores
+        var marcadores = [];
+        vehiculos.forEach(function (v) {
+            if(v.lat && v.lon) {
+                var marcador = L.marker([v.lat, v.lon]).addTo(mapa);
+                marcador.bindPopup('<b>' + v.marca + ' ' + v.modelo + '</b><br>' + 
+                    'Año: ' + v.anio + '<br>' +
+                    'Precio: $' + v.precio + '<br>' + 
+                    'Km: ' + v.km + '<br><br>' + 
+                    '<a href="/vehiculo/Detalle?id=' + v.id + '&origen=buscar">Ver Vehiculo</a>');
+                marcadores.push({ marcador, data: v });
             }
         });
+
+        // Filtrar marcadores
+        function aplicarFiltros() {
+            var marcaSeleccionada = document.getElementById('filtroMarca').value;
+            var modeloSeleccionado = document.getElementById('filtroModelo').value;
+            var anioSeleccionado = document.getElementById('filtroAnio').value;
+
+            marcadores.forEach(function(item) {
+                var visible = true;
+                if (marcaSeleccionada && item.data.idMarca != marcaSeleccionada) visible = false;
+                if (modeloSeleccionado && item.data.idModelo != modeloSeleccionado) visible = false;
+                if (anioSeleccionado && item.data.anio != anioSeleccionado) visible = false;
+
+                if (visible) item.marcador.addTo(mapa);
+                else mapa.removeLayer(item.marcador);
+            });
+        }
+
+        // Filtro de marca — oculta modelos de otras marcas
+        document.getElementById('filtroMarca').addEventListener('change', function() {
+            var marcaSeleccionada = this.value;
+            document.getElementById('filtroModelo').value = '';
+            document.querySelectorAll('#filtroModelo option').forEach(function(opt) {
+                if (!opt.value) return;
+                opt.style.display = !marcaSeleccionada || opt.dataset.marca === marcaSeleccionada ? '' : 'none';
+            });
+            aplicarFiltros();
+        });
+
+        document.getElementById('filtroModelo').addEventListener('change', aplicarFiltros);
+        document.getElementById('filtroAnio').addEventListener('change', aplicarFiltros);
     </script>
 }

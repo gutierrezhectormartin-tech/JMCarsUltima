@@ -47,8 +47,19 @@
                     @modelo.Nombre
                 </option>
             }
-        </select> 
-
+    </select> 
+    <select name="anio" class="form-select">
+        <option value="">Todos los años</option>
+        @foreach(var anio in Model.Select(v => v.Anio).Distinct().OrderBy(a => a))
+            {
+                <option value="@anio">@anio</option>
+            }
+        </select>
+        <select name="ordenPrecio" class="form-select">
+            <option value="">Ordenar por Precio</option>
+            <option value="asc">Menor a Mayor</option>
+            <option value="desc">Mayor a Menor</option>
+        </select>
     <a href="/" class="btn btn-outline-dark" role="button">
         Limpiar
     </a>
@@ -74,7 +85,7 @@
     <tbody>
         @foreach (var v in Model)
         {
-            <tr data-marca="@v.Modelo.Marca.IdMarca" data-modelo="@v.Modelo.IdModelo">
+            <tr data-marca="@v.Modelo.Marca.IdMarca" data-modelo="@v.Modelo.IdModelo" data-anio="@v.Anio">
                 <td>@v.IdVehiculo</td>
                 <td>@v.Modelo.Marca.NombreMarca</td>
                 <td>@v.Modelo.Modelo</td>
@@ -95,44 +106,67 @@
 </table>
 
 <script>
-    document.querySelector('select[name="marca"]')
-    .addEventListener('change', function ()
-    {
+    // Guardar orden original de años al cargar la página
+    const ddlAnio = document.querySelector('select[name="anio"]');
+    const ordenOriginalAnios = Array.from(ddlAnio.querySelectorAll('option[value]')).map(o => o.value);
+
+    function aplicarFiltros() {
+        const marcaSeleccionada = document.querySelector('select[name="marca"]').value;
+        const modeloSeleccionado = document.querySelector('select[name="modelo"]').value;
+        const anioSeleccionado = document.querySelector('select[name="anio"]').value;
+
+        // Filtrar filas
+        document.querySelectorAll('tbody tr').forEach(function (fila) {
+            const coincideMarca = !marcaSeleccionada || fila.dataset.marca === marcaSeleccionada;
+            const coincideModelo = !modeloSeleccionado || fila.dataset.modelo === modeloSeleccionado;
+            const coincideAnio = !anioSeleccionado || fila.dataset.anio === anioSeleccionado;
+            fila.style.display = coincideMarca && coincideModelo && coincideAnio ? '' : 'none';
+        });
+
+        // Actualizar opciones de año según marca y modelo seleccionados
+        const aniosVisibles = new Set();
+        document.querySelectorAll('tbody tr').forEach(function (fila) {
+            const coincideMarca = !marcaSeleccionada || fila.dataset.marca === marcaSeleccionada;
+            const coincideModelo = !modeloSeleccionado || fila.dataset.modelo === modeloSeleccionado;
+            if (coincideMarca && coincideModelo) aniosVisibles.add(fila.dataset.anio);
+        });
+
+        document.querySelectorAll('select[name="anio"] option').forEach(function (option) {
+            if (!option.value) return;
+            option.style.display = aniosVisibles.has(option.value) ? '' : 'none';
+        });
+
+        // Restaurar orden original de años
+        ordenOriginalAnios.forEach(function(anio) {
+            const option = ddlAnio.querySelector(`option[value="${anio}"]`);
+            if (option) ddlAnio.appendChild(option);
+        });
+    }
+
+    document.querySelector('select[name="marca"]').addEventListener('change', function () {
         const marcaSeleccionada = this.value;
-
-            const ddlModelo = document.querySelector('select[name="modelo"]');
-
-            ddlModelo.value = '';
-            ddlModelo.querySelectorAll('option').forEach(function(option) 
-            {
-                if (!option.value) 
-                    {
-                        return;
-                    }
-
-                option.style.display = !marcaSeleccionada || option.dataset.marca === marcaSeleccionada ? '' : 'none';
-            });
-
-        document.querySelectorAll('tbody tr').forEach(function (fila)
-        {
-            const idMarca = fila.dataset.marca;
-
-            
-
-            fila.style.display = !marcaSeleccionada || idMarca === marcaSeleccionada ? '' : 'none';
-        }
-        );
+        const ddlModelo = document.querySelector('select[name="modelo"]');
+        ddlModelo.value = '';
+        ddlModelo.querySelectorAll('option').forEach(function (option) {
+            if (!option.value) return;
+            option.style.display = !marcaSeleccionada || option.dataset.marca === marcaSeleccionada ? '' : 'none';
+        });
+        aplicarFiltros();
     });
 
-    document.querySelector('select[name="modelo"]').addEventListener('change', function ()
-        {
-            const modeloSeleccionado = this.value;
+    document.querySelector('select[name="modelo"]').addEventListener('change', aplicarFiltros);
+    document.querySelector('select[name="anio"]').addEventListener('change', aplicarFiltros);
 
-            document.querySelectorAll('tbody tr').forEach(function (fila)
-                {
-                    const idModelo = fila.dataset.modelo;
-
-                    fila.style.display = !modeloSeleccionado || idModelo === modeloSeleccionado ? '' : 'none';
-                });
+    document.querySelector('select[name="ordenPrecio"]').addEventListener('change', function () {
+        const orden = this.value;
+        if (!orden) return;
+        const tbody = document.querySelector('tbody');
+        const filas = Array.from(tbody.querySelectorAll('tr'));
+        filas.sort(function (a, b) {
+            const precioA = parseFloat(a.cells[8].textContent.replace(/[^0-9.]/g, ''));
+            const precioB = parseFloat(b.cells[8].textContent.replace(/[^0-9.]/g, ''));
+            return orden === 'asc' ? precioA - precioB : precioB - precioA;
         });
+        filas.forEach(function (fila) { tbody.appendChild(fila); });
+    });
 </script>

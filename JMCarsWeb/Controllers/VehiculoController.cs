@@ -282,7 +282,8 @@ namespace JMCarsWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Buscar(string latCli, string lonCli, int radioKM, string? direccion = null, int? idMarca = null, decimal? precioMax = null)
+        public async Task<IActionResult> Buscar(string latCli, string lonCli, int radioKM, string? direccion = null, 
+            int? idMarca = null, decimal? precioMax = null, string? modelo = null, int? anioMin = null, int? anioMax = null, string? ordenPrecio = null)
         {
             if(latCli == null || lonCli == null)
             {
@@ -296,6 +297,11 @@ namespace JMCarsWeb.Controllers
             ViewBag.LonCli = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
             ViewBag.RadioKM = radioKM;
             ViewBag.Direccion = direccion;
+            ViewBag.Modelo = modelo;
+            ViewBag.AnioMin = anioMin;
+            ViewBag.AnioMax = anioMax;
+            ViewBag.PrecioMax = precioMax;
+            ViewBag.OrdenPrecio = ordenPrecio;  
 
             try
             {
@@ -306,7 +312,22 @@ namespace JMCarsWeb.Controllers
                     ViewBag.Error = "Ocurrió un error al realizar la busqueda. Intente nuevamnte";
                     return View();
                 }
-
+                if(anioMin.HasValue)
+                {
+                    vehiculos = vehiculos.Where(v => v.Anio >= anioMin.Value).ToList();
+                }
+                if(anioMax.HasValue)
+                {
+                    vehiculos = vehiculos.Where(v => v.Anio <= anioMax.Value).ToList();
+                }
+                if(ordenPrecio == "desc")
+                {
+                    vehiculos = vehiculos.OrderByDescending(v => v.Precio).ToList();
+                }
+                else
+                {
+                    vehiculos = vehiculos.OrderBy(V => V.Precio).ToList();
+                }
                 if (!vehiculos!.Any())
                 {
                     TempData["Error"] = "No se encontraron vehiculos en este radio";

@@ -3,21 +3,24 @@ using Logica.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Modelo;
+using WebAPI.Services;
 
 
 namespace WebAPI.Controllers
 {
+    
+
     [Route("api/[controller]")]
     [ApiController]
     public class VehiculoController : ControllerBase
     {
         private readonly ILogicaVehiculo _logicaVehiculo;
-
-        public VehiculoController()
+        private readonly IEmailService _emailService;
+        public VehiculoController(IEmailService emailService)
         {
             _logicaVehiculo = FabricaLogica.GetLogicaVehiculo();
+            _emailService = emailService;
         }
-
 
         [HttpGet("listar")]
         public IActionResult ListarVehiculos()
@@ -189,11 +192,29 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("estado/{id}")]
-        public IActionResult CambiarEstado(int id, [FromBody] CambiarEstadoRequest request)
+        public async Task<IActionResult> CambiarEstado(int id, [FromBody] CambiarEstadoRequest request)
         {
             try
             {
                 _logicaVehiculo.CambiarEstado(id, request.IdEstado);
+                
+
+                if(request.IdEstado == 2 || request.IdEstado == 3)
+                {
+                    Vehiculo vehiculo = _logicaVehiculo.DetalleVehiculo(id);
+
+                    if(vehiculo?.Vendedor?.Email != null)
+                    {
+                        string estado = request.IdEstado == 2 ? "Aprobada" : "Rechazada";
+                        string asunto = $"Tu publicacion en JMCars ha sido {estado}";
+                        string cuerpo = $"Hola {vehiculo.Vendedor.NombreCompleto}, tu publicacion de {vehiculo.Modelo.Marca.NombreMarca} {vehiculo.Modelo.Modelo} {vehiculo.Anio}  en JMCars ha sido {estado}.";
+
+                        await _emailService.EnviarCorreo(vehiculo.Vendedor.Email, vehiculo.Vendedor.NombreCompleto, asunto, cuerpo);
+
+                            
+                    }
+                }
+
                 return Ok(new { mensaje = "Estado actualizado correctamente." });
             }
             catch (Exception ex)

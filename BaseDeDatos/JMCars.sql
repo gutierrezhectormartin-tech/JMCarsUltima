@@ -396,13 +396,31 @@ create proc sp_Vehiculo_Crear
 @Desc varchar(max),
 @Lat decimal(9,6),
 @Lon decimal(9,6),
-@IdModelo int,
+@NombreMarca varchar(50),
+@NombreModelo varchar(50),
 @IdVendedor int
 as
 begin
+    declare @IdMarca int
+    declare @IdModelo int
+
+    select @IdMarca = IdMarca from Marca where NombreMarca = @NombreMarca
+    if @IdMarca is null
+    begin
+        insert into Marca (NombreMarca) values (@NombreMarca)
+        set @IdMarca = SCOPE_IDENTITY()
+    end
+
+    select @IdModelo = IdModelo from Modelo where NombreModelo = @NombreModelo and IdMarca = @IdMarca
+    if @IdModelo is null
+    begin
+        insert into Modelo (NombreModelo, IdMarca) values (@NombreModelo, @IdMarca)
+        set @IdModelo = SCOPE_IDENTITY()
+    end
 
     insert into Vehiculo (Precio, Kilometraje, Ano, CajaDeCambios, Motorizacion, Descripcion, IdEstadoPublicacion, Latitud, Longitud, IdModelo, IdUsuarioVendedor)
     values (@Precio, @Kilometraje, @Ano, @Caja, @Motor, @Desc, 1, @Lat, @Lon, @IdModelo, @IdVendedor);
+    
     select SCOPE_IDENTITY() as IdVehiculo;
 end
 go

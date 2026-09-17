@@ -44,6 +44,32 @@ namespace WebAPI.Services
             await cliente.DisconnectAsync(true);
         }
 
+        public async Task EnviarCorreo(string pDestinatario, string pNombreUsuario, string pAsunto, string pCuerpo)
+        {
+            var mensaje = new MimeMessage();
+
+            mensaje.From.Add(new MailboxAddress("JMCars", _configuracion["EmailSettings:Usuario"]));
+
+            mensaje.To.Add(new MailboxAddress(pNombreUsuario, pDestinatario));
+
+            mensaje.Subject = pAsunto;
+
+            mensaje.Body = new TextPart("html")
+            {
+                Text = $@"
+                            <h3>Hola {pNombreUsuario},</h3>
+                            <p> {pCuerpo}</p>
+                            "
+            };
+
+            using var cliente = new SmtpClient();
+            cliente.CheckCertificateRevocation = false;
+            await cliente.ConnectAsync(_configuracion["EmailSettings:Host"]!, int.Parse(_configuracion["EmailSettings:Port"]!), SecureSocketOptions.StartTls);
+            await cliente.AuthenticateAsync(_configuracion["EmailSettings:Usuario"]!, _configuracion["EmailSettings:ContrasenaApp"]!);
+            await cliente.SendAsync(mensaje);
+            await cliente.DisconnectAsync(true);
+        }
+
 
     }
 }
