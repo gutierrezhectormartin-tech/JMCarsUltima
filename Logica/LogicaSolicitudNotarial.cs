@@ -53,39 +53,72 @@ namespace Logica
             {
                 _persistenciaSolicitud.Crear(pIdCliente, pIdVehiculo, pIdEscribano);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new Exception("Error en la lógica al crear la solicitud: " + ex.Message);
+                throw new Exception("No se pudo enviar la solicitud. Intente nuevamente.");
             }
         }
 
         public void Aceptar(int pIdSolicitud, int pIdEscribano)
         {
+            SolicitudEscribano solicitud = _persistenciaSolicitud.ObtenerPorId(pIdSolicitud);
+
+            if (solicitud == null)
+            {
+                throw new Exception("La solicitud no existe.");
+            }
+
+            if (solicitud.Escribano.IdUsuario != pIdEscribano)
+            {
+                throw new Exception("No tienes permiso para aceptar esta solicitud.");
+            }
+
+            if (solicitud.Solicitud.EstadoSolicitud != 1)
+            {
+                throw new Exception("Esta solicitud ya fue respondida, no se puede aceptar.");
+            }
+
             try
             {
                 _persistenciaSolicitud.Aceptar(pIdSolicitud, pIdEscribano);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new Exception("Error en la lógica al aceptar la solicitud: " + ex.Message);
+                throw new Exception("No se pudo aceptar la solicitud. Intente nuevamente.");
             }
         }
 
         public void Rechazar(int pIdSolicitud, int pIdEscribano)
         {
+            SolicitudEscribano solicitud = _persistenciaSolicitud.ObtenerPorId(pIdSolicitud);
+
+            if (solicitud == null)
+            {
+                throw new Exception("La solicitud no existe.");
+            }
+
+            if (solicitud.Escribano.IdUsuario != pIdEscribano)
+            {
+                throw new Exception("No tienes permiso para rechazar esta solicitud.");
+            }
+
+            if (solicitud.Solicitud.EstadoSolicitud != 1)
+            {
+                throw new Exception("Esta solicitud ya fue respondida, no se puede rechazar.");
+            }
+
             try
             {
                 _persistenciaSolicitud.Rechazar(pIdSolicitud, pIdEscribano);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new Exception("Error en la lógica al rechazar la solicitud: " + ex.Message);
+                throw new Exception("No se pudo rechazar la solicitud. Intente nuevamente.");
             }
         }
 
         public void Finalizar(int pIdSolicitud, int pIdEscribano)
         {
-            // sp_Notarial_FinalizarVenta no recibe el escribano, así que la pertenencia se valida acá.
             SolicitudEscribano solicitud = _persistenciaSolicitud.ObtenerPorId(pIdSolicitud);
 
             if (solicitud == null)
@@ -98,13 +131,18 @@ namespace Logica
                 throw new Exception("No tienes permiso para finalizar esta solicitud.");
             }
 
+            if (solicitud.Solicitud.EstadoSolicitud != 2)
+            {
+                throw new Exception("Solo puedes finalizar una solicitud que hayas aceptado.");
+            }
+
             try
             {
                 _persistenciaSolicitud.Finalizar(pIdSolicitud);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new Exception("Error en la lógica al finalizar la solicitud: " + ex.Message);
+                throw new Exception("No se pudo finalizar la venta. Intente nuevamente.");
             }
         }
 

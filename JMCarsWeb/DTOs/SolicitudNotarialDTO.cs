@@ -1,5 +1,3 @@
-﻿using System.Net;
-
 namespace JMCarsWeb.DTOs
 {
     public class SolicitudNotarialDTO
@@ -7,8 +5,8 @@ namespace JMCarsWeb.DTOs
         public int IdSolicitud { get; set; }
         public DateTime FechaSolicitud { get; set; }
         public int EstadoSolicitud { get; set; }
-        public int IdUsuarioCliente { get; set; }
-        public int IdVehiculo { get; set; }
+        public ClienteDTO Cliente { get; set; }
+        public VehiculoDTO Vehiculo { get; set; }
 
     }
 }

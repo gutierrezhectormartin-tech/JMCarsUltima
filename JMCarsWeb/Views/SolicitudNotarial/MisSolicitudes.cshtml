@@ -1,0 +1,92 @@
+@model List<JMCarsWeb.DTOs.SolicitudEscribanoDTO>
+@{
+    ViewData["Title"] = "Mis Solicitudes";
+}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2>Mis Solicitudes Notariales</h2>
+            <p class="text-muted mb-0">Estado de los escribanos que solicitaste</p>
+        </div>
+    </div>
+
+    <hr />
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            Todavía no solicitaste ningún escribano.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Vehículo</th>
+                        <th>Escribano</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var solicitud = item.Solicitud;
+                        var vehiculo = solicitud?.Vehiculo;
+
+                        string textoEstado;
+                        string claseEstado;
+
+                        switch (solicitud?.EstadoSolicitud)
+                        {
+                            case 1:
+                                textoEstado = "Pendiente";
+                                claseEstado = "bg-warning text-dark";
+                                break;
+                            case 2:
+                                textoEstado = "Aceptada";
+                                claseEstado = "bg-success";
+                                break;
+                            case 3:
+                                textoEstado = "Rechazada";
+                                claseEstado = "bg-danger";
+                                break;
+                            case 4:
+                                textoEstado = "Finalizada";
+                                claseEstado = "bg-primary";
+                                break;
+                            default:
+                                textoEstado = "Desconocido";
+                                claseEstado = "bg-secondary";
+                                break;
+                        }
+
+                        <tr>
+                            <td>
+                                <strong>@vehiculo?.Modelo?.Marca?.NombreMarca @vehiculo?.Modelo?.Modelo @vehiculo?.Anio</strong>
+                                <div class="text-muted small">Vendedor: @vehiculo?.Vendedor?.NombreCompleto</div>
+                            </td>
+                            <td>
+                                @item.Escribano?.NombreCompleto
+                                <div class="text-muted small">@item.Escribano?.Email</div>
+                            </td>
+                            <td>@solicitud?.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><span class="badge @claseEstado">@textoEstado</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

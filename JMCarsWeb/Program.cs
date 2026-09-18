@@ -15,6 +15,7 @@ builder.Services.AddScoped<ClienteService>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<EscribanoService>();
 builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<SolicitudNotarialService>();
 
 
 builder.Services.AddSession();

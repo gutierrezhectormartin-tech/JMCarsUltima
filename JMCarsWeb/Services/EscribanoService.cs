@@ -19,6 +19,29 @@ namespace JMCarsWeb.Services
             return respuesta.IsSuccessStatusCode;
         }
 
+        public async Task<List<EscribanoDTO>?> ListarActivos()
+        {
+            try
+            {
+                var respuesta = await _httpClient.GetAsync("api/escribano/activos");
+
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<List<EscribanoDTO>>();
+                }
+                if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return new List<EscribanoDTO>();
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         public async Task<EscribanoDTO?> ObtenerPorId(int id)
         {
             return await _httpClient.GetFromJsonAsync<EscribanoDTO>($"api/escribano/{id}");
