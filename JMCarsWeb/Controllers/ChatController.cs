@@ -34,7 +34,7 @@ namespace JMCarsWeb.Controllers
                     return RedirectToAction("Detalle", "Vehiculo", new { id = idVehiculo });
                 }
 
-                return RedirectToAction("Conversacion", new { idChat = idChat.Value });
+                return RedirectToAction("Conversacion", new { idChat = idChat.Value, idVehiculo });
             }
             catch (Exception ex)
             {
@@ -44,7 +44,7 @@ namespace JMCarsWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Conversacion(int idChat)
+        public async Task<IActionResult> Conversacion(int idChat, int idVehiculo = 0)
         {
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             int? idRol = HttpContext.Session.GetInt32("IdRol");
@@ -68,6 +68,7 @@ namespace JMCarsWeb.Controllers
 
                 ViewBag.IdChat = idChat;
                 ViewBag.IdUsuario = idUsuario.Value;
+                ViewBag.IdVehiculo = idVehiculo;
                 return View(mensajes);
             }
             catch (Exception ex)
@@ -78,7 +79,7 @@ namespace JMCarsWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> EnviarMensaje(int idChat, string contenido)
+        public async Task<IActionResult> EnviarMensaje(int idChat, int idVehiculo,string contenido)
         {
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             int? idRol = HttpContext.Session.GetInt32("IdRol");
@@ -96,7 +97,7 @@ namespace JMCarsWeb.Controllers
                 {
                     TempData["Error"] = "No se pudo enviar le mensaje. Intente nuevamente";
                 }
-                return RedirectToAction("Conversacion", new { idChat });
+                return RedirectToAction("Conversacion", new { idChat, idVehiculo });
 
 
             }

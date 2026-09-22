@@ -224,19 +224,32 @@
         });
 
         // Filtrar marcadores
-        function aplicarFiltros() {
+                function aplicarFiltros() {
             var marcaSeleccionada = document.getElementById('filtroMarca').value;
             var modeloSeleccionado = document.getElementById('filtroModelo').value;
             var anioSeleccionado = document.getElementById('filtroAnio').value;
 
+            // Filtrar marcadores
             marcadores.forEach(function(item) {
                 var visible = true;
                 if (marcaSeleccionada && item.data.idMarca != marcaSeleccionada) visible = false;
                 if (modeloSeleccionado && item.data.idModelo != modeloSeleccionado) visible = false;
                 if (anioSeleccionado && item.data.anio != anioSeleccionado) visible = false;
-
                 if (visible) item.marcador.addTo(mapa);
                 else mapa.removeLayer(item.marcador);
+            });
+
+            // Actualizar opciones de año según marca y modelo seleccionados
+            var aniosVisibles = new Set();
+            marcadores.forEach(function(item) {
+                var coincideMarca = !marcaSeleccionada || item.data.idMarca == marcaSeleccionada;
+                var coincideModelo = !modeloSeleccionado || item.data.idModelo == modeloSeleccionado;
+                if (coincideMarca && coincideModelo) aniosVisibles.add(String(item.data.anio));
+            });
+
+            document.querySelectorAll('#filtroAnio option').forEach(function(option) {
+                if (!option.value) return;
+                option.style.display = aniosVisibles.has(option.value) ? '' : 'none';
             });
         }
 

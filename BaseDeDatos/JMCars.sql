@@ -1010,6 +1010,22 @@ begin
 end
 go
 
+-- vamos a chequear por si hay una solicitud en un vehiculo, impedimento para cambiarle el estado
+create proc sp_SolicitudNotarial_ListarPorVehiculo
+@IdVehiculo int
+as
+begin
+    select 
+        SN.IdSolicitud,
+        SN.EstadoSolicitud,
+        SN.FechaSolicitud,
+        SN.IdVehiculo
+    from SolicitudNotarial SN
+    where SN.IdVehiculo = @IdVehiculo
+    and SN.EstadoSolicitud in (1, 2)
+end
+go
+
 -- Moderar Publicación
 create proc sp_Vehiculo_CambiarEstado
 @Id int,

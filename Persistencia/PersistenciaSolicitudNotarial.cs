@@ -344,5 +344,42 @@ namespace Persistencia
                 oConexion.Close();
             }
         }
+
+        public List<SolicituNotarial> ListarPorVehiculo(int pIdVehiculo)
+        {
+            List<SolicituNotarial> lista = new List<SolicituNotarial>();
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+            SqlCommand oComando = new SqlCommand("sp_SolicitudNotarial_ListarPorVehiculo", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+            oComando.Parameters.AddWithValue("@IdVehiculo", pIdVehiculo);
+
+            try
+            {
+                oConexion.Open();
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                while(lector.Read())
+                {
+                    SolicituNotarial solicitud = new SolicituNotarial(
+                                                                      Convert.ToInt32(lector["IdSolicitud"]),
+                                                                      Convert.ToDateTime(lector["FechaSolicitud"]),
+                                                                      Convert.ToInt32(lector["EstadoSolicitud"]),
+                                                                      null, null);
+                    lista.Add(solicitud);
+                }
+
+                lector.Close();
+                return lista;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
     }
 }

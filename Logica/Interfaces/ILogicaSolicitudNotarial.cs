@@ -18,5 +18,8 @@ namespace Logica.Interfaces
         List<SolicitudEscribano> ListarPorCliente(int pIdCliente);
 
         List<SolicitudEscribano> ListarPorEscribano(int pIdEscribano);
+
+        List<SolicituNotarial> ListarPorVehiculo(int pIdVehiculo);
+
     }
 }

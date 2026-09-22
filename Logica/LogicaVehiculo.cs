@@ -13,12 +13,15 @@ namespace Logica
     public class LogicaVehiculo : ILogicaVehiculo
     {
         private IPersistenciaVehiculo _persistenciaVehiculo;
-
-        public LogicaVehiculo() 
+        private ILogicaSolicitudNotarial _logicaSolicitudNotarial;
+        public LogicaVehiculo()
         {
             _persistenciaVehiculo = FabricaPersistencia.GetInstancia().GetPersistenciaVehiculo();
+            _logicaSolicitudNotarial = FabricaLogica.GetInstancia().GetLogicaSolicitudNotarial();
         }
 
+
+       
         public List<Vehiculo> ListarVehiculos()
         {
             return _persistenciaVehiculo.ListarVehiculos();
@@ -117,6 +120,17 @@ namespace Logica
 
         public void CambiarEstado(int pIdVehiculo, int pIdEstado)
         {
+            if(pIdEstado == 3 || pIdEstado == 4)
+            {
+                List<SolicituNotarial> solicitudes = _logicaSolicitudNotarial.ListarPorVehiculo(pIdVehiculo);
+
+                if(solicitudes.Any())
+                {
+                    throw new Exception("El vehiculo tiene solicitudes notariales asociadas y nos se puede dar de baja");
+                }
+
+            }
+
             _persistenciaVehiculo.CambiarEstado(pIdVehiculo, pIdEstado);
         }
     }

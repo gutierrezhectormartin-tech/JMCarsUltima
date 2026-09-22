@@ -14,9 +14,21 @@ namespace JMCarsWeb.Services
 
         public async Task<bool> Registrar(EscribanoDTO escribano, bool aceptaTerminos)
         {
-            var request = new { Escribano = escribano, AceptaTerminos = aceptaTerminos };
-            var respuesta = await _httpClient.PostAsJsonAsync("api/escribano/registrar", request);
-            return respuesta.IsSuccessStatusCode;
+            try
+            {
+                var request = new { Escribano = escribano, AceptaTerminos = aceptaTerminos };
+                var respuesta = await _httpClient.PostAsJsonAsync("api/escribano/registrar", request);
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido registar, intentelo nuevamente.");
+                    throw new Exception(error);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido registar: " + ex.Message);
+            }
         }
 
         public async Task<List<EscribanoDTO>?> ListarActivos()
@@ -33,28 +45,60 @@ namespace JMCarsWeb.Services
                 {
                     return new List<EscribanoDTO>();
                 }
-
-                return null;
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido obtener la lista de escribanos activos, intentelo nuevamente");
+                throw new Exception(error);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                throw new Exception("No se ha podido obtener la lista de escribanos activos, intentelo nuevamente: " + ex.Message);
             }
         }
 
         public async Task<EscribanoDTO?> ObtenerPorId(int id)
         {
-            return await _httpClient.GetFromJsonAsync<EscribanoDTO>($"api/escribano/{id}");
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<EscribanoDTO>($"api/escribano/{id}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido obtener el escribano: " + ex.Message);
+            }
         }
 
         public async Task ActualizarPerfil(EscribanoDTO escribano)
         {
-            await _httpClient.PutAsJsonAsync($"api/escribano/{escribano.IdUsuario}", escribano);
+            try
+            {
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/escribano/{escribano.IdUsuario}", escribano);
+
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido actualizar el perfil, intentelo nuevamente.");
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido actualizar el perfil: " + ex.Message);
+            }
         }
 
         public async Task Inactivar(int id)
         {
-            await _httpClient.DeleteAsync($"api/escribano/{id}/inactivar");
+            try
+            {
+                var respuesta = await _httpClient.DeleteAsync($"api/escribano/{id}/inactivar");
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido inactivar el escribano, intentelo nuevamente.");
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido inactivar el escribano: " + ex.Message);
+            }
         }
     }
 }

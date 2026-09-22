@@ -29,9 +29,9 @@ namespace JMCarsWeb.Services
 
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                throw new Exception("Error al listar los chats del usuario: " + ex.Message);
             }
         }
 
@@ -51,9 +51,9 @@ namespace JMCarsWeb.Services
                 }
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                throw new Exception("Error al obtener los mensajes: " + ex.Message);
             }
         }
 
@@ -68,11 +68,12 @@ namespace JMCarsWeb.Services
                     var resultado = await respuesta.Content.ReadFromJsonAsync<IdChatResponse>();
                     return resultado?.IdChat;
                 }
-                return null;
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo obtener o crear chat");
+                throw new Exception(error);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                throw new Exception("Error no se pudo crear u obtener chat: " + ex.Message);
             }
         }
 
@@ -83,10 +84,16 @@ namespace JMCarsWeb.Services
                 var request = new { IdEmisor = idEmisor, Contenido = contenido };
                 var respuesta = await _httpClient.PostAsJsonAsync($"api/chat/{idChat}/mensajes", request);
                 return respuesta.IsSuccessStatusCode;
+                if(!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo enviar el mensaje");
+                    throw new Exception(error);
+                }
+                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                throw new Exception("Error no se ha podido enviar el mensaje: " + ex.Message);
             }
         }
 
@@ -108,7 +115,7 @@ namespace JMCarsWeb.Services
             }
             catch (Exception ex)
             {
-                return null;
+                throw new Exception("Error no se ha logrado listar los chats: " + ex.Message);
             }
         }
     }

@@ -160,5 +160,10 @@ namespace Logica
         {
             return _persistenciaSolicitud.ListarPorEscribano(pIdEscribano);
         }
+
+        public List<SolicituNotarial> ListarPorVehiculo(int pIdVehiculo)
+        {
+            return _persistenciaSolicitud.ListarPorVehiculo(pIdVehiculo);
+        }
     }
 }

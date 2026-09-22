@@ -58,13 +58,12 @@ namespace JMCarsWeb.Controllers
             try
             {
                 await _vehiculoService.CambiarEstadoVehiculo(id, idEstado);
-
                 TempData["Mensaje"] = "El estado del vehiculo se ha cambiado exitosamente";
+               
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ha ocurrido un error al cambiar el estado del vehiculo" + ex.Message;
-                throw;
+                TempData["Error"] = ex.Message;
             }
 
             return RedirectToAction("Vehiculos");

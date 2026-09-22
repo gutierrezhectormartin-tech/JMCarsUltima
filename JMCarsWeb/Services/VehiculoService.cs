@@ -15,12 +15,26 @@ namespace JMCarsWeb.Services
 
         public async Task<List<VehiculoDTO>> ListarVehiculos()
         {
-            return await _httpClient.GetFromJsonAsync<List<VehiculoDTO>>("api/vehiculo/listar") ?? new List<VehiculoDTO>();
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<VehiculoDTO>>("api/vehiculo/listar") ?? new List<VehiculoDTO>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido listar los vehiculos: " + ex.Message);
+            }
         }
 
         public async Task<List<VehiculoDTO>> ListarMisVehiculos(string idUsuario)
         {
-            return await _httpClient.GetFromJsonAsync<List<VehiculoDTO>>($"api/vehiculo/mis-vehiculos/{idUsuario}") ?? new List<VehiculoDTO>();
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<VehiculoDTO>>($"api/vehiculo/mis-vehiculos/{idUsuario}") ?? new List<VehiculoDTO>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido listar sus vehiculos: " + ex.Message);
+            }
         }
 
         public async Task<VehiculoDTO?> DetalleVehiculo(int idVehiculo)
@@ -36,63 +50,47 @@ namespace JMCarsWeb.Services
         }
         public async Task<bool> RegistrarVehiculo(VehiculoDTO pVehiculo)
         {
-            HttpResponseMessage respuesta = await _httpClient.PostAsJsonAsync("api/vehiculo/registrar", pVehiculo);
+            try
+            {
+                HttpResponseMessage respuesta = await _httpClient.PostAsJsonAsync("api/vehiculo/registrar", pVehiculo);
 
-            if (respuesta.IsSuccessStatusCode)
-            {
-                return true;
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo registrar su vehiculo");
+                    throw new Exception(error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                string error = await respuesta.Content.ReadAsStringAsync();
-                throw new Exception(error);
+                throw new Exception("No se pudo registrar su vehiculo: " + ex.Message);
             }
         }
 
         public async Task<bool> ModificarVehiculo(VehiculoDTO pVehiculo)
         {
-            HttpResponseMessage respuesta = await _httpClient.PutAsJsonAsync("api/vehiculo/modificar", pVehiculo);
+            try
+            {
+                HttpResponseMessage respuesta = await _httpClient.PutAsJsonAsync("api/vehiculo/modificar", pVehiculo);
 
-            if (respuesta.IsSuccessStatusCode)
-            {
-                return true;
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo modificar el vehiculo");
+                    throw new Exception(error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                string error = await respuesta.Content.ReadAsStringAsync();
-                throw new Exception(error);
+                throw new Exception("No se pudo modificar el vehiculo:" + ex.Message);
             }
         }
-
-        //public async Task<bool> InactivarVehiculo(int idVehiculo)
-        //{
-        //    HttpResponseMessage respuesta = await _httpClient.PutAsync($"api/vehiculo/inactivar/{idVehiculo}", null);
-
-        //    if (respuesta.IsSuccessStatusCode)
-        //    {
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        string error = await respuesta.Content.ReadAsStringAsync();
-        //        throw new Exception(error);
-        //    }
-        //}
-
-        //public async Task<bool> ActivarVehiculo(int idVehiculo)
-        //{
-        //    HttpResponseMessage respuesta = await _httpClient.PutAsync($"api/vehiculo/activar/{idVehiculo}", null);
-
-        //    if (respuesta.IsSuccessStatusCode)
-        //    {
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        string error = await respuesta.Content.ReadAsStringAsync();
-        //        throw new Exception(error);
-        //    }
-        //}
 
         public async Task<List<VehiculoDTO>> BuscarGeneral(decimal latCli, decimal lonCli, int radioKM, int? idMarca = null, decimal? precioMax = null)
         {
@@ -122,26 +120,38 @@ namespace JMCarsWeb.Services
                     return new List<VehiculoDTO>();
                 }
 
+                if(!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo realizar la busqueda");
+                    throw new Exception(error);
+                }
+
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                throw new Exception("no se pudo realizar la busqueda: " + ex.Message);
             }
 
         }
-        public async Task<bool> CambiarEstadoVehiculo(int idVehiculo, int idEstado)
+        public async Task CambiarEstadoVehiculo(int idVehiculo, int idEstado)
         {
+
             try
             {
-                var respuesta = await _httpClient.PutAsJsonAsync($"api/vehiculo/estado/{idVehiculo}", new { IdEstado = idEstado });
-                return respuesta.IsSuccessStatusCode;
-            }
-            catch (Exception)
-            {
 
-                throw;
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/vehiculo/estado/{idVehiculo}", new { IdEstado = idEstado });
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    var error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo cambiar el estado a la publicacion");
+                    throw new Exception(error);
+                }
             }
+            catch (Exception ex)
+            {
+                throw new Exception("No se pudo cambiar el estado a la publicacion: " + ex.Message);
+            }
+           
         }
 
     }

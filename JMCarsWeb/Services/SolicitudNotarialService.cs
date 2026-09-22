@@ -14,42 +14,70 @@ namespace JMCarsWeb.Services
 
         public async Task Crear(int idCliente, int idVehiculo, int idEscribano)
         {
-            var request = new { IdCliente = idCliente, IdVehiculo = idVehiculo, IdEscribano = idEscribano };
-            var respuesta = await _httpClient.PostAsJsonAsync("api/solicitudnotarial/crear", request);
-
-            if (!respuesta.IsSuccessStatusCode)
+            try
             {
-                throw new Exception(await LeerMensajeError(respuesta, "No se pudo enviar la solicitud."));
+                var request = new { IdCliente = idCliente, IdVehiculo = idVehiculo, IdEscribano = idEscribano };
+                var respuesta = await _httpClient.PostAsJsonAsync("api/solicitudnotarial/crear", request);
+
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    throw new Exception(await ErrorHelper.LeerMensajeError(respuesta, "No se pudo enviar la solicitud"));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se pudo enviar la solicitud: " + ex.Message);
             }
         }
 
         public async Task Aceptar(int idSolicitud, int idEscribano)
         {
-            var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/{idSolicitud}/aceptar/{idEscribano}", null);
-
-            if (!respuesta.IsSuccessStatusCode)
+            try
             {
-                throw new Exception(await LeerMensajeError(respuesta, "No se pudo aceptar la solicitud."));
+                var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/{idSolicitud}/aceptar/{idEscribano}", null);
+
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    throw new Exception(await ErrorHelper.LeerMensajeError(respuesta, "No se pudo aceptar la solicitud."));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se pudo aceptar la solicitud: " + ex.Message);
             }
         }
 
         public async Task Rechazar(int idSolicitud, int idEscribano)
         {
-            var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/{idSolicitud}/rechazar/{idEscribano}", null);
-
-            if (!respuesta.IsSuccessStatusCode)
+            try
             {
-                throw new Exception(await LeerMensajeError(respuesta, "No se pudo rechazar la solicitud."));
+                var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/{idSolicitud}/rechazar/{idEscribano}", null);
+
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    throw new Exception(await ErrorHelper.LeerMensajeError(respuesta, "No se pudo rechazar la solicitud."));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se pudo rechazar la solicitud: " + ex.Message);
             }
         }
 
         public async Task Finalizar(int idSolicitud, int idEscribano)
         {
-            var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/{idSolicitud}/finalizar/{idEscribano}", null);
-
-            if (!respuesta.IsSuccessStatusCode)
+            try
             {
-                throw new Exception(await LeerMensajeError(respuesta, "No se pudo finalizar la venta."));
+                var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/{idSolicitud}/finalizar/{idEscribano}", null);
+
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    throw new Exception(await ErrorHelper.LeerMensajeError(respuesta, "No se pudo finalizar la venta."));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se pudo finalizar la venta: " + ex.Message);
             }
         }
 
@@ -66,9 +94,9 @@ namespace JMCarsWeb.Services
 
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                throw new Exception("No se pudo obtener la solicitud: " + ex.Message);
             }
         }
 
@@ -89,9 +117,9 @@ namespace JMCarsWeb.Services
 
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                throw new Exception("No se pudo listar las solicitudes del cliente: " + ex.Message);
             }
         }
 
@@ -112,34 +140,34 @@ namespace JMCarsWeb.Services
 
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                throw new Exception("No se pudo listar las solicitudes del escribano: " + ex.Message);
             }
         }
 
-        private async Task<string> LeerMensajeError(HttpResponseMessage pRespuesta, string pMensajePorDefecto)
-        {
-            try
-            {
-                var contenido = await pRespuesta.Content.ReadFromJsonAsync<MensajeResponse>();
+        //private async Task<string> LeerMensajeError(HttpResponseMessage pRespuesta, string pMensajePorDefecto)
+        //{
+        //    try
+        //    {
+        //        var contenido = await pRespuesta.Content.ReadFromJsonAsync<MensajeResponse>();
 
-                if (contenido != null && !string.IsNullOrWhiteSpace(contenido.Mensaje))
-                {
-                    return contenido.Mensaje;
-                }
+        //        if (contenido != null && !string.IsNullOrWhiteSpace(contenido.Mensaje))
+        //        {
+        //            return contenido.Mensaje;
+        //        }
 
-                return pMensajePorDefecto;
-            }
-            catch (Exception)
-            {
-                return pMensajePorDefecto;
-            }
-        }
+        //        return pMensajePorDefecto;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return pMensajePorDefecto;
+        //    }
+        //}
     }
 
-    public class MensajeResponse
-    {
-        public string Mensaje { get; set; }
-    }
+    //public class MensajeResponse
+    //{
+    //    public string Mensaje { get; set; }
+    //}
 }

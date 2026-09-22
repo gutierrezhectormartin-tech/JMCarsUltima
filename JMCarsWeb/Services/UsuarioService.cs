@@ -14,17 +14,22 @@ namespace JMCarsWeb.Services
 
         public async Task<UsuarioDTO?> Login (string email, string contrasena)
         {
-            var request = new { Email = email, Contrasena = contrasena };
-            var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/login", request);
-
-
-
-            if (respuesta.IsSuccessStatusCode)
+            try
             {
-                return await respuesta.Content.ReadFromJsonAsync<UsuarioDTO>();
-            }
+                var request = new { Email = email, Contrasena = contrasena };
+                var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/login", request);
 
-            return null;
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<UsuarioDTO>();
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         private class ExisteMailResponse
@@ -34,22 +39,43 @@ namespace JMCarsWeb.Services
 
         public async Task<bool> ExisteMail(string email)
         {
-            var respuesta = await _httpClient.GetFromJsonAsync<ExisteMailResponse>($"api/usuario/existe-mail/{email}");
-            return respuesta?.Existe ?? false;
+            try
+            {
+                var respuesta = await _httpClient.GetFromJsonAsync<ExisteMailResponse>($"api/usuario/existe-mail/{email}");
+                return respuesta?.Existe ?? false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<bool> RecuperarContrasena(string email)
         {
-            var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/recuperar-contrasena", email);
-            var contenido = await respuesta.Content.ReadAsStringAsync();
-            return respuesta.IsSuccessStatusCode;
+            try
+            {
+                var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/recuperar-contrasena", email);
+                var contenido = await respuesta.Content.ReadAsStringAsync();
+                return respuesta.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<bool> ResetearContrasena(string token, string NuevaContrasena)
         {
-            var request = new { Token = token, NuevaContrasena = NuevaContrasena };
-            var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/resetear-contrasena", request);
-            return respuesta.IsSuccessStatusCode;
+            try
+            {
+                var request = new { Token = token, NuevaContrasena = NuevaContrasena };
+                var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/resetear-contrasena", request);
+                return respuesta.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

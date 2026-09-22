@@ -14,24 +14,68 @@ namespace JMCarsWeb.Services
 
         public async Task<bool> Registrar(ClienteDTO cliente, bool aceptaTerminos)
         {
-            var request = new { Cliente = cliente, AceptaTerminos = aceptaTerminos };
-            var respuesta = await _httpClient.PostAsJsonAsync("api/cliente/registrar", request);
-            return respuesta.IsSuccessStatusCode;
+            try
+            {
+                var request = new { Cliente = cliente, AceptaTerminos = aceptaTerminos };
+                var respuesta = await _httpClient.PostAsJsonAsync("api/cliente/registrar", request);
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo completar el registro");
+                    throw new Exception(error);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se pudo completar el registro: " + ex.Message);
+            }
         }
 
         public async Task<ClienteDTO?> ObtenerPorId(int id)
         {
-            return await _httpClient.GetFromJsonAsync<ClienteDTO>($"api/cliente/{id}");
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<ClienteDTO>($"api/cliente/{id}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido obtener el cliente: " + ex.Message);
+            }
         }
 
         public async Task ActualizarPerfil(ClienteDTO cliente)
         {
-            await _httpClient.PutAsJsonAsync($"api/cliente/{cliente.IdUsuario}", cliente);
+            try
+            {
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/cliente/{cliente.IdUsuario}", cliente);
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido actualizar el perfil");
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se pudo actualizar  el perfil: " + ex.Message);
+            }
         }
 
         public async Task Inactivar(int id)
         {
-            await _httpClient.PutAsJsonAsync($"api/cliente/{id}/inactivar", new { });
+            try
+            {
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/cliente/{id}/inactivar", new { });
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido inactivar el articulo");
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido inactivar el cliente: " + ex.Message);
+            }
         }
 
     }
