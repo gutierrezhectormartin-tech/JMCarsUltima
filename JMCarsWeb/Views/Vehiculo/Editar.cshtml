@@ -8,12 +8,13 @@
     <p class="text-muted">Podés actualizar los datos de tu vehículo, cambiar la foto y reubicarlo en el mapa.</p>
     <hr />
 
-    @if (ViewBag.Error != null)
+    @if (TempData["Mensaje"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>⚠️ Atención:</strong> @ViewBag.Error
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
     }
 
     <form asp-action="Editar" asp-route-id="@Model.IdVehiculo" method="post" enctype="multipart/form-data" class="shadow p-4 bg-white rounded">

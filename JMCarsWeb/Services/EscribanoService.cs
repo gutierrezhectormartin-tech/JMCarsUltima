@@ -12,7 +12,7 @@ namespace JMCarsWeb.Services
             _httpClient = httpClientFactory.CreateClient("JMCarsAPI");
         }
 
-        public async Task<bool> Registrar(EscribanoDTO escribano, bool aceptaTerminos)
+        public async Task Registrar(EscribanoDTO escribano, bool aceptaTerminos)
         {
             try
             {
@@ -23,7 +23,6 @@ namespace JMCarsWeb.Services
                     string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido registar, intentelo nuevamente.");
                     throw new Exception(error);
                 }
-                return true;
             }
             catch (Exception ex)
             {

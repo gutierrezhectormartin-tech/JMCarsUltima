@@ -43,22 +43,18 @@ namespace JMCarsWeb.Services
             {
                 return await _httpClient.GetFromJsonAsync<VehiculoDTO>($"api/vehiculo/detalle/{idVehiculo}");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                throw new Exception("No se pudo obtener el detalle del vehiculo: " + ex.Message);
             }
         }
-        public async Task<bool> RegistrarVehiculo(VehiculoDTO pVehiculo)
+        public async Task RegistrarVehiculo(VehiculoDTO pVehiculo)
         {
             try
             {
                 HttpResponseMessage respuesta = await _httpClient.PostAsJsonAsync("api/vehiculo/registrar", pVehiculo);
 
-                if (respuesta.IsSuccessStatusCode)
-                {
-                    return true;
-                }
-                else
+                if (!respuesta.IsSuccessStatusCode)
                 {
                     string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo registrar su vehiculo");
                     throw new Exception(error);
@@ -70,17 +66,13 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<bool> ModificarVehiculo(VehiculoDTO pVehiculo)
+        public async Task ModificarVehiculo(VehiculoDTO pVehiculo)
         {
             try
             {
                 HttpResponseMessage respuesta = await _httpClient.PutAsJsonAsync("api/vehiculo/modificar", pVehiculo);
 
-                if (respuesta.IsSuccessStatusCode)
-                {
-                    return true;
-                }
-                else
+                if (!respuesta.IsSuccessStatusCode)
                 {
                     string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo modificar el vehiculo");
                     throw new Exception(error);
@@ -119,14 +111,10 @@ namespace JMCarsWeb.Services
                 {
                     return new List<VehiculoDTO>();
                 }
+                    
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo realizar la busqueda");
+                throw new Exception(error);
 
-                if(!respuesta.IsSuccessStatusCode)
-                {
-                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo realizar la busqueda");
-                    throw new Exception(error);
-                }
-
-                return null;
             }
             catch (Exception ex)
             {

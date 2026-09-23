@@ -17,8 +17,16 @@ namespace JMCarsWeb.Controllers
 
         public async Task<IActionResult> Listar()
         {
-            List<VehiculoDTO> vehiculos = await _vehiculoService.ListarVehiculos();
-            return View(vehiculos);
+            try
+            {
+                List<VehiculoDTO> vehiculos = await _vehiculoService.ListarVehiculos();
+                return View(vehiculos);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View(new List<VehiculoDTO>());
+            }
         }
 
         [HttpGet]
@@ -39,10 +47,16 @@ namespace JMCarsWeb.Controllers
 
             string idUsuarioStr = idUsuarioInt.Value.ToString();
 
-            List<VehiculoDTO> misVehiculos = await _vehiculoService.ListarMisVehiculos(idUsuarioStr);
-
-
-            return View(misVehiculos);
+            try
+            {
+                List<VehiculoDTO> misVehiculos = await _vehiculoService.ListarMisVehiculos(idUsuarioStr);
+                return View(misVehiculos);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View(new List<VehiculoDTO>());
+            }
         }
         [HttpGet]
         public async Task<IActionResult> Detalle(int id, string? origen = null)
@@ -53,17 +67,17 @@ namespace JMCarsWeb.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            VehiculoDTO vehiculo = await _vehiculoService.DetalleVehiculo(id);
-
-            if (vehiculo == null)
+            try
             {
-                TempData["Error"] = "Error";
+                VehiculoDTO vehiculo = await _vehiculoService.DetalleVehiculo(id);
+                ViewBag.Origen = origen;
+                return View("DetalleVehiculo", vehiculo);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Index", "Home");
             }
-
-            ViewBag.Origen = origen;
-
-            return View("DetalleVehiculo",vehiculo);
         }
 
         [HttpGet]
@@ -90,7 +104,7 @@ namespace JMCarsWeb.Controllers
 
             if (fotoInput == null || !fotoInput.Any(f => f.Length > 0))
             {
-                ViewBag.Error = "Debe subir al menos una fotografía del vehículo.";
+                TempData["Error"] = "Debe subir al menos una fotografía del vehículo.";
                 return View(vehiculo);
             }
 
@@ -99,7 +113,7 @@ namespace JMCarsWeb.Controllers
 
             if (string.IsNullOrEmpty(latRaw) || string.IsNullOrEmpty(lngRaw))
             {
-                ViewBag.Error = "Debe seleccionar una ubicación válida en el mapa.";
+                TempData["Error"] = "Debe seleccionar una ubicación válida en el mapa.";
                 return View(vehiculo);
             }
 
@@ -134,19 +148,12 @@ namespace JMCarsWeb.Controllers
                 vehiculo.Latitud = Math.Round(decimal.Parse(latRaw, System.Globalization.CultureInfo.InvariantCulture), 6);
                 vehiculo.Longitud = Math.Round(decimal.Parse(lngRaw, System.Globalization.CultureInfo.InvariantCulture), 6);
 
-                bool exitoLlamadaApi = await _vehiculoService.RegistrarVehiculo(vehiculo);
-
-                if (!exitoLlamadaApi)
-                {
-                    ViewBag.Error = "La API rechazó los datos. Revisa la consola o los logs de la API.";
-                    return View(vehiculo);
-                }
-
+                await _vehiculoService.RegistrarVehiculo(vehiculo);
                 return RedirectToAction("MisVehiculos");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ViewBag.Error = "Ocurrio un error inesperado intente nuevamente";
+                TempData["Error"] = ex.Message;
                 return View(vehiculo);
             }
         }
@@ -161,14 +168,24 @@ namespace JMCarsWeb.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            VehiculoDTO vehiculo = await _vehiculoService.DetalleVehiculo(id);
-
-            if (vehiculo == null || vehiculo.Vendedor?.IdUsuario != idUsuarioSession.Value)
+            try
             {
+                VehiculoDTO vehiculo = await _vehiculoService.DetalleVehiculo(id);
+
+                if (vehiculo.Vendedor?.IdUsuario != idUsuarioSession.Value)
+                {
+                    return RedirectToAction("MisVehiculos");
+                }
+
+                return View(vehiculo);
+
+    }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("MisVehiculos");
             }
-
-            return View(vehiculo);
+            ;
         }
 
         [HttpPost]
@@ -181,9 +198,19 @@ namespace JMCarsWeb.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            VehiculoDTO vehiculoActual = await _vehiculoService.DetalleVehiculo(id);
+            VehiculoDTO vehiculoActual;
+            try
+            {
+                vehiculoActual  = await _vehiculoService.DetalleVehiculo(id);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("MisVehiculos");
+            }
 
-            if (vehiculoActual == null || vehiculoActual.Vendedor?.IdUsuario != idUsuarioSession.Value)
+
+            if (vehiculoActual.Vendedor?.IdUsuario != idUsuarioSession.Value)
             {
                 return RedirectToAction("MisVehiculos");
             }
@@ -193,9 +220,10 @@ namespace JMCarsWeb.Controllers
             string latRaw = Request.Form["Latitud"];
             string lngRaw = Request.Form["Longitud"];
 
-            if (string.IsNullOrEmpty(latRaw) || string.IsNullOrEmpty(lngRaw))
+            if (!decimal.TryParse(latRaw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal latitud) ||
+                !decimal.TryParse(lngRaw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal longitud))
             {
-                ViewBag.Error = "Debe seleccionar una ubicación válida en el mapa.";
+                TempData["Error"] = "Debe seleccionar una ubicación válida en el mapa.";
                 return View(vehiculoActual);
             }
 
@@ -207,8 +235,8 @@ namespace JMCarsWeb.Controllers
             vehiculoActual.Descripcion = vehiculo.Descripcion;
             vehiculoActual.Modelo.Modelo = !string.IsNullOrEmpty(nombreModeloEscrito) ? nombreModeloEscrito : vehiculoActual.Modelo.Modelo;
             vehiculoActual.Modelo.Marca.NombreMarca = !string.IsNullOrEmpty(nombreMarcaEscrito) ? nombreMarcaEscrito : vehiculoActual.Modelo.Marca.NombreMarca;
-            vehiculoActual.Latitud = Math.Round(decimal.Parse(latRaw, System.Globalization.CultureInfo.InvariantCulture), 6);
-            vehiculoActual.Longitud = Math.Round(decimal.Parse(lngRaw, System.Globalization.CultureInfo.InvariantCulture), 6);
+            vehiculoActual.Latitud = Math.Round(latitud, 6);
+            vehiculoActual.Longitud = Math.Round(longitud, 6);
 
             vehiculoActual.Vendedor.Contrasena = null;
 
@@ -223,7 +251,7 @@ namespace JMCarsWeb.Controllers
 
                 if (fotosFinal.Count == 0)
                 {
-                    ViewBag.Error = "El vehículo debe tener al menos una fotografía.";
+                    TempData["Error"] = "El vehículo debe tener al menos una fotografía.";
                     return View(vehiculoActual);
                 }
 
@@ -234,7 +262,7 @@ namespace JMCarsWeb.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = ex.Message;
+                TempData["Error"] = ex.Message;
                 return View(vehiculoActual);
             }
         }
@@ -285,13 +313,12 @@ namespace JMCarsWeb.Controllers
         public async Task<IActionResult> Buscar(string latCli, string lonCli, int radioKM, string? direccion = null, 
             int? idMarca = null, decimal? precioMax = null, string? modelo = null, int? anioMin = null, int? anioMax = null, string? ordenPrecio = null)
         {
-            if(latCli == null || lonCli == null)
+            if(!decimal.TryParse(latCli, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal lat) ||
+                !decimal.TryParse(lonCli, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal lon))
             {
-                ViewBag.Error = "Debe de seleccionar una direccion correcta.";
+                TempData["Error"] = "Debe de seleccionar una direccion correcta.";
                 return View();
             }
-            decimal lat = decimal.Parse(latCli, System.Globalization.CultureInfo.InvariantCulture);
-            decimal lon = decimal.Parse(lonCli, System.Globalization.CultureInfo.InvariantCulture);
 
             ViewBag.LatCli = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
             ViewBag.LonCli = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
@@ -307,11 +334,6 @@ namespace JMCarsWeb.Controllers
             {
                 List<VehiculoDTO> vehiculos = await _vehiculoService.BuscarGeneral(lat, lon, radioKM, idMarca, precioMax);
 
-                if (vehiculos == null)
-                {
-                    ViewBag.Error = "Ocurrió un error al realizar la busqueda. Intente nuevamnte";
-                    return View();
-                }
                 if(anioMin.HasValue)
                 {
                     vehiculos = vehiculos.Where(v => v.Anio >= anioMin.Value).ToList();
@@ -338,7 +360,7 @@ namespace JMCarsWeb.Controllers
             }
             catch (Exception)
             {
-                ViewBag.Error = "Ocurrio un error inesperado intente nuevamente";
+                TempData["Error"] = "Ocurrio un error inesperado intente nuevamente";
                 return View();
             }
         }

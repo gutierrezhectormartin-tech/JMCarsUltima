@@ -26,20 +26,13 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                List<VehiculoDTO>? vehiculos = await _vehiculoService.ListarVehiculos();
-
-                if(vehiculos == null)
-                {
-                    TempData["Error"] = "Ha ocurrido un error. No se han encontrado vehiculos";
-                    return View(new List<VehiculoDTO>());
-                }
-
+                List<VehiculoDTO> vehiculos = await _vehiculoService.ListarVehiculos();
                 return View(vehiculos);
             }
 
             catch (Exception ex )
             {
-                TempData["Error"] = "Ha ocurrido un error." + ex.Message;
+                TempData["Error"] =  ex.Message;
                 return View(new List<VehiculoDTO>());
             }
         }

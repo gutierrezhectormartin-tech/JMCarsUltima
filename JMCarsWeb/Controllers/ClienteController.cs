@@ -36,20 +36,13 @@ namespace WebApi.Controllers
 
             try
             {
-                bool exito = await _clienteService.Registrar(clientePasado, aceptaTerminos);
-
-                if(!exito)
-                {
-                    ViewBag.Error = "No se puede completar el registro. Verifique sus datos";
-                    return View(clientePasado);
-                }
-
+                await _clienteService.Registrar(clientePasado, aceptaTerminos);
                 TempData ["Mensaje"] = "Registro realizado con éxito."; //le agregue aca el tempdata porque nunca iba a funcionarte con viewbag, luego de un redirect el viewbag se pierde te acordas martin?
                 return RedirectToAction("Index", "Login");
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Error: No se pudo completar el registro. Verifica tus datos";
+                TempData["Error"] = ex.Message;
                 return View(clientePasado);
             }
         }
@@ -66,17 +59,25 @@ namespace WebApi.Controllers
             }
 
 
-            ClienteDTO? cliente = await _clienteService.ObtenerPorId(idUsuario.Value);
-
-            if (cliente == null)
+            try
             {
+                ClienteDTO? cliente = await _clienteService.ObtenerPorId(idUsuario.Value);
+
+                if (cliente == null)
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+
+                HttpContext.Session.SetString("EmailCliente", cliente.Email);
+                HttpContext.Session.SetString("CedulaCliente", cliente.Cedula);
+
+                return View(cliente);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Index", "Login");
             }
-
-            HttpContext.Session.SetString("EmailCliente", cliente.Email);
-            HttpContext.Session.SetString("CedulaCliente", cliente.Cedula);
-
-            return View(cliente);
         }
 
         [HttpPost]
@@ -92,18 +93,13 @@ namespace WebApi.Controllers
             ModelState.Remove("Contrasena");
             ModelState.Remove("Email");
 
-            clientePasado.Email = HttpContext.Session.GetString("EmailCliente");
-            clientePasado.Contrasena = HttpContext.Session.GetString("CedulaCliente");
+            clientePasado.Email = HttpContext.Session.GetString("EmailCliente")!;
+            clientePasado.Cedula = HttpContext.Session.GetString("CedulaCliente")!; //cambio aca.
 
             if (!ModelState.IsValid)
             {
                 var errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                ViewBag.Error = string.Join(" | ", errores);
-                return View(clientePasado);
-            }
-
-            if (!ModelState.IsValid)
-            {
+                TempData["Error"] = string.Join(" | ", errores);
                 return View(clientePasado);
             }
 
@@ -112,12 +108,12 @@ namespace WebApi.Controllers
                 clientePasado.IdUsuario = idUsuario.Value;
                 await _clienteService.ActualizarPerfil(clientePasado);
                 HttpContext.Session.SetString("NombreCompleto", clientePasado.NombreCompleto);
-                ViewBag.Mensaje = "El perfil se actualizó correctamente";
+                TempData["Mensaje"] = "El perfil se actualizó correctamente";
                 return View(clientePasado);
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "No se pudo actualizar el perfil." + ex.Message;
+                TempData["Error"] = ex.Message;
                 return View(clientePasado);
             }
         }
@@ -133,11 +129,19 @@ namespace WebApi.Controllers
             }
 
 
-            await _clienteService.Inactivar(idUsuario.Value);
+            try
+            {
+                await _clienteService.Inactivar(idUsuario.Value);
 
-            HttpContext.Session.Clear();
+                HttpContext.Session.Clear();
 
-            return RedirectToAction("CuentaInactivada", "Home");
+                return RedirectToAction("CuentaInactivada", "Home");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Perfil");
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ namespace JMCarsWeb.Services
             _httpClient = httpClientFactory.CreateClient("JMCarsAPI");
         }
 
-        public async Task<List<ChatDTO>?> ListarChatsPorUsuario (int idUsuario)
+        public async Task<List<ChatDTO>> ListarChatsPorUsuario (int idUsuario)
         {
             try
             {
@@ -20,14 +20,14 @@ namespace JMCarsWeb.Services
 
                 if(respuesta.IsSuccessStatusCode)
                 {
-                    return await respuesta.Content.ReadFromJsonAsync<List<ChatDTO>>();
+                    return await respuesta.Content.ReadFromJsonAsync<List<ChatDTO>>() ?? new List<ChatDTO>();
                 }
                 if(respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     return new List<ChatDTO>();
                 }
-
-                return null;
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudieron listar los chats");
+                throw new Exception(error);
             }
             catch (Exception ex)
             {
@@ -35,7 +35,7 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<List<MensajeDTO>?> ObtenerMensajes(int idChat, int idUsuario)
+        public async Task<List<MensajeDTO>> ObtenerMensajes(int idChat, int idUsuario)
         {
             try
             {
@@ -43,13 +43,14 @@ namespace JMCarsWeb.Services
 
                 if(respuesta.IsSuccessStatusCode)
                 {
-                    return await respuesta.Content.ReadFromJsonAsync<List<MensajeDTO>>();
+                    return await respuesta.Content.ReadFromJsonAsync<List<MensajeDTO>>() ?? new List<MensajeDTO>();
                 }
                 if(respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     return new List<MensajeDTO>();
                 }
-                return null;
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se han podido obtener los mensajes");
+                throw new Exception(error);
             }
             catch (Exception ex)
             {
@@ -57,7 +58,7 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<int?> ObtenerOCrearChat(int idVehiculo, int idComprador, int idVendedor)
+        public async Task<int> ObtenerOCrearChat(int idVehiculo, int idComprador, int idVendedor)
         {
             try
             {
@@ -66,7 +67,7 @@ namespace JMCarsWeb.Services
                 if(respuesta.IsSuccessStatusCode)
                 {
                     var resultado = await respuesta.Content.ReadFromJsonAsync<IdChatResponse>();
-                    return resultado?.IdChat;
+                    return resultado!.IdChat;
                 }
                 string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo obtener o crear chat");
                 throw new Exception(error);
@@ -77,19 +78,17 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<bool> EnviarMensaje(int idChat, int idEmisor, string contenido)
+        public async Task EnviarMensaje(int idChat, int idEmisor, string contenido)
         {
             try
             {
                 var request = new { IdEmisor = idEmisor, Contenido = contenido };
                 var respuesta = await _httpClient.PostAsJsonAsync($"api/chat/{idChat}/mensajes", request);
-                return respuesta.IsSuccessStatusCode;
                 if(!respuesta.IsSuccessStatusCode)
                 {
                     string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo enviar el mensaje");
                     throw new Exception(error);
                 }
-                return true;
             }
             catch (Exception ex)
             {
@@ -97,7 +96,7 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<List<ChatDTO>?> ListarChatsPorVehiculo(int idVehiculo)
+        public async Task<List<ChatDTO>> ListarChatsPorVehiculo(int idVehiculo)
         {
             try
             {
@@ -105,13 +104,14 @@ namespace JMCarsWeb.Services
 
                 if(respuesta.IsSuccessStatusCode)
                 {
-                    return await respuesta.Content.ReadFromJsonAsync<List<ChatDTO>>();
+                    return await respuesta.Content.ReadFromJsonAsync<List<ChatDTO>>() ?? new List<ChatDTO>(); ;
                 }
                 if(respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     return new List<ChatDTO>();
                 }
-                return null;
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudieron listar los chats");
+                throw new Exception(error);
             }
             catch (Exception ex)
             {

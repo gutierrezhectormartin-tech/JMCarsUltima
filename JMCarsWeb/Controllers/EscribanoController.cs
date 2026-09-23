@@ -30,24 +30,18 @@ namespace WebApi.Controllers
 
             if(!aceptaTerminos)
             {
-                ViewBag.Error = "Debe aceptar los terminos y condiciones para registrarse";
+                TempData["Error"] = "Debe aceptar los terminos y condiciones para registrarse";
                 return View(escribanoPasado);
             }
             try
             {
-                bool exito =  await _escribanoService.Registrar(escribanoPasado, aceptaTerminos);
-
-                if(!exito)
-                {
-                    ViewBag.Error = "No se puede completar el registro. Verifique sus datos";
-                    return View(escribanoPasado);
-                }
+                await _escribanoService.Registrar(escribanoPasado, aceptaTerminos);
                 TempData["Mensaje"] = "Registro recibido. Tu cuenta será activada cuando un administrador la apruebe.";//le agregue aca el tempdata porque nunca iba a funcionarte con viewbag, luego de un redirect el viewbag se pierde te acordas martin?
                 return RedirectToAction("Index", "Login");
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Error: No se pudo completar el registro. Verifica tus datos" + ex.Message;
+                TempData["Error"] = ex.Message;
                 return View(escribanoPasado);
             }
         }
@@ -65,17 +59,25 @@ namespace WebApi.Controllers
 
 
             // cargo los datos actuales del escribano desde la base
-            EscribanoDTO? escribano = await _escribanoService.ObtenerPorId(idUsuario.Value);
-
-            if (escribano == null)
+            try
             {
+                EscribanoDTO? escribano = await _escribanoService.ObtenerPorId(idUsuario.Value);
+
+                if (escribano == null)
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+
+                HttpContext.Session.SetString("EmailEscribano", escribano.Email);
+                HttpContext.Session.SetString("NumeroCajaEscribano", escribano.NumeroCaja);
+
+                return View(escribano);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Index", "Login");
             }
-
-            HttpContext.Session.SetString("EmailEscribano", escribano.Email);
-            HttpContext.Session.SetString("NumeroCajaEscribano", escribano.NumeroCaja);
-
-            return View(escribano);
         }
 
         [HttpPost]
@@ -96,7 +98,7 @@ namespace WebApi.Controllers
             if (!ModelState.IsValid)
             {
                 var errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                ViewBag.Error = string.Join(" | ", errores);
+                TempData["Error"] = string.Join(" | ", errores);
                 return View(escribanoPasado);
             }
 
@@ -107,12 +109,12 @@ namespace WebApi.Controllers
                 escribanoPasado.NumeroCaja = HttpContext.Session.GetString("NumeroCajaEscribano");
                 await _escribanoService.ActualizarPerfil(escribanoPasado);
                 HttpContext.Session.SetString("NombreCompleto", escribanoPasado.NombreCompleto);
-                ViewBag.Mensaje = "Perfil actualizado correectamente";
+                TempData["Mensaje"] = "Perfil actualizado correectamente";
                 return View(escribanoPasado);
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "No se pudo actualizar el perfil." + ex.Message;
+                TempData["Error"] = ex.Message;
                 return View(escribanoPasado);
             }
         }
@@ -128,9 +130,18 @@ namespace WebApi.Controllers
             }
 
 
-            await _escribanoService.Inactivar(idUsuario.Value);
-            HttpContext.Session.Clear();
-            return RedirectToAction("CuentaInactivada", "Home");
+            try
+            {
+                await _escribanoService.Inactivar(idUsuario.Value);
+                HttpContext.Session.Clear();
+                return RedirectToAction("CuentaInactivada", "Home");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Perfil");
+
+            }
         }
     }
 }

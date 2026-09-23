@@ -27,18 +27,12 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                int? idChat = await _chatService.ObtenerOCrearChat(idVehiculo, idUsuario.Value, idVendedor);
-                if(idChat == null)
-                {
-                    TempData["Error"] = "Ha ocurrido un error al iniciar el chat. Intente nuevamente";
-                    return RedirectToAction("Detalle", "Vehiculo", new { id = idVehiculo });
-                }
-
-                return RedirectToAction("Conversacion", new { idChat = idChat.Value, idVehiculo });
+                int idChat = await _chatService.ObtenerOCrearChat(idVehiculo, idUsuario.Value, idVendedor);
+                return RedirectToAction("Conversacion", new { idChat, idVehiculo });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ha ocurrido un error" + ex.Message;
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Detalle", "Vehiculo", new { id = idVehiculo });
             }
         }
@@ -58,14 +52,8 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                List<MensajeDTO>? mensajes = await _chatService.ObtenerMensajes(idChat, idUsuario.Value);
+                List<MensajeDTO> mensajes = await _chatService.ObtenerMensajes(idChat, idUsuario.Value);
                 
-                if(mensajes == null)
-                {
-                    TempData["Error"] = "Ha ocurrido un error al cargar los mensajes";
-                    return RedirectToAction("Historial");
-                }
-
                 ViewBag.IdChat = idChat;
                 ViewBag.IdUsuario = idUsuario.Value;
                 ViewBag.IdVehiculo = idVehiculo;
@@ -73,7 +61,7 @@ namespace JMCarsWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ha ocurrido un error" + ex.Message;
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Historial");
             }
         }
@@ -92,19 +80,15 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                bool exito = await _chatService.EnviarMensaje(idChat, idUsuario.Value, contenido);
-                if(!exito)
-                {
-                    TempData["Error"] = "No se pudo enviar le mensaje. Intente nuevamente";
-                }
+                await _chatService.EnviarMensaje(idChat, idUsuario.Value, contenido);
                 return RedirectToAction("Conversacion", new { idChat, idVehiculo });
 
 
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ha ocurrido un error" + ex.Message;
-                return RedirectToAction("Historial");
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Conversacion", new { idChat, idVehiculo });
             }
 
         }
@@ -123,19 +107,12 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                List<ChatDTO>? chats = await _chatService.ListarChatsPorUsuario(idUsuario.Value);
-
-                if(chats == null)
-                {
-                    TempData["Error"] = "Ha ocurrido un error al cargar los chats";
-                    return View(new List<ChatDTO>());
-                }
-
+                List<ChatDTO> chats = await _chatService.ListarChatsPorUsuario(idUsuario.Value);
                 return View(chats);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ha ocurrido un error" + ex.Message;
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("Historial");
             }
         }
@@ -154,13 +131,9 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                List<ChatDTO>? chats = await _chatService.ListarChatsPorVehiculo(idVehiculo);
+                List<ChatDTO> chats = await _chatService.ListarChatsPorVehiculo(idVehiculo);
 
-                if(chats == null)
-                {
-                    TempData["Error"] = "Ha ocurrido un error al intentar cargar las consultas";
-                    return View(new List<ChatDTO>());
-                }
+                
                 if(!chats.Any())
                 {
                     TempData["Mensaje"] = "El vehiculo no ha tenido consultas aun";
@@ -170,7 +143,7 @@ namespace JMCarsWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ha ocurrido un error" + ex.Message;
+                TempData["Error"] =  ex.Message;
                 return View(new List<ChatDTO>());
             }
         }
@@ -189,13 +162,7 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                List<MensajeDTO>? mensajes = await _chatService.ObtenerMensajes(idChat, idUsuario.Value);
-
-                if(mensajes == null)
-                {
-                    TempData["Error"] = "Ha ocurrido un error al cargar los mensajes de esta conversacion";
-                    return RedirectToAction("ConsultasVehiculo", new { idVehiculo });
-                }
+                List<MensajeDTO> mensajes = await _chatService.ObtenerMensajes(idChat, idUsuario.Value);
 
                 ViewBag.IdChat = idChat;
                 ViewBag.IdUsuario = idUsuario.Value;
@@ -223,17 +190,12 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                bool exito = await _chatService.EnviarMensaje(idChat, idUsuario.Value, contenido);
-
-                if(!exito)
-                {
-                    TempData["Error"] = "No se pudo enviar el mensaje";
-                }
+                await _chatService.EnviarMensaje(idChat, idUsuario.Value, contenido);
                 return RedirectToAction("ConversacionesVendedor", new { idChat, idVehiculo });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ha ocurrido un error" + ex.Message;
+                TempData["Error"] = ex.Message;
                 return RedirectToAction("ConversacionesVendedor", new { idChat, idVehiculo });
             }
         }
