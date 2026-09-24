@@ -381,5 +381,66 @@ namespace Persistencia
                 oConexion.Close();
             }
         }
+
+        public List<CompraVenta> ListarComprasVentaPorEscribano(int pIdEscribano)
+        {
+            List<CompraVenta> lista = new List<CompraVenta>();
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+            SqlCommand oComando = new SqlCommand("sp_Compraventa_ListarPorEscribano", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure();
+            oComando.Parameters.AddWithValue("@IdEscribano", pIdEscribano);
+
+            try
+            {
+                oConexion.Open();
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                while(lector.Read())
+                {
+                    SolicituNotarial solicitud = new SolicituNotarial(Convert.ToInt32(lector["IdSolicitud"]),
+                                                                       DateTime.MinValue, 0, null, null);
+                    CompraVenta unaCompraVenta = new CompraVenta(Convert.ToInt32(lector["IdCompraVenta"]),
+                                                                 Convert.ToDateTime(lector["FechaInicio"]),
+                                                                 Convert.ToInt32(lector["EstadoCompraVenta"]),
+                                                                 solicitud);
+                    lista.Add(unaCompraVenta);
+                }
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+
+        }
+
+        public void CambiarEstadoCompraVenta(int pIdCompraVenta, int pIdEstadoCompraVenta, int pIdEscribano)
+        {
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+            SqlCommand oComando = new SqlCommand("sp_Compraventa_CambiarEstado", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+            oComando.Parameters.AddWithValue("@IdCompraVenta", pIdCompraVenta);
+            oComando.Parameters.AddWithValue("@IdEstadoCompraVenta", pIdEstadoCompraVenta);
+            oComando.Parameters.AddWithValue("@IdEscribano", pIdEscribano);
+
+            try
+            {
+                oConexion.Open();
+                oComando.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
     }
 }

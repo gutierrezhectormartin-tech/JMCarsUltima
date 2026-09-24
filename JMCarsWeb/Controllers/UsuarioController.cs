@@ -21,13 +21,15 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> RecuperarContrasena(string email)
         {
-            bool enviado = await _usuarioService.RecuperarContrasena(email);
-
-            if (enviado)
-                ViewBag.Mensaje = "Si el email existe, se enviaron instrucciones a tu correo.";
-            else
-                ViewBag.Error = "Ocurrió un error. Intentá nuevamente.";
-
+            try
+            {
+                await _usuarioService.RecuperarContrasena(email);
+                TempData["Mensaje"] = "Si el email existe, se enviaron instrucciones a tu correo.";
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Ocurrió un error. Intentá nuevamente.";
+            }
             return View();
         }
 
@@ -47,17 +49,18 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetearContrasena(string ptoken, string pNuevaContrasena)
         {
-            bool exito = await _usuarioService.ResetearContrasena(ptoken, pNuevaContrasena);
-
-            if(exito)
+            try
             {
+                await _usuarioService.ResetearContrasena(ptoken, pNuevaContrasena);
                 TempData["Mensaje"] = "Tu contraseña fue reseteada correctamente. Inicia sesión con tu nueva contraseña.";
                 return RedirectToAction("Index", "Login");
             }
-
-            ViewBag.Error = "El enlace no es válido o ya expiró";
-            ViewBag.Token = ptoken;
-            return View();
+            catch (Exception)
+            {
+                TempData["Error"] = "El enlace no es válido o ya expiró";
+                ViewBag.Token = ptoken;
+                return View();
+            }
         }
 
     }

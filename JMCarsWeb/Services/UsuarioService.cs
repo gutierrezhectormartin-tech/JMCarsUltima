@@ -50,13 +50,15 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<bool> RecuperarContrasena(string email)
+        public async Task RecuperarContrasena(string email)
         {
             try
             {
                 var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/recuperar-contrasena", email);
-                var contenido = await respuesta.Content.ReadAsStringAsync();
-                return respuesta.IsSuccessStatusCode;
+                if(!respuesta.IsSuccessStatusCode)
+                {
+                    throw new Exception(); //A drede no ponemos mas info de porque.
+                }
             }
             catch (Exception ex)
             {
@@ -64,13 +66,16 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<bool> ResetearContrasena(string token, string NuevaContrasena)
+        public async Task ResetearContrasena(string token, string NuevaContrasena)
         {
             try
             {
                 var request = new { Token = token, NuevaContrasena = NuevaContrasena };
                 var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/resetear-contrasena", request);
-                return respuesta.IsSuccessStatusCode;
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    throw new Exception(); //A drede no damos mas info
+                }
             }
             catch (Exception ex)
             {

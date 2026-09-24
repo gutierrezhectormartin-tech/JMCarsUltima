@@ -6,6 +6,7 @@
         public DateTime FechaInicio { get; set; }
         public int EstadoCompraVenta { get; set; }
         public int IdSolicitud { get; set; }
+        public SolicitudNotarialDTO Solicitud { get; set; }
 
     }
 }

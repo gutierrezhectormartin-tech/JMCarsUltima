@@ -100,7 +100,7 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<List<SolicitudEscribanoDTO>?> ListarPorCliente(int idCliente)
+        public async Task<List<SolicitudEscribanoDTO>> ListarPorCliente(int idCliente)
         {
             try
             {
@@ -108,14 +108,14 @@ namespace JMCarsWeb.Services
 
                 if (respuesta.IsSuccessStatusCode)
                 {
-                    return await respuesta.Content.ReadFromJsonAsync<List<SolicitudEscribanoDTO>>();
+                    return await respuesta.Content.ReadFromJsonAsync<List<SolicitudEscribanoDTO>>() ?? new List<SolicitudEscribanoDTO>();
                 }
                 if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     return new List<SolicitudEscribanoDTO>();
                 }
-
-                return null;
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo listar las solicitudes del cliente");
+                throw new Exception(error);
             }
             catch (Exception ex)
             {
@@ -123,7 +123,7 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<List<SolicitudEscribanoDTO>?> ListarPorEscribano(int idEscribano)
+        public async Task<List<SolicitudEscribanoDTO>> ListarPorEscribano(int idEscribano)
         {
             try
             {
@@ -131,14 +131,14 @@ namespace JMCarsWeb.Services
 
                 if (respuesta.IsSuccessStatusCode)
                 {
-                    return await respuesta.Content.ReadFromJsonAsync<List<SolicitudEscribanoDTO>>();
+                    return await respuesta.Content.ReadFromJsonAsync<List<SolicitudEscribanoDTO>>() ?? new List<SolicitudEscribanoDTO>();
                 }
                 if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     return new List<SolicitudEscribanoDTO>();
                 }
-
-                return null;
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo listar las solicitudes del escribano");
+                throw new Exception(error);
             }
             catch (Exception ex)
             {
@@ -146,6 +146,44 @@ namespace JMCarsWeb.Services
             }
         }
 
+        public async Task<List<CompraVentaDTO>> ListarComprasVentaPorEscribano(int idEscribano)
+        {
+            try
+            {
+                var respuesta = await _httpClient.GetAsync($"api/solicitudnotarial/compraventa/por-escribano/{idEscribano}");
+
+                if(respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsAsync<List<CompraVentaDTO>>() ?? new List<CompraVentaDTO>();
+                }
+                if(respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return new List<CompraVentaDTO>();
+                }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo listar las compraventa de este escribano");
+                throw new Exception(error);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se pudo listar las compraventas del escribano: " + ex.Message);
+            }
+        }
+
+        public async Task CambiarEstadoCompraVenta(int idCompraVenta, int idEstadoCompraVenta, int idEscribano)
+        {
+            try
+            {
+                var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/compraventa/{idCompraVenta}/estado/{idEstadoCompraVenta}/{idEscribano}");
+                if(!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido actualizar el estado del compraventa");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido actualizar el estado del compraventa: " + ex.Message);
+            }
+        }
         //private async Task<string> LeerMensajeError(HttpResponseMessage pRespuesta, string pMensajePorDefecto)
         //{
         //    try

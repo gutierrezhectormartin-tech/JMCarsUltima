@@ -87,7 +87,9 @@ insert into EstadoPublicacion values
 (1, 'Pendiente'),
 (2, 'Aprobada'),
 (3, 'Rechazada'),
-(4, 'Inactiva')
+(4, 'Inactiva'),
+(5, 'En Tramite'),
+(6, 'Vendido')
 go
 
 CREATE TABLE Vehiculo
@@ -171,10 +173,9 @@ CREATE TABLE EstadoCompraVenta
 )
 GO
 
-INSERT INTO EstadoCompraVenta VALUES (1, 'Pendiente'),
-									 (2, 'Aceptada'),
-									 (3, 'Rechazada'),
-									 (4, 'Inactiva')
+INSERT INTO EstadoCompraVenta VALUES (1, 'En Proceso'),
+									 (2, 'Rechazada'),
+									 (3, 'Finalizada')
 GO
 
 
@@ -734,30 +735,71 @@ begin
 end
 go
 
--- Finalizar Venta (Cierre total)
-create proc sp_Notarial_FinalizarVenta
-@IdSolicitud int
+-- Lista las CompraVentas asociadas a las Solicitudes de un Escribano
+create proc sp_CompraVenta_ListarPorEscribano
+@IdEscribano int
+as
+begin
+
+    select
+        CV.IdCompraVenta,
+        CV.FechaInicio,
+        CV.EstadoCompraVenta,
+        ECV.NombreEstado,
+        CV.IdSolicitud
+
+    from CompraVenta CV
+    join EstadoCompraVenta ECV on CV.EstadoCompraVenta = ECV.IdEstadoCompraVenta
+    join SolicitudEscribano SE on CV.IdSolicitud = SE.IdSolicitud
+    where SE.IdUsuarioEscribano = @IdEscribano
+end
+go
+
+-- Cambia el estado de una CompraVenta (Finalizada o Rechazada), sin afectar el estado de la Solicitud Notarial asociada
+create proc sp_CompraVenta_CambiarEstado
+@IdCompraVenta int,
+@IdEstadoCompraVenta int,
+@IdEscribano int
 as
 begin
 
     begin transaction;
     begin try
-        -- Validamos que la solicitud esté en estado "Aceptada/En Proceso" (Estado 2) 
-        -- y no esté ya Finalizada (4) o Cancelada (3)
-        if not exists (select 1 from SolicitudNotarial where IdSolicitud = @IdSolicitud and EstadoSolicitud = 2)
+        --vemos que la solicitud sea del mismo escribano que esta logueado
+        if not exists (
+            select 1 
+            from CompraVenta CV
+            inner join SolicitudEscribano SE on CV.IdSolicitud = SE.IdSolicitud
+            where CV.IdCompraVenta = @IdCompraVenta and SE.IdUsuarioEscribano = @IdEscribano
+        )
         begin
-            raiserror ('La solicitud no se encuentra en un estado válido para ser finalizada.', 16, 1);
+            raiserror ('No tienes permiso para gestionar esta compraventa.', 16, 1);
         end
 
-        -- Finaliza solicitud
-        update SolicitudNotarial set EstadoSolicitud = 4 where IdSolicitud = @IdSolicitud;
-        
-        -- Crea registro en CompraVenta
-        insert into CompraVenta (EstadoCompraVenta, IdSolicitud) values (2, @IdSolicitud);
-        
-        -- Quitamos el auto de la venta pública
-        declare @IdV int = (select IdVehiculo from SolicitudNotarial where IdSolicitud = @IdSolicitud);
-        update Vehiculo set IdEstadoPublicacion = 4 where IdVehiculo = @IdV;
+        -- verificamos que este en proceso
+        if not exists (select 1 from CompraVenta where IdCompraVenta = @IdCompraVenta and EstadoCompraVenta = 1)
+        begin
+            raiserror ('La compraventa no se encuentra en un estado válido para ser modificada.', 16, 1);
+        end
+
+        update CompraVenta set EstadoCompraVenta = @IdEstadoCompraVenta where IdCompraVenta = @IdCompraVenta;
+
+        declare @IdV int = (
+            select V.IdVehiculo 
+            from CompraVenta CV
+            inner join SolicitudNotarial SN on CV.IdSolicitud = SN.IdSolicitud
+            inner join Vehiculo V on SN.IdVehiculo = V.IdVehiculo
+            where CV.IdCompraVenta = @IdCompraVenta
+        );
+
+        if @IdEstadoCompraVenta = 3 -- Finalizada
+        begin
+            update Vehiculo set IdEstadoPublicacion = 6 where IdVehiculo = @IdV;
+        end
+        else if @IdEstadoCompraVenta = 2 -- Rechazada
+        begin
+            update Vehiculo set IdEstadoPublicacion = 2 where IdVehiculo = @IdV;
+        end
 
         commit transaction;
     end try
@@ -789,11 +831,10 @@ begin
 
         declare @IdV int = (select IdVehiculo from SolicitudNotarial where IdSolicitud = @IdSolicitud);
 
-        -- Aceptamos esta solicitud
         update SolicitudNotarial set EstadoSolicitud = 2 where IdSolicitud = @IdSolicitud;
-
-        -- Rechazamos automáticamente las demás solicitudes pendientes sobre el mismo vehículo
         update SolicitudNotarial set EstadoSolicitud = 3 where IdVehiculo = @IdV and EstadoSolicitud = 1 and IdSolicitud <> @IdSolicitud;
+        insert into CompraVenta (EstadoCompraVenta, IdSolicitud) values (1, @IdSolicitud);
+        update Vehiculo set IdEstadoPublicacion = 5 where IdVehiculo = @IdV;
 
         commit transaction;
     end try
@@ -1462,7 +1503,7 @@ VALUES
 )
 GO
 
--- Maria vende Onix
+-- Maria vende Onix -> "En Tramite" (5): tiene una CompraVenta en proceso
 INSERT INTO Vehiculo
 (
     Precio,
@@ -1485,7 +1526,7 @@ VALUES
     'Manual',
     'Nafta',
     'Chevrolet Onix muy economico.',
-    2,
+    5,
     -34.9032,
     -56.1881,
     3,
@@ -1493,7 +1534,7 @@ VALUES
 )
 GO
 
--- Carlos vende Ranger
+-- Carlos vende Ranger -> "Vendido" (6): su CompraVenta fue Finalizada
 INSERT INTO Vehiculo
 (
     Precio,
@@ -1516,7 +1557,7 @@ VALUES
     'Automatica',
     'Electrico',
     'Ford Ranger doble cabina.',
-    2,
+    6,
     -34.8870,
     -56.1312,
     10,
@@ -1570,7 +1611,7 @@ VALUES
 -- SOLICITUDES NOTARIALES
 
 
--- Maria quiere comprar el Corolla de Juan
+-- Escenario 1: Maria quiere comprar el Corolla de Juan (Pendiente, aun sin decision del escribano)
 INSERT INTO SolicitudNotarial
 (
     EstadoSolicitud,
@@ -1598,11 +1639,7 @@ VALUES
 GO
 
 
-
--- COMPRA VENTA
-
-
--- Solicitud aceptada/finalizada de ejemplo
+-- Escenario 2: Juan quiere comprar el Onix de Maria -> Escribano Acepto -> CompraVenta "En Proceso"
 INSERT INTO SolicitudNotarial
 (
     EstadoSolicitud,
@@ -1611,7 +1648,7 @@ INSERT INTO SolicitudNotarial
 )
 VALUES
 (
-    4,
+    2,
     2,
     2
 )
@@ -1629,6 +1666,92 @@ VALUES
 )
 GO
 
+
+
+-- COMPRA VENTA
+
+
+-- CompraVenta del Escenario 2: "En Proceso"
+INSERT INTO CompraVenta
+(
+    EstadoCompraVenta,
+    IdSolicitud
+)
+VALUES
+(
+    1,
+    2
+)
+GO
+
+
+-- Escenario 3: Maria quiere comprar el Ranger de Carlos -> Escribano Acepto -> CompraVenta "Finalizada" -> Vehiculo Vendido
+INSERT INTO SolicitudNotarial
+(
+    EstadoSolicitud,
+    IdUsuarioCliente,
+    IdVehiculo
+)
+VALUES
+(
+    2,
+    3,
+    3
+)
+GO
+
+INSERT INTO SolicitudEscribano
+(
+    IdSolicitud,
+    IdUsuarioEscribano
+)
+VALUES
+(
+    3,
+    15
+)
+GO
+
+INSERT INTO CompraVenta
+(
+    EstadoCompraVenta,
+    IdSolicitud
+)
+VALUES
+(
+    3,
+    3
+)
+GO
+
+
+-- Escenario 4: Carlos quiso comprar el Corolla SEG de Lucia -> Escribano Acepto -> CompraVenta "Rechazada" -> Vehiculo vuelve a Aprobada
+INSERT INTO SolicitudNotarial
+(
+    EstadoSolicitud,
+    IdUsuarioCliente,
+    IdVehiculo
+)
+VALUES
+(
+    2,
+    4,
+    4
+)
+GO
+
+INSERT INTO SolicitudEscribano
+(
+    IdSolicitud,
+    IdUsuarioEscribano
+)
+VALUES
+(
+    4,
+    15
+)
+GO
+
 INSERT INTO CompraVenta
 (
     EstadoCompraVenta,
@@ -1637,7 +1760,7 @@ INSERT INTO CompraVenta
 VALUES
 (
     2,
-    2
+    4
 )
 GO
 

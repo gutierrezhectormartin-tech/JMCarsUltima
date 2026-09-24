@@ -32,16 +32,9 @@ namespace JMCarsWeb.Controllers
             try
             {
                 VehiculoDTO? vehiculo = await _vehiculoService.DetalleVehiculo(idVehiculo);
+                List<EscribanoDTO> escribanos = await _escribanoService.ListarActivos();
 
-                if (vehiculo == null)
-                {
-                    TempData["Error"] = "No se encontró el vehículo.";
-                    return RedirectToAction("Index", "Home");
-                }
-
-                List<EscribanoDTO>? escribanos = await _escribanoService.ListarActivos();
-
-                if (escribanos == null || !escribanos.Any())
+                if (!escribanos.Any())
                 {
                     TempData["Error"] = "No hay escribanos disponibles en este momento.";
                     return RedirectToAction("Detalle", "Vehiculo", new { id = idVehiculo });
@@ -52,7 +45,7 @@ namespace JMCarsWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ha ocurrido un error: " + ex.Message;
+                TempData["Error"] =  ex.Message;
                 return RedirectToAction("Detalle", "Vehiculo", new { id = idVehiculo });
             }
         }
@@ -102,25 +95,18 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                List<SolicitudEscribanoDTO>? solicitudes = await _solicitudService.ListarPorCliente(idUsuario.Value);
-
-                if (solicitudes == null)
-                {
-                    TempData["Error"] = "Ha ocurrido un error al cargar sus solicitudes.";
-                    return View(new List<SolicitudEscribanoDTO>());
-                }
-
+                List<SolicitudEscribanoDTO> solicitudes = await _solicitudService.ListarPorCliente(idUsuario.Value);
                 return View(solicitudes);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ha ocurrido un error: " + ex.Message;
+                TempData["Error"] =  ex.Message;
                 return View(new List<SolicitudEscribanoDTO>());
             }
         }
 
         [HttpGet]
-        public async Task<IActionResult> SolicitudesPendientes()
+        public async Task<IActionResult> SolicitudesEscribano()
         {
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             int? idRol = HttpContext.Session.GetInt32("IdRol");
@@ -133,19 +119,12 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                List<SolicitudEscribanoDTO>? solicitudes = await _solicitudService.ListarPorEscribano(idUsuario.Value);
-
-                if (solicitudes == null)
-                {
-                    TempData["Error"] = "Ha ocurrido un error al cargar las solicitudes.";
-                    return View(new List<SolicitudEscribanoDTO>());
-                }
-
+                List<SolicitudEscribanoDTO> solicitudes = await _solicitudService.ListarPorEscribano(idUsuario.Value);
                 return View(solicitudes);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Ha ocurrido un error: " + ex.Message;
+                TempData["Error"] =  ex.Message;
                 return View(new List<SolicitudEscribanoDTO>());
             }
         }
@@ -172,7 +151,7 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("SolicitudesPendientes");
+            return RedirectToAction("SolicitudesEscribano");
         }
 
         [HttpPost]
@@ -197,7 +176,7 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("SolicitudesPendientes");
+            return RedirectToAction("SolicitudesEscribano");
         }
 
         [HttpPost]
@@ -222,7 +201,7 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("SolicitudesPendientes");
+            return RedirectToAction("SolicitudesEscribano");
         }
     }
 }

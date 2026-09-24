@@ -165,5 +165,26 @@ namespace Logica
         {
             return _persistenciaSolicitud.ListarPorVehiculo(pIdVehiculo);
         }
+
+        public List<CompraVenta> ListarComprasVentaPorEscribano(int pIdEscribano)
+        {
+            return _persistenciaSolicitud.ListarComprasVentaPorEscribano(pIdEscribano);
+        }
+
+        public void CambiarEstadoCompraVenta(int pIdCompraVenta, int pIdEstadoCompraVenta, int pIdEscribano)
+        {
+            if(pIdEstadoCompraVenta != 3 || pIdEstadoCompraVenta != 2)
+            {
+                throw new Exception("El estado no es valido para una CompraVenta");
+            }
+            try
+            {
+                _persistenciaSolicitud.CambiarEstadoCompraVenta(pIdCompraVenta, pIdEstadoCompraVenta, pIdEscribano);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

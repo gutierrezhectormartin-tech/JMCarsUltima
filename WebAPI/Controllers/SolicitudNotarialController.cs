@@ -142,6 +142,38 @@ namespace WebAPI.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
+        [HttpGet("compraventa/por-escribano/{idEscribano}")]
+        public IActionResult ListarComprasVentaPorEscribano(int idEscribano)
+        {
+            try
+            {
+                List<CompraVenta> compras = _logicaSolicitud.ListarComprasVentaPorEscribano(idEscribano);
+                if(compras == null || !compras.Any())
+                {
+                    return NotFound(new { mensaje = "No se han encontrado CompraVentas para este escribano" });
+                }
+                return Ok(compras);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPut("compraventa/{idCompraVenta}/estado/{idEstadoCompraVenta}/{idEscribano}")]
+        public IActionResult CambiarEstadoCompraVenta(int idCompraVenta, int idEstadoCompraVenta, int idEscribano)
+        {
+            try
+            {
+                _logicaSolicitud.CambiarEstadoCompraVenta(idCompraVenta, idEstadoCompraVenta, idEscribano);
+                return Ok(new { mensaje = "Estado de Compraventa modificado correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message})
+            }
+        } 
     }
 
     public class SolicitudNotarialRequest
