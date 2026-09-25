@@ -15,6 +15,7 @@ namespace Logica.Interfaces
 
         TokenRecuperacion RecuperarContrasena(string pEmail);
         bool ResetearContrasena(string pToken, string pNuevaContrasena);
+        List<Usuario> ListarAdministradoresActivos();
 
     }
 }

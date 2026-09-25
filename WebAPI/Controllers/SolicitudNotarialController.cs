@@ -41,12 +41,12 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("{id}/aceptar/{idEscribano}")]
-        public IActionResult Aceptar(int id, int idEscribano)
+        [HttpPut("{id}/aceptar")]
+        public IActionResult Aceptar(int id, [FromBody] AccionSolicitudRequest request)
         {
             try
             {
-                _logicaSolicitud.Aceptar(id, idEscribano);
+                _logicaSolicitud.Aceptar(id, request.IdEscribano);
                 return Ok(new { mensaje = "Solicitud aceptada correctamente" });
             }
             catch (Exception ex)
@@ -55,12 +55,12 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("{id}/rechazar/{idEscribano}")]
-        public IActionResult Rechazar(int id, int idEscribano)
+        [HttpPut("{id}/rechazar")]
+        public IActionResult Rechazar(int id, [FromBody] AccionSolicitudRequest request)
         {
             try
             {
-                _logicaSolicitud.Rechazar(id, idEscribano);
+                _logicaSolicitud.Rechazar(id, request.IdEscribano);
                 return Ok(new { mensaje = "Solicitud rechazada correctamente" });
             }
             catch (Exception ex)
@@ -69,12 +69,12 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("{id}/finalizar/{idEscribano}")]
-        public IActionResult Finalizar(int id, int idEscribano)
+        [HttpPut("{id}/finalizar")]
+        public IActionResult Finalizar(int id, [FromBody] AccionSolicitudRequest request)
         {
             try
             {
-                _logicaSolicitud.Finalizar(id, idEscribano);
+                _logicaSolicitud.Finalizar(id, request.IdEscribano);
                 return Ok(new { mensaje = "Venta finalizada correctamente" });
             }
             catch (Exception ex)
@@ -161,17 +161,17 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("compraventa/{idCompraVenta}/estado/{idEstadoCompraVenta}/{idEscribano}")]
-        public IActionResult CambiarEstadoCompraVenta(int idCompraVenta, int idEstadoCompraVenta, int idEscribano)
+        [HttpPut("compraventa/{idCompraVenta}/estado")]
+        public IActionResult CambiarEstadoCompraVenta(int idCompraVenta, [FromBody] CambiarEstadoCompraVentaRequest request)
         {
             try
             {
-                _logicaSolicitud.CambiarEstadoCompraVenta(idCompraVenta, idEstadoCompraVenta, idEscribano);
+                _logicaSolicitud.CambiarEstadoCompraVenta(idCompraVenta, request.IdEstadoCompraVenta, request.IdEscribano);
                 return Ok(new { mensaje = "Estado de Compraventa modificado correctamente" });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { mensaje = ex.Message})
+                return BadRequest(new { mensaje = ex.Message });
             }
         } 
     }
@@ -180,6 +180,17 @@ namespace WebAPI.Controllers
     {
         public int IdCliente { get; set; }
         public int IdVehiculo { get; set; }
+        public int IdEscribano { get; set; }
+    }
+
+    public class  AccionSolicitudRequest
+    {
+        public int IdEscribano { get; set; }
+    }
+
+    public class CambiarEstadoCompraVentaRequest
+    {
+        public int IdEstadoCompraVenta { get; set; }
         public int IdEscribano { get; set; }
     }
 }

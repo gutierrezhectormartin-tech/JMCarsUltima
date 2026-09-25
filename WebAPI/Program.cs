@@ -14,7 +14,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IEmailService, EmailServices>();
-
+builder.Services.AddHostedService<VerificadorSolicitudesVencidasService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

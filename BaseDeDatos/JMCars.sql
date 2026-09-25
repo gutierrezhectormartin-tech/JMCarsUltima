@@ -1067,6 +1067,31 @@ begin
 end
 go
 
+-- listado de todas las solicitudes que tengan mas de un dia de antiguedad sin accion del escribano
+create proc sp_SolicitudNotarial_ListarPendientesVencidas
+as
+begin
+
+    select
+            SN.solicitud,
+            SN.FechaSolicitud,
+            U_ESC.NombreCompleto as NombreEscribano,
+            U_CLI.NombreCompleto as NombreCliente,
+            MA.ModeloMarca,
+            M.NombreModelo
+    from SolicitudNotarial SN
+    inner join SolicitudEscribano SE on SN.IdSolicitud = SE.IdSolicitud
+    inner join Usuario U_ESC on SE.IdUsuarioEscribano = U_ESC.IdUsuario
+    inner join Usuario U_CLI on SN.IdUsuarioCliente = U_CLI.IdUsuario
+    inner join Vehiculo V on SN.IdVehiculo = V.IdVehiculo
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    inner join Marca MA on M.IdMarca = MA.IdMarca
+    where SN.EstadoSolicitud = 1
+    and DATEDIFF(hour, SN.FechaSolicitud, GETDATE()) >= 24
+end
+go
+
+
 -- Moderar Publicación
 create proc sp_Vehiculo_CambiarEstado
 @Id int,
@@ -1088,19 +1113,19 @@ begin
 end
 go
 
--- Alerta de 24 horas para Escribanos
-create proc sp_Admin_AlertaEscribanos
+--listar administradores activos
+create proc sp_Admin_ListarAdministradores
 as
 begin
-
-    select S.IdSolicitud, U.NombreCompleto as Escribano, S.FechaSolicitud
-    from SolicitudNotarial S
-    join SolicitudEscribano SE on S.IdSolicitud = SE.IdSolicitud
-    join Usuario U on SE.IdUsuarioEscribano = U.IdUsuario
-    where S.EstadoSolicitud = 1 and DATEDIFF(HOUR, S.FechaSolicitud, GETDATE()) > 24;
+    select
+            U.IdUsuario,
+            U.NombreCompleto,
+            U.Email
+    from Administrador A
+    inner join Usuario U on A.IdUsuario = U.IdUsuario
+    where U.Estado = 1
 end
 go
-
 
 -- Marcas (Alta y Modificación)
 create proc sp_Marca_Guardar

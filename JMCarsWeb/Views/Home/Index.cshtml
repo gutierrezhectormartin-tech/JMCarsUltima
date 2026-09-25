@@ -9,7 +9,26 @@
 {
     <div class="alert alert-success">@TempData["Mensaje"]</div>
 }
+@if(TempData["Advertencia"] != null)
+{
+    <div class="modal fade" id="modalAdvertencia" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i>Advertencia de sistema</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    @TempData["Advertencia"]
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
+                </div>
+            </div>
+        </div>
 
+    </div>
+}
 @{
     var marcas = Model.Where(v => v.Modelo?.Marca != null).Select(v => new { Id = v.Modelo.Marca.IdMarca, Nombre = v.Modelo.Marca.NombreMarca })
             .Distinct().OrderBy(x => x.Nombre).ToList();
@@ -168,5 +187,11 @@
             return orden === 'asc' ? precioA - precioB : precioB - precioA;
         });
         filas.forEach(function (fila) { tbody.appendChild(fila); });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var modal = new bootstrap.Modal(document.getElementById('modalAdvertencia'));
+        modal.show();
     });
 </script>

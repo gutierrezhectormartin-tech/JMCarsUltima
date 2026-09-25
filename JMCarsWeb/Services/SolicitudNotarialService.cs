@@ -34,7 +34,8 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/{idSolicitud}/aceptar/{idEscribano}", null);
+                var request = new { IdEscribano = idEscribano };
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/solicitudnotarial/{idSolicitud}/aceptar", request);
 
                 if (!respuesta.IsSuccessStatusCode)
                 {
@@ -51,7 +52,8 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/{idSolicitud}/rechazar/{idEscribano}", null);
+                var request = new { IdEscribano = idEscribano };
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/solicitudnotarial/{idSolicitud}/rechazar", request);
 
                 if (!respuesta.IsSuccessStatusCode)
                 {
@@ -68,7 +70,8 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/{idSolicitud}/finalizar/{idEscribano}", null);
+                var request = new { IdEscribano = idEscribano };
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/solicitudnotarial/{idSolicitud}/finalizar", request);
 
                 if (!respuesta.IsSuccessStatusCode)
                 {
@@ -154,7 +157,7 @@ namespace JMCarsWeb.Services
 
                 if(respuesta.IsSuccessStatusCode)
                 {
-                    return await respuesta.Content.ReadFromJsonAsAsync<List<CompraVentaDTO>>() ?? new List<CompraVentaDTO>();
+                    return await respuesta.Content.ReadFromJsonAsync<List<CompraVentaDTO>>() ?? new List<CompraVentaDTO>();
                 }
                 if(respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
@@ -173,10 +176,12 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                var respuesta = await _httpClient.PutAsync($"api/solicitudnotarial/compraventa/{idCompraVenta}/estado/{idEstadoCompraVenta}/{idEscribano}");
+                var request = new { IdEstadoCompraVenta = idEstadoCompraVenta, IdEscribano = idEscribano };
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/solicitudnotarial/compraventa/{idCompraVenta}/estado", request);
                 if(!respuesta.IsSuccessStatusCode)
                 {
                     string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido actualizar el estado del compraventa");
+                    throw new Exception(error);
                 }
             }
             catch (Exception ex)

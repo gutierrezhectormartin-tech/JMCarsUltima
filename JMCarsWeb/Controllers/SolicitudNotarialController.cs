@@ -120,6 +120,9 @@ namespace JMCarsWeb.Controllers
             try
             {
                 List<SolicitudEscribanoDTO> solicitudes = await _solicitudService.ListarPorEscribano(idUsuario.Value);
+                List<CompraVentaDTO> comprasVenta = await _solicitudService.ListarComprasVentaPorEscribano(idUsuario.Value);
+                Dictionary<int, CompraVentaDTO> compraVentaPorSolicitud = comprasVenta.ToDictionary(cv => cv.Solicitud.IdSolicitud, cv => cv);
+                ViewBag.CompraVentaPorSolicitud = compraVentaPorSolicitud;
                 return View(solicitudes);
             }
             catch (Exception ex)
@@ -201,6 +204,52 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = ex.Message;
             }
 
+            return RedirectToAction("SolicitudesEscribano");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> FinalizarCompraVenta(int idCompraVenta)
+        {
+            int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+            int? idRol = HttpContext.Session.GetInt32("IdRol");
+
+            if (idUsuario == null || idRol != 2)
+            {
+                TempData["Error"] = "Debe iniciar sesión como escribano para gestionar solicitudes.";
+                return RedirectToAction("Index", "Login");
+            }
+
+            try
+            {
+                await _solicitudService.CambiarEstadoCompraVenta(idCompraVenta, 3, idUsuario.Value);
+                TempData["Mensaje"] = "Venta finalizada correctamenta";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction("SolicitudesEscribano");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RechazarCompraVenta(int idCompraVenta)
+        {
+            int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+            int? idRol = HttpContext.Session.GetInt32("IdRol");
+            if (idUsuario == null || idRol != 2)
+            {
+                TempData["Error"] = "Debe iniciar sesión como escribano para gestionar solicitudes.";
+                return RedirectToAction("Index", "Login");
+            }
+            try
+            {
+                await _solicitudService.CambiarEstadoCompraVenta(idCompraVenta, 2, idUsuario.Value);
+                TempData["Mensaje"] = "Venta rechazada correctamente";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
             return RedirectToAction("SolicitudesEscribano");
         }
     }

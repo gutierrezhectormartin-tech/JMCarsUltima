@@ -49,6 +49,11 @@ namespace WebApi.Controllers
             switch (usuarioLogueado.RolUsu)
             {
                 case 1:
+                    bool funcionandoCorrectamente = await _usuarioService.EstadoVerificadorFuncionandoCorrectamente();
+                    if(!funcionandoCorrectamente)
+                    {
+                        TempData["Advertencia"] = "El servicio de notificacion de Solicitudes Vencidas no funciona correctamente";
+                    }
                     return RedirectToAction("Index", "Home");
                 case 2:
                     return RedirectToAction("Index", "Home");

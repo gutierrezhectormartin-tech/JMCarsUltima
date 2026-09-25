@@ -82,5 +82,22 @@ namespace JMCarsWeb.Services
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<bool> EstadoVerificadorFuncionandoCorrectamente()
+        {
+            try
+            {
+                var respuesta = await _httpClient.GetFromJsonAsync<EstadoVerificadorResponse>("api/usuario/estado-verificador");
+                return respuesta?.FuncionandoCorrectamente ?? true;
+            }
+            catch (Exception)
+            {
+                return true; // si no se puede consultar, es que paso algo que esta mas alla del admin, y como es un aviso secundario no vale la pena notificacion
+            }
+        }
+        public class EstadoVerificadorResponse
+        {
+            public bool FuncionandoCorrectamente { get; set; }
+        }
     }
 }

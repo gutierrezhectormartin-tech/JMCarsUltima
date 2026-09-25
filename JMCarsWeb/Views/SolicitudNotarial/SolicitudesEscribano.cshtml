@@ -1,6 +1,7 @@
 @model List<JMCarsWeb.DTOs.SolicitudEscribanoDTO>
 @{
     ViewData["Title"] = "Solicitudes Recibidas";
+    var compraVentaPorSolicitud = ViewBag.CompraVentaPorSolicitud as Dictionary<int, JMCarsWeb.DTOs.CompraVentaDTO>;
 }
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -31,13 +32,13 @@
     {
         <div class="table-responsive">
             <table class="table table-hover align-middle">
-                <thead>
+                <thead class="table-dark">
                     <tr>
                         <th>Vehículo</th>
                         <th>Cliente</th>
                         <th>Fecha</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
+                        <th class="text-center">Solicitud</th>
+                        <th class="text-center">Compraventa</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,15 +64,15 @@
                                 textoEstado = "Rechazada";
                                 claseEstado = "bg-danger";
                                 break;
-                            case 4:
-                                textoEstado = "Finalizada";
-                                claseEstado = "bg-primary";
-                                break;
                             default:
                                 textoEstado = "Desconocido";
                                 claseEstado = "bg-secondary";
                                 break;
                         }
+
+                        JMCarsWeb.DTOs.CompraVentaDTO compraVenta = compraVentaPorSolicitud != null && compraVentaPorSolicitud.ContainsKey(solicitud.IdSolicitud)
+                            ? compraVentaPorSolicitud[solicitud.IdSolicitud]
+                            : null;
 
                         <tr>
                             <td>
@@ -83,29 +84,60 @@
                                 <div class="text-muted small">@solicitud?.Cliente?.Email</div>
                             </td>
                             <td>@solicitud?.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td><span class="badge @claseEstado">@textoEstado</span></td>
-                            <td>
+
+                            <!-- Columna Solicitud -->
+                            <td class="text-center">
+                                <span class="badge @claseEstado mb-2 d-block">@textoEstado</span>
                                 @if (solicitud?.EstadoSolicitud == 1)
                                 {
-                                    <form asp-action="Aceptar" method="post" class="d-inline">
-                                        <input type="hidden" name="idSolicitud" value="@solicitud.IdSolicitud" />
-                                        <button type="submit" class="btn btn-sm btn-success">Aceptar</button>
-                                    </form>
-                                    <form asp-action="Rechazar" method="post" class="d-inline">
-                                        <input type="hidden" name="idSolicitud" value="@solicitud.IdSolicitud" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Rechazar</button>
-                                    </form>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <form asp-action="Aceptar" method="post" class="d-inline">
+                                            <input type="hidden" name="idSolicitud" value="@solicitud.IdSolicitud" />
+                                            <button type="submit" class="btn btn-outline-success" title="Aceptar">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="Rechazar" method="post" class="d-inline">
+                                            <input type="hidden" name="idSolicitud" value="@solicitud.IdSolicitud" />
+                                            <button type="submit" class="btn btn-outline-danger" title="Rechazar">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 }
-                                else if (solicitud?.EstadoSolicitud == 2)
+                            </td>
+
+                            <!-- Columna Compraventa -->
+                            <td class="text-center">
+                                @if (compraVenta == null)
                                 {
-                                    <form asp-action="Finalizar" method="post" class="d-inline">
-                                        <input type="hidden" name="idSolicitud" value="@solicitud.IdSolicitud" />
-                                        <button type="submit" class="btn btn-sm btn-primary">Finalizar Venta</button>
-                                    </form>
+                                    <span class="text-muted small">—</span>
                                 }
-                                else
+                                else if (compraVenta.EstadoCompraVenta == 1)
                                 {
-                                    <span class="text-muted small">Sin acciones</span>
+                                    <span class="badge bg-info text-dark mb-2 d-block">En Proceso</span>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <form asp-action="FinalizarCompraVenta" method="post" class="d-inline">
+                                            <input type="hidden" name="idCompraVenta" value="@compraVenta.IdCompraVenta" />
+                                            <button type="submit" class="btn btn-outline-success" title="Finalizar Venta">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="RechazarCompraVenta" method="post" class="d-inline">
+                                            <input type="hidden" name="idCompraVenta" value="@compraVenta.IdCompraVenta" />
+                                            <button type="submit" class="btn btn-outline-danger" title="Rechazar Venta">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                                else if (compraVenta.EstadoCompraVenta == 3)
+                                {
+                                    <span class="badge bg-primary">Finalizada</span>
+                                }
+                                else if (compraVenta.EstadoCompraVenta == 2)
+                                {
+                                    <span class="badge bg-danger">Rechazada</span>
                                 }
                             </td>
                         </tr>

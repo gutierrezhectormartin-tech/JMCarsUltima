@@ -22,5 +22,6 @@ namespace Logica.Interfaces
         List<SolicituNotarial> ListarPorVehiculo(int pIdVehiculo);
         List<CompraVenta> ListarComprasVentaPorEscribano(int pIdEscribano);
         void CambiarEstadoCompraVenta(int pIdCompraVenta, int pIdEstadoCompraVenta, int pIdEscribano);
+        List<SolicitudVencida> ListarPendientesVencidas();
     }
 }

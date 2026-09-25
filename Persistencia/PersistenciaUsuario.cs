@@ -4,6 +4,7 @@ using Persistencia.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
@@ -166,6 +167,39 @@ namespace Persistencia
             {
                 oConexion.Open();
                 oComando.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+        public List<Usuario> ListarAdministradoresActivos()
+        {
+            List<Usuario> lista = new List<Usuario>();
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+            SqlCommand oComando = new SqlCommand("sp_Admin_ListarAdministradores", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            try
+            {
+                oConexion.Open();
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                while(lector.Read())
+                {
+                    int id = Convert.ToInt32(lector["IdUsuario"]);
+                    string nombre = lector["NombreCompleto"].ToString() ?? string.Empty;
+                    string email = lector["Email"].ToString() ?? string.Empty;
+
+                    Usuario admin = new Administrador(id, nombre, "", email, "", true, Rol.Administrador, null);
+                    lista.Add(admin);
+                }
+                return lista;
             }
             catch (Exception ex)
             {

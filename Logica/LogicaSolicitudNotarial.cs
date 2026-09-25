@@ -82,9 +82,9 @@ namespace Logica
             {
                 _persistenciaSolicitud.Aceptar(pIdSolicitud, pIdEscribano);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new Exception("No se pudo aceptar la solicitud. Intente nuevamente.");
+                throw new Exception(ex.Message);
             }
         }
 
@@ -173,7 +173,7 @@ namespace Logica
 
         public void CambiarEstadoCompraVenta(int pIdCompraVenta, int pIdEstadoCompraVenta, int pIdEscribano)
         {
-            if(pIdEstadoCompraVenta != 3 || pIdEstadoCompraVenta != 2)
+            if(pIdEstadoCompraVenta != 3 && pIdEstadoCompraVenta != 2)
             {
                 throw new Exception("El estado no es valido para una CompraVenta");
             }
@@ -185,6 +185,11 @@ namespace Logica
             {
                 throw;
             }
+        }
+
+        public List<SolicitudVencida> ListarPendientesVencidas()
+        {
+            return _persistenciaSolicitud.ListarPendientesVencidas();
         }
     }
 }

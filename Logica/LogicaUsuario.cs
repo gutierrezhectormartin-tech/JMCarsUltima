@@ -92,5 +92,11 @@ namespace Logica
             return true;
         }
 
+        public List<Usuario> ListarAdministradoresActivos()
+        {
+            return persistenciaUsuario.ListarAdministradoresActivos();
+        }
+        
+
     }
 }

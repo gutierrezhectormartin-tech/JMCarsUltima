@@ -388,7 +388,7 @@ namespace Persistencia
 
             SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
             SqlCommand oComando = new SqlCommand("sp_Compraventa_ListarPorEscribano", oConexion);
-            oComando.CommandType = CommandType.StoredProcedure();
+            oComando.CommandType = CommandType.StoredProcedure;
             oComando.Parameters.AddWithValue("@IdEscribano", pIdEscribano);
 
             try
@@ -432,6 +432,44 @@ namespace Persistencia
             {
                 oConexion.Open();
                 oComando.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public List<SolicitudVencida> ListarPendientesVencidas()
+        {
+            List<SolicitudVencida> lista = new List<SolicitudVencida>();
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+            SqlCommand oComando = new SqlCommand("sp_SolicitudNotarial_ListarPendientesVencidas", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            try
+            {
+                oConexion.Open();
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                while(lector.Read())
+                {
+                    SolicitudVencida solicitudV = new SolicitudVencida
+                    {
+                        IdSolicitud = Convert.ToInt32(lector["IdSolicitud"]),
+                        FechaSolicitud = Convert.ToDateTime(lector["FechaSolicitud"]),
+                        NombreEscribano = lector["NombreEscribano"].ToString(),
+                        NombreCliente = lector["NombreCliente"].ToString(),
+                        NombreMarca = lector["NombreMarca"].ToString(),
+                        NombreModelo = lector["NombreModelo"].ToString()
+                    };
+                    lista.Add(solicitudV);
+                }
+                return lista;
             }
             catch (Exception ex)
             {

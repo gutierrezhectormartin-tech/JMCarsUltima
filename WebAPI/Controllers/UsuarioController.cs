@@ -107,6 +107,12 @@ namespace WebAPI.Controllers
             }  
         }
 
+        [HttpGet("estado-verificador")]
+        public IActionResult EstadoVerificador()
+        {
+            return Ok(new { funcionandoCorrectamente = VerificadorSolicitudesVencidasService.UltimaEjecucionExitosa });
+        }
+
         //[HttpGet("generar-hashes")]
         //public IActionResult GenerarHashes()
         //{

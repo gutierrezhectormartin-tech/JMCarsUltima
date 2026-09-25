@@ -15,5 +15,6 @@ namespace Persistencia.Interfaces
 
         void ActualizarContrasena(int pIdUsuario, string pNuevaContrasena);
         bool ExisteEmail(string pEmail);
+        List<Usuario> ListarAdministradoresActivos();
     }
 }
