@@ -237,5 +237,83 @@ namespace Persistencia
                 oConexion.Close();
             }
         }
+
+        public List<Escribano> ListarInactivos()
+        {
+            List<Escribano> lista = new List<Escribano>();
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Escribano_ListarInactivos", oConexion);
+
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            try
+            {
+                oConexion.Open();
+
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                while (lector.Read())
+                {
+                    DateTime? fechaAceptacion = lector["FechaAceptacionTerminos"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechaAceptacionTerminos"]);
+
+                    Escribano unEscribano = new Escribano(
+                        Convert.ToInt32(lector["IdUsuario"]),
+                        lector["NombreCompleto"].ToString() ?? string.Empty,
+                        lector["Telefono"].ToString() ?? string.Empty,
+                        lector["Email"].ToString() ?? string.Empty,
+                        "", false, Rol.Escribano, fechaAceptacion,
+                        lector["NumCajaProf"].ToString() ?? string.Empty,
+                        lector["DireccionEstudio"].ToString() ?? string.Empty);
+
+                    lista.Add(unEscribano);
+                }
+
+                lector.Close();
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public void Activar(int pIdUsuario)
+        {
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Admin_SetEstadoUsuario", oConexion);
+
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            SqlParameter _id = new SqlParameter("@Id", pIdUsuario);
+
+            SqlParameter _estado = new SqlParameter("@Estado", true);
+
+            oComando.Parameters.Add(_id);
+            oComando.Parameters.Add(_estado);
+
+            try
+            {
+                oConexion.Open();
+
+                oComando.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
     }
 }

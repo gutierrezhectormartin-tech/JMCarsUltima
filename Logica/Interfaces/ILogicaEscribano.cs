@@ -18,5 +18,7 @@ namespace Logica.Interfaces
         void Inactivar(int pIdUsuario);
 
         List<Escribano> ListarActivos();
+        List<Escribano> ListarInactivos();
+        void Activar(int pIdUsuario);
     }
 }

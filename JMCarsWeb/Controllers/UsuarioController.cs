@@ -55,9 +55,9 @@ namespace WebApi.Controllers
                 TempData["Mensaje"] = "Tu contraseña fue reseteada correctamente. Inicia sesión con tu nueva contraseña.";
                 return RedirectToAction("Index", "Login");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                TempData["Error"] = "El enlace no es válido o ya expiró";
+                TempData["Error"] = ex.Message;
                 ViewBag.Token = ptoken;
                 return View();
             }

@@ -245,7 +245,9 @@ create proc sp_Usuario_Login
 as
 begin
 
-    select U.IdUsuario, U.NombreCompleto, U.Contrasena, U.Estado, U.FechaAceptacionTerminos,
+    -- Tambien devuelve al escribano inactivo (pendiente de aprobacion) para poder avisarle en la Logica;
+    -- si hubiera mas de una fila, primero va la del usuario activo
+    select top 1 U.IdUsuario, U.NombreCompleto, U.Contrasena, U.Estado, U.FechaAceptacionTerminos,
         case
             when A.IdUsuario is not null then 1 -- Admin
             when E.IdUsuario is not null then 2 -- Escribano
@@ -255,7 +257,8 @@ begin
     left join Administrador A on U.IdUsuario = A.IdUsuario
     left join Escribano E on U.IdUsuario = E.IdUsuario
     left join Cliente C on U.IdUsuario = C.IdUsuario
-    where U.Email = @Email and U.Estado = 1;
+    where U.Email = @Email and (U.Estado = 1 or E.IdUsuario is not null)
+    order by U.Estado desc;
 end
 go
 
@@ -274,6 +277,22 @@ begin
 
     begin transaction;
     begin try
+        -- El email no puede estar en uso por un usuario activo ni por un escribano (pendiente de aprobacion o no)
+        if exists (select 1 from Usuario U
+                   left join Escribano E on U.IdUsuario = E.IdUsuario
+                   where U.Email = @Email and (U.Estado = 1 or E.IdUsuario is not null))
+        begin
+            raiserror ('Ya existe una cuenta registrada con ese email.', 16, 1);
+        end
+
+        -- La cedula es el identificador del cliente: no puede repetirse entre clientes activos
+        if exists (select 1 from Cliente C
+                   inner join Usuario U on C.IdUsuario = U.IdUsuario
+                   where C.Cedula = @Cedula and U.Estado = 1)
+        begin
+            raiserror ('Ya existe un cliente registrado con esa cédula.', 16, 1);
+        end
+
         insert into Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
         values (@NombreCompleto, @Telefono, @Email, @Contrasena, 1, @FechaAceptacionTerminos);
         insert into Cliente (IdUsuario, Cedula) values (SCOPE_IDENTITY(), @Cedula);
@@ -299,6 +318,20 @@ begin
 
     begin transaction;
     begin try
+        -- El email no puede estar en uso por un usuario activo ni por un escribano (pendiente de aprobacion o no)
+        if exists (select 1 from Usuario U
+                   left join Escribano E on U.IdUsuario = E.IdUsuario
+                   where U.Email = @Email and (U.Estado = 1 or E.IdUsuario is not null))
+        begin
+            raiserror ('Ya existe una cuenta registrada con ese email.', 16, 1);
+        end
+
+        -- El numero de caja profesional es el identificador del escribano: no puede repetirse
+        if exists (select 1 from Escribano where NumCajaProf = @NumCajaProf)
+        begin
+            raiserror ('Ya existe un escribano registrado con ese número de caja profesional.', 16, 1);
+        end
+
         insert into Usuario (NombreCompleto, Telefono, Email, Contrasena, Estado, FechaAceptacionTerminos)
         values (@NombreCompleto, @Telefono, @Email, @Contrasena, 0, @FechaAceptacionTerminos);
         insert into Escribano (IdUsuario, NumCajaProf, DireccionEstudio) 
@@ -1331,6 +1364,19 @@ begin
     from Usuario U
     join Escribano E on U.IdUsuario = E.IdUsuario
     where U.Estado = 1;
+end
+go
+
+-- Listar Escribanos inactivos (pendientes de aprobacion o dados de baja), para que el Administrador los active
+create proc sp_Escribano_ListarInactivos
+as
+begin
+
+    select U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.FechaAceptacionTerminos, E.DireccionEstudio, E.NumCajaProf
+    from Usuario U
+    join Escribano E on U.IdUsuario = E.IdUsuario
+    where U.Estado = 0
+    order by U.FechaAceptacionTerminos asc;
 end
 go
 

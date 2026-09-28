@@ -24,7 +24,15 @@ namespace JMCarsWeb.Services
                     return await respuesta.Content.ReadFromJsonAsync<UsuarioDTO>();
                 }
 
-                return null;
+                //credenciales incorrectas
+                if (respuesta.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    return null;
+                }
+
+                //otro error (ej. escribano pendiente de aprobacion)
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo iniciar sesión, intentelo nuevamente.");
+                throw new Exception(error);
             }
             catch (Exception ex)
             {
@@ -74,7 +82,9 @@ namespace JMCarsWeb.Services
                 var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/resetear-contrasena", request);
                 if (!respuesta.IsSuccessStatusCode)
                 {
-                    throw new Exception(); //A drede no damos mas info
+                    //la API ya devuelve un mensaje generico si el token no es valido, asi que no damos mas info de la necesaria
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "El enlace no es válido o ya expiró");
+                    throw new Exception(error);
                 }
             }
             catch (Exception ex)

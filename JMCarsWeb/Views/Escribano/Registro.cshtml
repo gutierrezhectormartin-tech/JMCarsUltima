@@ -8,6 +8,16 @@
         <h2>Registro de Escribano</h2>
         <p class="text-muted">Tu cuenta será activada cuando un administrador la apruebe.</p>
 
+        @if(TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        @if(TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success">@TempData["Mensaje"]</div>
+        }
+
         @if (ViewBag.Error != null)
         {
             <div class="alert alert-danger">@ViewBag.Error</div>
@@ -46,7 +56,7 @@
                 @Html.ValidationMessageFor(m => m.Direccion, "", new { @class = "text-danger" })
             </div>
             <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" name="aceptaTerminos" id="aceptaTerminos" required />
+                <input type="checkbox" class="form-check-input" name="aceptaTerminos" id="aceptaTerminos" value="true" required />
                 <label class="form-check-label" for="aceptaTerminos">
                     Acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#modalTerminos">Terminos y Condiciones</a>
                 </label>

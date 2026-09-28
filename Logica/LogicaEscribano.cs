@@ -47,5 +47,27 @@ namespace Logica
         {
             return persistenciaEscribano.ListarActivos();
         }
+
+        public List<Escribano> ListarInactivos()
+        {
+            return persistenciaEscribano.ListarInactivos();
+        }
+
+        public void Activar(int pIdUsuario)
+        {
+            Escribano unEscribano = persistenciaEscribano.ObtenerPorId(pIdUsuario);
+
+            if (unEscribano == null)
+            {
+                throw new Exception("El escribano no existe.");
+            }
+
+            if (unEscribano.EstadoUsu)
+            {
+                throw new Exception("El escribano ya se encuentra activo.");
+            }
+
+            persistenciaEscribano.Activar(pIdUsuario);
+        }
     }
 }

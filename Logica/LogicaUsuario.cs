@@ -36,6 +36,12 @@ namespace Logica
                 return null!;
             }
 
+            // solo llegan inactivos los escribanos (pendientes de aprobacion o dados de baja)
+            if (!usuario.EstadoUsu)
+            {
+                throw new Exception("Tu cuenta de escribano no está activa. Si te registraste recientemente, un administrador tiene que aprobarla.");
+            }
+
             return usuario;
         }
 
@@ -78,6 +84,11 @@ namespace Logica
 
         public bool ResetearContrasena(string pToken, string pNuevaContrasena)
         {
+            if (string.IsNullOrWhiteSpace(pNuevaContrasena) || pNuevaContrasena.Length < 3)
+            {
+                throw new Exception("La contraseña debe tener al menos 3 caracteres.");
+            }
+
             TokenRecuperacion tokenValido = persistenciaToken.ObtenerValido(pToken);
 
             if(tokenValido == null)

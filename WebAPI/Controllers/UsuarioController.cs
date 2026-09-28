@@ -96,7 +96,7 @@ namespace WebAPI.Controllers
 
                 if(!exito)
                 {
-                    return BadRequest(new { mensaje = "El enlace no es válido o esta vencido" });
+                    return BadRequest(new { mensaje = "El enlace no es válido o está vencido" });
                 }
 
                 return Ok(new { mensaje = "Contraseña actualizada correctamente" });
@@ -139,7 +139,7 @@ namespace WebAPI.Controllers
     public class ResetearContrasenaRequest
     {
         public string Token { get; set; }
-        public string NuevaContrasena { get; set; }
+        public string? NuevaContrasena { get; set; }
     }
 
 }

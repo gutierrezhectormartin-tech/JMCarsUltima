@@ -66,6 +66,26 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpGet("inactivos")]
+        public IActionResult ListarInactivos()
+        {
+            try
+            {
+                List<Escribano> escribanos = _logicaEscribano.ListarInactivos();
+
+                if (escribanos == null || !escribanos.Any())
+                {
+                    return NotFound(new { mensaje = "No hay escribanos pendientes de aprobación" });
+                }
+
+                return Ok(escribanos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
         public IActionResult ObtenerPorId(int id)
         {
@@ -111,6 +131,20 @@ namespace WebAPI.Controllers
             {
                 _logicaEscribano.Inactivar(id);
                 return Ok(new { mensaje = "La cuenta ha sido correctametne inactivada" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/activar")]
+        public IActionResult Activar(int id)
+        {
+            try
+            {
+                _logicaEscribano.Activar(id);
+                return Ok(new { mensaje = "La cuenta del escribano ha sido activada" });
             }
             catch (Exception ex)
             {

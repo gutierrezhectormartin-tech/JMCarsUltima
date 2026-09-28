@@ -99,5 +99,45 @@ namespace JMCarsWeb.Services
                 throw new Exception("No se ha podido inactivar el escribano: " + ex.Message);
             }
         }
+
+        public async Task<List<EscribanoDTO>> ListarInactivos()
+        {
+            try
+            {
+                var respuesta = await _httpClient.GetAsync("api/escribano/inactivos");
+
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<List<EscribanoDTO>>() ?? new List<EscribanoDTO>();
+                }
+                if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return new List<EscribanoDTO>();
+                }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido obtener la lista de escribanos pendientes, intentelo nuevamente");
+                throw new Exception(error);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido obtener la lista de escribanos pendientes: " + ex.Message);
+            }
+        }
+
+        public async Task Activar(int id)
+        {
+            try
+            {
+                var respuesta = await _httpClient.PutAsync($"api/escribano/{id}/activar", null);
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido activar el escribano, intentelo nuevamente.");
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido activar el escribano: " + ex.Message);
+            }
+        }
     }
 }

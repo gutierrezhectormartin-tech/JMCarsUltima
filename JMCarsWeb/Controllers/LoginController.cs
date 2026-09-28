@@ -31,7 +31,17 @@ namespace WebApi.Controllers
             }
 
             // Martin cambiamos la llamaada a la logica, para desacoplar por el servicio de usuarios
-            UsuarioDTO? usuarioLogueado = await _usuarioService.Login(model.Email, model.Contrasena);
+            UsuarioDTO? usuarioLogueado;
+            try
+            {
+                usuarioLogueado = await _usuarioService.Login(model.Email, model.Contrasena);
+            }
+            catch (Exception ex)
+            {
+                // ej. escribano pendiente de aprobacion
+                ViewBag.Error = ex.Message;
+                return View("Index", model);
+            }
 
             if (usuarioLogueado == null)
             {
