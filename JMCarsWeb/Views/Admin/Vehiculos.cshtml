@@ -83,9 +83,20 @@
                                 {
                                     <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i>Inactiva</span>
                                 }
+                                else if (v.IdEstadoPublicacion == 5)
+                                {
+                                    <span class="badge bg-info"><i class="bi bi-hourglass-split"></i>En Trámite</span>
+                                }
+                                else if (v.IdEstadoPublicacion == 6)
+                                {
+                                    <span class="badge bg-dark"><i class="bi bi-bag-check"></i>Vendido</span>
+                                }
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" asp-route-origen="admin" class="btn btn-outline-info btn-sm" title="Ver Detalle">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
                                     @if(v.IdEstadoPublicacion == 1) //hacemos de pendiente a aproar o rechazar
                                     {
                                         <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
@@ -124,7 +135,7 @@
                                             </button>
                                         </form>
                                     }
-                                    else //aca solo van a estar rechazadas o inactivas, solo debemos aprobarlas(activarlas)
+                                    else if (v.IdEstadoPublicacion == 3 || v.IdEstadoPublicacion == 4) //aca solo van a estar rechazadas o inactivas, solo debemos aprobarlas(activarlas)
                                     {
                                         <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
                                             @Html.AntiForgeryToken()

@@ -1,9 +1,17 @@
 ﻿@model JMCarsWeb.DTOs.VehiculoDTO
 @{
     bool vieneDeHome = string.Equals(ViewBag.Origen as string, "home", StringComparison.OrdinalIgnoreCase);
+    bool vieneDeAdmin = string.Equals(ViewBag.Origen as string, "admin", StringComparison.OrdinalIgnoreCase);
     string volverAccion = vieneDeHome ? "Index" : "MisVehiculos";
     string volverControlador = vieneDeHome ? "Home" : "Vehiculo";
     string volverTexto = vieneDeHome ? "Volver al Inicio" : "Volver a Mis Vehículos";
+
+    if (vieneDeAdmin)
+    {
+        volverAccion = "Vehiculos";
+        volverControlador = "Admin";
+        volverTexto = "Volver al Panel de Publicaciones";
+    }
 }
 
 <style>

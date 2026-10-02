@@ -31,8 +31,24 @@ namespace Persistencia
                 SqlDataReader lector =
                     oComando.ExecuteReader();
 
+                Dictionary<int, Vehiculo> vistos = new Dictionary<int, Vehiculo>();
+
                 while (lector.Read())
                 {
+                    int idVehiculo = Convert.ToInt32(lector["IdVehiculo"]);
+
+                    string urlFoto = lector["UrlFoto"] != DBNull.Value ? lector["UrlFoto"].ToString() : null;
+                    bool esFotoReal = urlFoto != null && !urlFoto.EndsWith("sin-foto.jpg");
+
+                    if (vistos.TryGetValue(idVehiculo, out Vehiculo existente))
+                    {
+                        if (esFotoReal && !existente.Fotografia.Contains(urlFoto))
+                        {
+                            existente.Fotografia.Add(urlFoto);
+                        }
+                        continue;
+                    }
+
                     Marcas unaMarca = new Marcas(Convert.ToInt32(lector["IdMarca"]), lector["NombreMarca"].ToString());
 
                     Modelos unModelo = new Modelos(Convert.ToInt32(lector["IdModelo"]), lector["NombreModelo"].ToString(), unaMarca);
@@ -42,10 +58,14 @@ namespace Persistencia
 
 
                     List<string> fotos = new List<string>();
+                    if (esFotoReal)
+                    {
+                        fotos.Add(urlFoto);
+                    }
                     decimal? latitud = lector["Latitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Latitud"]);
                     decimal? longitud = lector["Longitud"] == DBNull.Value ? null : Convert.ToDecimal(lector["Longitud"]);
 
-                    Vehiculo unVehiculo = new Vehiculo(Convert.ToInt32(lector["IdVehiculo"]),
+                    Vehiculo unVehiculo = new Vehiculo(idVehiculo,
                         Convert.ToDecimal(lector["Precio"]),
                         Convert.ToInt32(lector["Kilometraje"]),
                         Convert.ToInt32(lector["Ano"]),
@@ -59,6 +79,7 @@ namespace Persistencia
                         unCliente,
                         fotos);
 
+                    vistos[idVehiculo] = unVehiculo;
                     lista.Add(unVehiculo);
                 }
 

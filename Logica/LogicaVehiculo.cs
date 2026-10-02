@@ -51,7 +51,7 @@ namespace Logica
             }
             catch (Exception ex)
             {
-                throw new Exception("Error en la lógica al registrar el vehículo: " + ex.Message);
+                throw new Exception(ex.Message);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Logica
             }
             catch (Exception ex)
             {
-                throw new Exception("Error en la lógica al modificar el vehículo: " + ex.Message);
+                throw new Exception(ex.Message);
             }
         }
 
@@ -126,7 +126,7 @@ namespace Logica
 
                 if(solicitudes.Any())
                 {
-                    throw new Exception("El vehiculo tiene solicitudes notariales asociadas y nos se puede dar de baja");
+                    throw new Exception("El vehículo tiene solicitudes notariales en curso y no se puede dar de baja.");
                 }
 
             }

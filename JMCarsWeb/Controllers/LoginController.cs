@@ -38,7 +38,6 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                // ej. escribano pendiente de aprobacion
                 ViewBag.Error = ex.Message;
                 return View("Index", model);
             }

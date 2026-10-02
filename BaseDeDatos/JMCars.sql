@@ -245,8 +245,6 @@ create proc sp_Usuario_Login
 as
 begin
 
-    -- Tambien devuelve al escribano inactivo (pendiente de aprobacion) para poder avisarle en la Logica;
-    -- si hubiera mas de una fila, primero va la del usuario activo
     select top 1 U.IdUsuario, U.NombreCompleto, U.Contrasena, U.Estado, U.FechaAceptacionTerminos,
         case
             when A.IdUsuario is not null then 1 -- Admin
@@ -277,7 +275,6 @@ begin
 
     begin transaction;
     begin try
-        -- El email no puede estar en uso por un usuario activo ni por un escribano (pendiente de aprobacion o no)
         if exists (select 1 from Usuario U
                    left join Escribano E on U.IdUsuario = E.IdUsuario
                    where U.Email = @Email and (U.Estado = 1 or E.IdUsuario is not null))
@@ -285,7 +282,6 @@ begin
             raiserror ('Ya existe una cuenta registrada con ese email.', 16, 1);
         end
 
-        -- La cedula es el identificador del cliente: no puede repetirse entre clientes activos
         if exists (select 1 from Cliente C
                    inner join Usuario U on C.IdUsuario = U.IdUsuario
                    where C.Cedula = @Cedula and U.Estado = 1)
@@ -318,7 +314,6 @@ begin
 
     begin transaction;
     begin try
-        -- El email no puede estar en uso por un usuario activo ni por un escribano (pendiente de aprobacion o no)
         if exists (select 1 from Usuario U
                    left join Escribano E on U.IdUsuario = E.IdUsuario
                    where U.Email = @Email and (U.Estado = 1 or E.IdUsuario is not null))
@@ -326,7 +321,6 @@ begin
             raiserror ('Ya existe una cuenta registrada con ese email.', 16, 1);
         end
 
-        -- El numero de caja profesional es el identificador del escribano: no puede repetirse
         if exists (select 1 from Escribano where NumCajaProf = @NumCajaProf)
         begin
             raiserror ('Ya existe un escribano registrado con ese número de caja profesional.', 16, 1);
@@ -485,7 +479,9 @@ begin
         MA.NombreMarca,
 
         U.IdUsuario,
-        U.NombreCompleto
+        U.NombreCompleto,
+
+        isnull(FV.UrlFoto, 'images/sin-foto.jpg') as UrlFoto
 
     from Vehiculo V
 
@@ -493,6 +489,7 @@ begin
     inner join Marca MA on M.IdMarca = MA.IdMarca
     inner join Usuario U on V.IdUsuarioVendedor = U.IdUsuario
     inner join EstadoPublicacion EP on V.IdEstadoPublicacion = EP.IdEstadoPublicacion
+    left join FotoVehiculo FV on V.IdVehiculo = FV.IdVehiculo
 end
 go
 
@@ -1367,7 +1364,7 @@ begin
 end
 go
 
--- Listar todos los Clientes (activos e inactivos), para que el Administrador gestione sus cuentas
+-- Listar todos los Clientes (Administrador)
 create proc sp_Cliente_ListarTodos
 as
 begin
@@ -1379,7 +1376,7 @@ begin
 end
 go
 
--- Listar todos los Escribanos (activos e inactivos), para que el Administrador gestione sus cuentas
+-- Listar todos los Escribanos (Administrador)
 create proc sp_Escribano_ListarTodos
 as
 begin
@@ -1391,8 +1388,7 @@ begin
 end
 go
 
--- Cantidad de vehiculos del cliente que siguen publicados (Pendiente, Aprobada o En Tramite).
--- Si tiene alguno, no se puede inactivar su cuenta
+-- Vehículos activos de un Cliente
 create proc sp_Cliente_TieneVehiculosActivos
 @IdUsuario int
 as
@@ -1405,8 +1401,7 @@ begin
 end
 go
 
--- Cantidad de operaciones en curso del cliente, como comprador o como vendedor:
--- solicitudes Pendientes o compraventas En Proceso. Si tiene alguna, no se puede inactivar su cuenta
+-- Operaciones en curso de un Cliente
 create proc sp_Cliente_TieneOperacionesEnCurso
 @IdUsuario int
 as
@@ -1421,8 +1416,7 @@ begin
 end
 go
 
--- Cantidad de operaciones en curso del escribano: solicitudes Pendientes o compraventas En Proceso.
--- Si tiene alguna, no se puede inactivar su cuenta
+-- Operaciones en curso de un Escribano
 create proc sp_Escribano_TieneOperacionesEnCurso
 @IdUsuario int
 as
@@ -1437,8 +1431,7 @@ begin
 end
 go
 
--- Cantidad de clientes activos con esa cedula. Se usa antes de reactivar un cliente,
--- por si mientras estuvo inactivo se registro otra cuenta con la misma cedula
+-- Verificar Cédula de un Cliente activo
 create proc sp_Cliente_ExisteCedulaActiva
 @Cedula varchar(8)
 as

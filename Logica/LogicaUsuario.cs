@@ -36,7 +36,6 @@ namespace Logica
                 return null!;
             }
 
-            // solo llegan inactivos los escribanos (pendientes de aprobacion o dados de baja)
             if (!usuario.EstadoUsu)
             {
                 throw new Exception("Tu cuenta de escribano no está activa. Si te registraste recientemente, un administrador tiene que aprobarla; si fue inactivada, un administrador puede reactivarla.");

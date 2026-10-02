@@ -286,7 +286,6 @@ namespace JMCarsWeb.Controllers
                     return RedirectToAction("MisVehiculos");
                 }
 
-                // solo se inactivan publicaciones Pendientes (1) o Aprobadas (2)
                 if (vehiculo.IdEstadoPublicacion != 1 && vehiculo.IdEstadoPublicacion != 2)
                 {
                     TempData["Error"] = "Solo se pueden inactivar publicaciones pendientes o aprobadas.";
@@ -329,7 +328,6 @@ namespace JMCarsWeb.Controllers
                     return RedirectToAction("MisVehiculos");
                 }
 
-                // al reactivarla vuelve directo a Aprobada (2)
                 await _vehiculoService.CambiarEstadoVehiculo(id, 2);
                 TempData["Mensaje"] = "La publicación fue activada";
             }

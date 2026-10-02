@@ -54,7 +54,6 @@ namespace Logica
                 throw new Exception("La cuenta del escribano ya se encuentra inactiva.");
             }
 
-            // no se puede inactivar si tiene solicitudes o compraventas asignadas sin terminar
             if (persistenciaEscribano.TieneOperacionesEnCurso(pIdUsuario))
             {
                 throw new Exception("No se puede inactivar la cuenta porque tiene solicitudes notariales o compraventas en curso.");
@@ -82,7 +81,6 @@ namespace Logica
                 throw new Exception("El escribano ya se encuentra activo.");
             }
 
-            // el email pudo haber quedado en uso por otra cuenta activa
             if (persistenciaUsuario.ExisteEmail(unEscribano.Email))
             {
                 throw new Exception("No se puede activar la cuenta porque ya existe otra cuenta activa con el email " + unEscribano.Email + ".");

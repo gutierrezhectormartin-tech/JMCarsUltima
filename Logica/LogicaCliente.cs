@@ -52,7 +52,6 @@ namespace Logica
                 throw new Exception("La cuenta del cliente ya se encuentra inactiva.");
             }
 
-            // no se puede inactivar si tiene algo en curso, como comprador o como vendedor
             if (persistenciaCliente.TieneOperacionesEnCurso(pIdUsuario))
             {
                 throw new Exception("No se puede inactivar la cuenta porque tiene solicitudes notariales o compraventas en curso.");
@@ -80,7 +79,6 @@ namespace Logica
                 throw new Exception("La cuenta del cliente ya se encuentra activa.");
             }
 
-            // mientras estuvo inactivo pudo haberse registrado otra cuenta con el mismo email o cedula
             if (persistenciaUsuario.ExisteEmail(unCliente.Email))
             {
                 throw new Exception("No se puede activar la cuenta porque ya existe otra cuenta activa con el email " + unCliente.Email + ".");

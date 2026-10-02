@@ -25,7 +25,7 @@ namespace JMCarsWeb.Controllers
 
             if(idRol != 1)
             {
-                TempData["Error"] = "Ningun usuario con permisos de adminitrador logueado";
+                TempData["Error"] = "Ningún usuario con permisos de administrador logueado";
                 return RedirectToAction("Index", "Login");
             }
 
@@ -49,7 +49,7 @@ namespace JMCarsWeb.Controllers
 
             if(idRol != 1)
             {
-                TempData["Error"] = "Ningun usuario con permisos de adminitrador logueado";
+                TempData["Error"] = "Ningún usuario con permisos de administrador logueado";
                 return RedirectToAction("Index", "Login");
             }
 
@@ -74,7 +74,7 @@ namespace JMCarsWeb.Controllers
 
             if(idRol != 1)
             {
-                TempData["Error"] = "Ningun usuario con permisos de adminitrador logueado";
+                TempData["Error"] = "Ningún usuario con permisos de administrador logueado";
                 return RedirectToAction("Index", "Login");
             }
 
@@ -100,7 +100,7 @@ namespace JMCarsWeb.Controllers
 
             if(idRol != 1)
             {
-                TempData["Error"] = "Ningun usuario con permisos de adminitrador logueado";
+                TempData["Error"] = "Ningún usuario con permisos de administrador logueado";
                 return RedirectToAction("Index", "Login");
             }
 
@@ -124,7 +124,7 @@ namespace JMCarsWeb.Controllers
 
             if(idRol != 1)
             {
-                TempData["Error"] = "Ningun usuario con permisos de adminitrador logueado";
+                TempData["Error"] = "Ningún usuario con permisos de administrador logueado";
                 return RedirectToAction("Index", "Login");
             }
 
@@ -148,7 +148,7 @@ namespace JMCarsWeb.Controllers
 
             if(idRol != 1)
             {
-                TempData["Error"] = "Ningun usuario con permisos de adminitrador logueado";
+                TempData["Error"] = "Ningún usuario con permisos de administrador logueado";
                 return RedirectToAction("Index", "Login");
             }
 
@@ -172,7 +172,7 @@ namespace JMCarsWeb.Controllers
 
             if(idRol != 1)
             {
-                TempData["Error"] = "Ningun usuario con permisos de adminitrador logueado";
+                TempData["Error"] = "Ningún usuario con permisos de administrador logueado";
                 return RedirectToAction("Index", "Login");
             }
 
