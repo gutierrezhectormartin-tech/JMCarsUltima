@@ -109,7 +109,7 @@ namespace WebApi.Controllers
                 escribanoPasado.NumeroCaja = HttpContext.Session.GetString("NumeroCajaEscribano");
                 await _escribanoService.ActualizarPerfil(escribanoPasado);
                 HttpContext.Session.SetString("NombreCompleto", escribanoPasado.NombreCompleto);
-                TempData["Mensaje"] = "Perfil actualizado correectamente";
+                TempData["Mensaje"] = "Perfil actualizado correctamente";
                 return View(escribanoPasado);
             }
             catch (Exception ex)

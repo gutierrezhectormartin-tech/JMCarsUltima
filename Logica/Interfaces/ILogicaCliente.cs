@@ -16,5 +16,9 @@ namespace Logica.Interfaces
         void ActualizarPerfil(Cliente pCliente);
 
         void Inactivar(int pIdUsuario);
+
+        void Activar(int pIdUsuario);
+
+        List<Cliente> ListarTodos();
     }
 }

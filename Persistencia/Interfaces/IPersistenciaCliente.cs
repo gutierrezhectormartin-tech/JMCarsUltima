@@ -16,5 +16,15 @@ namespace Persistencia.Interfaces
         void ActualizarPerfil(Cliente pCliente);
 
         void Inactivar(int pIdUsuario);
+
+        void Activar(int pIdUsuario);
+
+        List<Cliente> ListarTodos();
+
+        bool TieneVehiculosActivos(int pIdUsuario);
+
+        bool TieneOperacionesEnCurso(int pIdUsuario);
+
+        bool ExisteCedulaActiva(string pCedula);
     }
 }

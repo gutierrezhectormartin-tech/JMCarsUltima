@@ -267,6 +267,80 @@ namespace JMCarsWeb.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Inactivar(int id)
+        {
+            int? idUsuarioSession = HttpContext.Session.GetInt32("IdUsuario");
+            if (idUsuarioSession == null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            try
+            {
+                VehiculoDTO vehiculo = await _vehiculoService.DetalleVehiculo(id);
+
+                if (vehiculo.Vendedor?.IdUsuario != idUsuarioSession.Value)
+                {
+                    return RedirectToAction("MisVehiculos");
+                }
+
+                // solo se inactivan publicaciones Pendientes (1) o Aprobadas (2)
+                if (vehiculo.IdEstadoPublicacion != 1 && vehiculo.IdEstadoPublicacion != 2)
+                {
+                    TempData["Error"] = "Solo se pueden inactivar publicaciones pendientes o aprobadas.";
+                    return RedirectToAction("MisVehiculos");
+                }
+
+                await _vehiculoService.CambiarEstadoVehiculo(id, 4);
+                TempData["Mensaje"] = "La publicación fue inactivada";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction("MisVehiculos");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Activar(int id)
+        {
+            int? idUsuarioSession = HttpContext.Session.GetInt32("IdUsuario");
+            if (idUsuarioSession == null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            try
+            {
+                VehiculoDTO vehiculo = await _vehiculoService.DetalleVehiculo(id);
+
+                if (vehiculo.Vendedor?.IdUsuario != idUsuarioSession.Value)
+                {
+                    return RedirectToAction("MisVehiculos");
+                }
+
+                if (vehiculo.IdEstadoPublicacion != 4)
+                {
+                    TempData["Error"] = "Solo se pueden activar publicaciones inactivas.";
+                    return RedirectToAction("MisVehiculos");
+                }
+
+                // al reactivarla vuelve directo a Aprobada (2)
+                await _vehiculoService.CambiarEstadoVehiculo(id, 2);
+                TempData["Mensaje"] = "La publicación fue activada";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction("MisVehiculos");
+        }
+
         //[HttpPost]
         //[ValidateAntiForgeryToken]
         //public async Task<IActionResult> Inactivar(int id)

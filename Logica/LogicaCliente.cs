@@ -13,10 +13,12 @@ namespace Logica
     public class LogicaCliente : ILogicaCliente
     {
         private IPersistenciaCliente persistenciaCliente;
+        private IPersistenciaUsuario persistenciaUsuario;
 
         public LogicaCliente()
         {
             persistenciaCliente = FabricaPersistencia.GetInstancia().GetPersistenciaCliente();
+            persistenciaUsuario = FabricaPersistencia.GetInstancia().GetPersistenciaUsuario();
         }
 
         public void Registrar(Cliente pCliente)
@@ -38,7 +40,63 @@ namespace Logica
 
         public void Inactivar(int pIdUsuario)
         {
+            Cliente unCliente = persistenciaCliente.ObtenerPorId(pIdUsuario);
+
+            if (unCliente == null)
+            {
+                throw new Exception("El cliente no existe.");
+            }
+
+            if (!unCliente.EstadoUsu)
+            {
+                throw new Exception("La cuenta del cliente ya se encuentra inactiva.");
+            }
+
+            // no se puede inactivar si tiene algo en curso, como comprador o como vendedor
+            if (persistenciaCliente.TieneOperacionesEnCurso(pIdUsuario))
+            {
+                throw new Exception("No se puede inactivar la cuenta porque tiene solicitudes notariales o compraventas en curso.");
+            }
+
+            if (persistenciaCliente.TieneVehiculosActivos(pIdUsuario))
+            {
+                throw new Exception("No se puede inactivar la cuenta porque tiene vehículos publicados, pendientes de aprobación o en trámite. Primero hay que inactivarlos.");
+            }
+
             persistenciaCliente.Inactivar(pIdUsuario);
+        }
+
+        public void Activar(int pIdUsuario)
+        {
+            Cliente unCliente = persistenciaCliente.ObtenerPorId(pIdUsuario);
+
+            if (unCliente == null)
+            {
+                throw new Exception("El cliente no existe.");
+            }
+
+            if (unCliente.EstadoUsu)
+            {
+                throw new Exception("La cuenta del cliente ya se encuentra activa.");
+            }
+
+            // mientras estuvo inactivo pudo haberse registrado otra cuenta con el mismo email o cedula
+            if (persistenciaUsuario.ExisteEmail(unCliente.Email))
+            {
+                throw new Exception("No se puede activar la cuenta porque ya existe otra cuenta activa con el email " + unCliente.Email + ".");
+            }
+
+            if (persistenciaCliente.ExisteCedulaActiva(unCliente.Cedula))
+            {
+                throw new Exception("No se puede activar la cuenta porque ya existe otro cliente activo con la cédula " + unCliente.Cedula + ".");
+            }
+
+            persistenciaCliente.Activar(pIdUsuario);
+        }
+
+        public List<Cliente> ListarTodos()
+        {
+            return persistenciaCliente.ListarTodos();
         }
     }
 }

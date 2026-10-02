@@ -1367,16 +1367,88 @@ begin
 end
 go
 
--- Listar Escribanos inactivos (pendientes de aprobacion o dados de baja), para que el Administrador los active
-create proc sp_Escribano_ListarInactivos
+-- Listar todos los Clientes (activos e inactivos), para que el Administrador gestione sus cuentas
+create proc sp_Cliente_ListarTodos
 as
 begin
 
-    select U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.FechaAceptacionTerminos, E.DireccionEstudio, E.NumCajaProf
+    select U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, U.FechaAceptacionTerminos, C.Cedula
+    from Usuario U
+    join Cliente C on U.IdUsuario = C.IdUsuario
+    order by U.NombreCompleto asc;
+end
+go
+
+-- Listar todos los Escribanos (activos e inactivos), para que el Administrador gestione sus cuentas
+create proc sp_Escribano_ListarTodos
+as
+begin
+
+    select U.IdUsuario, U.NombreCompleto, U.Telefono, U.Email, U.Estado, U.FechaAceptacionTerminos, E.NumCajaProf, E.DireccionEstudio
     from Usuario U
     join Escribano E on U.IdUsuario = E.IdUsuario
-    where U.Estado = 0
-    order by U.FechaAceptacionTerminos asc;
+    order by U.NombreCompleto asc;
+end
+go
+
+-- Cantidad de vehiculos del cliente que siguen publicados (Pendiente, Aprobada o En Tramite).
+-- Si tiene alguno, no se puede inactivar su cuenta
+create proc sp_Cliente_TieneVehiculosActivos
+@IdUsuario int
+as
+begin
+
+    select count(*)
+    from Vehiculo
+    where IdUsuarioVendedor = @IdUsuario
+    and IdEstadoPublicacion in (1, 2, 5);
+end
+go
+
+-- Cantidad de operaciones en curso del cliente, como comprador o como vendedor:
+-- solicitudes Pendientes o compraventas En Proceso. Si tiene alguna, no se puede inactivar su cuenta
+create proc sp_Cliente_TieneOperacionesEnCurso
+@IdUsuario int
+as
+begin
+
+    select count(*)
+    from SolicitudNotarial S
+    inner join Vehiculo V on S.IdVehiculo = V.IdVehiculo
+    left join CompraVenta CV on S.IdSolicitud = CV.IdSolicitud
+    where (S.IdUsuarioCliente = @IdUsuario or V.IdUsuarioVendedor = @IdUsuario)
+    and (S.EstadoSolicitud = 1 or CV.EstadoCompraVenta = 1);
+end
+go
+
+-- Cantidad de operaciones en curso del escribano: solicitudes Pendientes o compraventas En Proceso.
+-- Si tiene alguna, no se puede inactivar su cuenta
+create proc sp_Escribano_TieneOperacionesEnCurso
+@IdUsuario int
+as
+begin
+
+    select count(*)
+    from SolicitudEscribano SE
+    inner join SolicitudNotarial S on SE.IdSolicitud = S.IdSolicitud
+    left join CompraVenta CV on S.IdSolicitud = CV.IdSolicitud
+    where SE.IdUsuarioEscribano = @IdUsuario
+    and (S.EstadoSolicitud = 1 or CV.EstadoCompraVenta = 1);
+end
+go
+
+-- Cantidad de clientes activos con esa cedula. Se usa antes de reactivar un cliente,
+-- por si mientras estuvo inactivo se registro otra cuenta con la misma cedula
+create proc sp_Cliente_ExisteCedulaActiva
+@Cedula varchar(8)
+as
+begin
+
+    select count(*)
+    from Cliente C
+    inner join Usuario U on C.IdUsuario = U.IdUsuario
+    where C.Cedula = @Cedula
+    and U.Estado = 1;
 end
 go
 

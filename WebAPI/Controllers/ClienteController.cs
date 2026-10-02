@@ -62,6 +62,26 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpGet("todos")]
+        public IActionResult ListarTodos()
+        {
+            try
+            {
+                List<Cliente> clientes = _logicaCliente.ListarTodos();
+
+                if (clientes == null || !clientes.Any())
+                {
+                    return NotFound(new { mensaje = "No hay clientes registrados" });
+                }
+
+                return Ok(clientes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
         public IActionResult ObtenerPorId(int id)
         {
@@ -108,6 +128,20 @@ namespace WebAPI.Controllers
             {
                 _logicaCliente.Inactivar(id);
                 return Ok(new { mensaje = "La cuenta ha sido correctametne inactivada" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/activar")]
+        public IActionResult Activar(int id)
+        {
+            try
+            {
+                _logicaCliente.Activar(id);
+                return Ok(new { mensaje = "La cuenta del cliente ha sido activada" });
             }
             catch (Exception ex)
             {

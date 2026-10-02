@@ -7,6 +7,16 @@
     <div class="col-md-5">
         <h2>Mi perfil</h2>
 
+        @if(TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        @if(TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success">@TempData["Mensaje"]</div>
+        }
+
         @if (ViewBag.Mensaje != null)
         {
             <div class="alert alert-success">@ViewBag.Mensaje</div>
@@ -48,7 +58,7 @@
         <hr class="my-4" />
 
         <h5>Inactivar cuenta</h5>
-        <p class="text-muted">Si inactivás tu cuenta vas a quedar fuera del sistema. Podés volver a registrarte luego.</p>
+        <p class="text-muted">Si inactivás tu cuenta vas a quedar fuera del sistema. Después, solo un administrador puede reactivarla.</p>
         @using (Html.BeginForm("Inactivar", "Escribano", FormMethod.Post))
         {
             <button type="submit" class="btn btn-danger">Inactivar mi cuenta</button>

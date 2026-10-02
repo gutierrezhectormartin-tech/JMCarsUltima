@@ -100,11 +100,11 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task<List<EscribanoDTO>> ListarInactivos()
+        public async Task<List<EscribanoDTO>> ListarTodos()
         {
             try
             {
-                var respuesta = await _httpClient.GetAsync("api/escribano/inactivos");
+                var respuesta = await _httpClient.GetAsync("api/escribano/todos");
 
                 if (respuesta.IsSuccessStatusCode)
                 {
@@ -114,12 +114,12 @@ namespace JMCarsWeb.Services
                 {
                     return new List<EscribanoDTO>();
                 }
-                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido obtener la lista de escribanos pendientes, intentelo nuevamente");
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido obtener la lista de escribanos, intentelo nuevamente");
                 throw new Exception(error);
             }
             catch (Exception ex)
             {
-                throw new Exception("No se ha podido obtener la lista de escribanos pendientes: " + ex.Message);
+                throw new Exception("No se ha podido obtener la lista de escribanos: " + ex.Message);
             }
         }
 

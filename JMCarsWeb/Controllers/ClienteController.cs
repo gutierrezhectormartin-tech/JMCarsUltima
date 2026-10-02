@@ -92,6 +92,7 @@ namespace WebApi.Controllers
 
             ModelState.Remove("Contrasena");
             ModelState.Remove("Email");
+            ModelState.Remove("Cedula"); // la cedula se muestra deshabilitada, el navegador no la manda; se toma de la sesion
 
             clientePasado.Email = HttpContext.Session.GetString("EmailCliente")!;
             clientePasado.Cedula = HttpContext.Session.GetString("CedulaCliente")!; //cambio aca.

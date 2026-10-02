@@ -238,52 +238,6 @@ namespace Persistencia
             }
         }
 
-        public List<Escribano> ListarInactivos()
-        {
-            List<Escribano> lista = new List<Escribano>();
-
-            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
-
-            SqlCommand oComando = new SqlCommand("sp_Escribano_ListarInactivos", oConexion);
-
-            oComando.CommandType = CommandType.StoredProcedure;
-
-            try
-            {
-                oConexion.Open();
-
-                SqlDataReader lector = oComando.ExecuteReader();
-
-                while (lector.Read())
-                {
-                    DateTime? fechaAceptacion = lector["FechaAceptacionTerminos"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechaAceptacionTerminos"]);
-
-                    Escribano unEscribano = new Escribano(
-                        Convert.ToInt32(lector["IdUsuario"]),
-                        lector["NombreCompleto"].ToString() ?? string.Empty,
-                        lector["Telefono"].ToString() ?? string.Empty,
-                        lector["Email"].ToString() ?? string.Empty,
-                        "", false, Rol.Escribano, fechaAceptacion,
-                        lector["NumCajaProf"].ToString() ?? string.Empty,
-                        lector["DireccionEstudio"].ToString() ?? string.Empty);
-
-                    lista.Add(unEscribano);
-                }
-
-                lector.Close();
-
-                return lista;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
-                oConexion.Close();
-            }
-        }
-
         public void Activar(int pIdUsuario)
         {
 
@@ -305,6 +259,82 @@ namespace Persistencia
                 oConexion.Open();
 
                 oComando.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public List<Escribano> ListarTodos()
+        {
+            List<Escribano> lista = new List<Escribano>();
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Escribano_ListarTodos", oConexion);
+
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            try
+            {
+                oConexion.Open();
+
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                while (lector.Read())
+                {
+                    DateTime? fechaAceptacion = lector["FechaAceptacionTerminos"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechaAceptacionTerminos"]);
+
+                    Escribano unEscribano = new Escribano(
+                        Convert.ToInt32(lector["IdUsuario"]),
+                        lector["NombreCompleto"].ToString() ?? string.Empty,
+                        lector["Telefono"].ToString() ?? string.Empty,
+                        lector["Email"].ToString() ?? string.Empty,
+                        "", Convert.ToBoolean(lector["Estado"]), Rol.Escribano, fechaAceptacion,
+                        lector["NumCajaProf"].ToString() ?? string.Empty,
+                        lector["DireccionEstudio"].ToString() ?? string.Empty);
+
+                    lista.Add(unEscribano);
+                }
+
+                lector.Close();
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public bool TieneOperacionesEnCurso(int pIdUsuario)
+        {
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Escribano_TieneOperacionesEnCurso", oConexion);
+
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            SqlParameter _id = new SqlParameter("@IdUsuario", pIdUsuario);
+
+            oComando.Parameters.Add(_id);
+
+            try
+            {
+                oConexion.Open();
+
+                int cantidad = Convert.ToInt32(oComando.ExecuteScalar());
+
+                return cantidad > 0;
             }
             catch (Exception ex)
             {

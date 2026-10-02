@@ -1,0 +1,168 @@
+@model JMCarsWeb.ViewModels.UsuariosViewModel
+@{
+    ViewData["Title"] = "Gestión de usuarios";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2>Gestión de usuarios</h2>
+            <p class="text-muted mb-0">Puede activar o inactivar las cuentas de clientes y escribanos</p>
+        </div>
+    </div>
+
+    <hr />
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <h4 class="mt-4">Clientes</h4>
+
+    @if (Model.Clientes == null || !Model.Clientes.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i> No hay clientes registrados
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Cédula</th>
+                        <th>Contacto</th>
+                        <th>Fecha de Registro</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.Clientes)
+                    {
+                        <tr>
+                            <td><strong>@c.NombreCompleto</strong></td>
+                            <td>@c.Cedula</td>
+                            <td>
+                                <div>@c.Email</div>
+                                <div class="text-muted small">@c.Telefono</div>
+                            </td>
+                            <td>@c.FechaAceptacionTerminos?.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @if (c.EstadoUsu)
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i>Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i>Inactivo</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (c.EstadoUsu)
+                                {
+                                    <form asp-controller="Admin" asp-action="InactivarCliente" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@c.IdUsuario" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Inactivar">
+                                            <i class="bi bi-slash-circle"></i> Inactivar
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-controller="Admin" asp-action="ActivarCliente" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@c.IdUsuario" />
+                                        <button type="submit" class="btn btn-outline-success btn-sm" title="Activar">
+                                            <i class="bi bi-check-circle"></i> Activar
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <h4 class="mt-4">Escribanos</h4>
+
+    @if (Model.Escribanos == null || !Model.Escribanos.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i> No hay escribanos registrados
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Escribano</th>
+                        <th>Caja Profesional</th>
+                        <th>Dirección del Estudio</th>
+                        <th>Contacto</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model.Escribanos)
+                    {
+                        <tr>
+                            <td><strong>@e.NombreCompleto</strong></td>
+                            <td>@e.NumeroCaja</td>
+                            <td>@e.Direccion</td>
+                            <td>
+                                <div>@e.Email</div>
+                                <div class="text-muted small">@e.Telefono</div>
+                            </td>
+                            <td>
+                                @if (e.EstadoUsu)
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i>Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i>Inactivo</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (e.EstadoUsu)
+                                {
+                                    <form asp-controller="Admin" asp-action="InactivarEscribano" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@e.IdUsuario" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Inactivar">
+                                            <i class="bi bi-slash-circle"></i> Inactivar
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-controller="Admin" asp-action="ActivarEscribano" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@e.IdUsuario" />
+                                        <button type="submit" class="btn btn-outline-success btn-sm" title="Activar">
+                                            <i class="bi bi-check-circle"></i> Activar
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

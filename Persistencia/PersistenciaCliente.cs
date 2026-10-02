@@ -182,5 +182,171 @@ namespace Persistencia
                 oConexion.Close();
             }
         }
+
+        public void Activar(int pIdUsuario)
+        {
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Admin_SetEstadoUsuario", oConexion);
+
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            SqlParameter _id = new SqlParameter("@Id", pIdUsuario);
+
+            SqlParameter _estado = new SqlParameter("@Estado", true);
+
+            oComando.Parameters.Add(_id);
+            oComando.Parameters.Add(_estado);
+
+            try
+            {
+                oConexion.Open();
+
+                oComando.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public List<Cliente> ListarTodos()
+        {
+            List<Cliente> lista = new List<Cliente>();
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Cliente_ListarTodos", oConexion);
+
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            try
+            {
+                oConexion.Open();
+
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                while (lector.Read())
+                {
+                    DateTime? fechaAceptacion = lector["FechaAceptacionTerminos"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechaAceptacionTerminos"]);
+
+                    Cliente unCliente = new Cliente(
+                        Convert.ToInt32(lector["IdUsuario"]),
+                        lector["NombreCompleto"].ToString() ?? string.Empty,
+                        lector["Telefono"].ToString() ?? string.Empty,
+                        lector["Email"].ToString() ?? string.Empty,
+                        "", Convert.ToBoolean(lector["Estado"]), Rol.Cliente, fechaAceptacion,
+                        lector["Cedula"].ToString() ?? string.Empty);
+
+                    lista.Add(unCliente);
+                }
+
+                lector.Close();
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public bool TieneVehiculosActivos(int pIdUsuario)
+        {
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Cliente_TieneVehiculosActivos", oConexion);
+
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            SqlParameter _id = new SqlParameter("@IdUsuario", pIdUsuario);
+
+            oComando.Parameters.Add(_id);
+
+            try
+            {
+                oConexion.Open();
+
+                int cantidad = Convert.ToInt32(oComando.ExecuteScalar());
+
+                return cantidad > 0;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public bool TieneOperacionesEnCurso(int pIdUsuario)
+        {
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Cliente_TieneOperacionesEnCurso", oConexion);
+
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            SqlParameter _id = new SqlParameter("@IdUsuario", pIdUsuario);
+
+            oComando.Parameters.Add(_id);
+
+            try
+            {
+                oConexion.Open();
+
+                int cantidad = Convert.ToInt32(oComando.ExecuteScalar());
+
+                return cantidad > 0;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public bool ExisteCedulaActiva(string pCedula)
+        {
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+
+            SqlCommand oComando = new SqlCommand("sp_Cliente_ExisteCedulaActiva", oConexion);
+
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            SqlParameter _cedula = new SqlParameter("@Cedula", pCedula);
+
+            oComando.Parameters.Add(_cedula);
+
+            try
+            {
+                oConexion.Open();
+
+                int cantidad = Convert.ToInt32(oComando.ExecuteScalar());
+
+                return cantidad > 0;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
     }
 }

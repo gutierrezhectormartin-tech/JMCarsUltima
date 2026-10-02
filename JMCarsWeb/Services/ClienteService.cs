@@ -63,16 +63,56 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                var respuesta = await _httpClient.PutAsJsonAsync($"api/cliente/{id}/inactivar", new { });
+                var respuesta = await _httpClient.DeleteAsync($"api/cliente/{id}/inactivar");
                 if (!respuesta.IsSuccessStatusCode)
                 {
-                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido inactivar el articulo");
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido inactivar el cliente, intentelo nuevamente.");
                     throw new Exception(error);
                 }
             }
             catch (Exception ex)
             {
                 throw new Exception("No se ha podido inactivar el cliente: " + ex.Message);
+            }
+        }
+
+        public async Task<List<ClienteDTO>> ListarTodos()
+        {
+            try
+            {
+                var respuesta = await _httpClient.GetAsync("api/cliente/todos");
+
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<List<ClienteDTO>>() ?? new List<ClienteDTO>();
+                }
+                if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return new List<ClienteDTO>();
+                }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido obtener la lista de clientes, intentelo nuevamente");
+                throw new Exception(error);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido obtener la lista de clientes: " + ex.Message);
+            }
+        }
+
+        public async Task Activar(int id)
+        {
+            try
+            {
+                var respuesta = await _httpClient.PutAsync($"api/cliente/{id}/activar", null);
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido activar el cliente, intentelo nuevamente.");
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido activar el cliente: " + ex.Message);
             }
         }
 

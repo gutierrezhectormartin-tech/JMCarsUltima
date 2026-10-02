@@ -66,16 +66,16 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpGet("inactivos")]
-        public IActionResult ListarInactivos()
+        [HttpGet("todos")]
+        public IActionResult ListarTodos()
         {
             try
             {
-                List<Escribano> escribanos = _logicaEscribano.ListarInactivos();
+                List<Escribano> escribanos = _logicaEscribano.ListarTodos();
 
                 if (escribanos == null || !escribanos.Any())
                 {
-                    return NotFound(new { mensaje = "No hay escribanos pendientes de aprobación" });
+                    return NotFound(new { mensaje = "No hay escribanos registrados" });
                 }
 
                 return Ok(escribanos);
