@@ -179,7 +179,8 @@ INSERT INTO EstadoCompraVenta VALUES (1, 'En Proceso'),
 GO
 
 
-CREATE TABLE CompraVenta (
+CREATE TABLE CompraVenta 
+(
     IdCompraVenta INT IDENTITY(1,1) PRIMARY KEY,
     FechaInicio DATETIME DEFAULT GETDATE(),
     EstadoCompraVenta INT NOT NULL,
@@ -193,7 +194,8 @@ GO
 
 
 
-CREATE TABLE Chat (
+CREATE TABLE Chat 
+(
     IdChat INT IDENTITY(1,1) PRIMARY KEY,
     FechaInicio DATETIME DEFAULT GETDATE(),
     IdVehiculo INT NOT NULL,
@@ -201,7 +203,8 @@ CREATE TABLE Chat (
 )
 GO
 
-CREATE TABLE ChatParticipante (
+CREATE TABLE ChatParticipante 
+(
     IdChat INT NOT NULL,
     IdUsuario INT NOT NULL,
     FechaIngreso DATETIME NOT NULL DEFAULT GETDATE(),-- esto es opcional si queres lo borramos jorge
@@ -211,7 +214,8 @@ CREATE TABLE ChatParticipante (
     CONSTRAINT FK_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario)
 );
 
-CREATE TABLE Mensaje (
+CREATE TABLE Mensaje 
+(
     IdMensaje INT IDENTITY(1,1) PRIMARY KEY,
     IdChat INT NOT NULL,
 	IdUsuarioEmisor INT NOT NULL,
@@ -222,7 +226,8 @@ CREATE TABLE Mensaje (
 )
 GO
 
-CREATE TABLE TokenRecuperacion (
+CREATE TABLE TokenRecuperacion 
+(
     IdToken INT IDENTITY(1,1) PRIMARY KEY,
     IdUsuario INT NOT NULL,
     Token VARCHAR(255) NOT NULL,
@@ -233,8 +238,16 @@ CREATE TABLE TokenRecuperacion (
 );
 GO
 
-
-
+CREATE TABLE RegistroActividad
+(
+    IdRegistro int IDENTITY(1,1) primary key,
+    FechaHora datetime not null Default GETDATE(),
+    IdUsuario int not null,
+    TipoAccion varchar(30) not null,
+    Detalle varchar(200) null,
+    constraint FK_RegistroActividad_Usuario foreign key(IdUsuario) references Usuario(IdUsuario)
+);
+GO
 ---------------------- SP-------------------------
 
 -- Login
@@ -1103,11 +1116,11 @@ as
 begin
 
     select
-            SN.solicitud,
+            SN.IdSolicitud,
             SN.FechaSolicitud,
             U_ESC.NombreCompleto as NombreEscribano,
             U_CLI.NombreCompleto as NombreCliente,
-            MA.ModeloMarca,
+            MA.NombreMarca,
             M.NombreModelo
     from SolicitudNotarial SN
     inner join SolicitudEscribano SE on SN.IdSolicitud = SE.IdSolicitud
@@ -1442,6 +1455,71 @@ begin
     inner join Usuario U on C.IdUsuario = U.IdUsuario
     where C.Cedula = @Cedula
     and U.Estado = 1;
+end
+go
+
+create proc sp_RegistroActividad_Crear
+@IdUsuario int,
+@TipoAccion varchar(30),
+@Detalle varchar(200)
+as
+begin
+    insert into RegistroActividad(IdUsuario, TipoAccion, Detalle) values (@IdUsuario, @TipoAccion, @Detalle);
+end
+go
+
+-- Estadisticas
+
+create proc sp_Estadisticas_Conteos
+as
+begin
+    select
+            (select COUNT(*) from Vehiculo where IdEstadoPublicacion = 1) as CantPendientes,
+            (select COUNT(*) from Vehiculo where IdEstadoPublicacion = 2) as CantAprobadas,
+            (select COUNT(*) from Vehiculo where IdEstadoPublicacion = 3) as CantRechazadas,
+            (select COUNT(*) from Vehiculo where IdEstadoPublicacion = 4) as CantInactivas,
+            (select COUNT(*) from Vehiculo where IdEstadoPublicacion = 5) as CantEnTramite,
+            (select COUNT(*) from Vehiculo where IdEstadoPublicacion = 6) as CantVendidas,
+            (select COUNT(*) from Cliente C inner join Usuario U on C.IdUsuario = U.IdUsuario where U.Estado = 1) as CantClientesActivos,
+            (select COUNT(*) from Escribano E inner join Usuario U on E.IdUsuario = U.IdUsuario where U.Estado = 1) as CantEscribanosActivos,
+            (select COUNT(*) from CompraVenta where EstadoCompraVenta = 3) as CantCompraVentasFinalizadas,
+            (select COUNT(*) from SolicitudNotarial where EstadoSolicitud = 1 and DATEDIFF(hour, FechaSolicitud, GETDATE()) >= 24) as CantSolicitudesPendientesVencidas
+end
+go
+
+create proc sp_Estadisticas_ComprasPorMes
+as
+begin
+    select YEAR(FechaInicio) as Anio, MONTH(FechaInicio) as Mes, COUNT(*) as Cantidad
+    from CompraVenta
+    where FechaInicio >= DATEADD(month, -11, DATEADD(day, 1-DAY(GETDATE()), CAST(GETDATE() as date)))
+    group by YEAR(FechaInicio), MONTH(FechaInicio)
+    order by Anio, Mes
+end
+go
+
+create proc sp_Estadisticas_MarcasMasPublicadas
+as
+begin
+    select top 10 MA.NombreMarca, COUNT(*) as Cantidad
+    from Vehiculo V
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    inner join Marca MA on M.IdMarca = MA.IdMarca
+    group by MA.NombreMarca
+    order by Cantidad desc
+end
+go
+
+create proc sp_Estadisticas_ModelosVendidosPorMarca
+as
+begin
+    select MA.NombreMarca, M.NombreModelo, COUNT(*) as Cantidad
+    from Vehiculo V
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    inner join Marca MA on M.IdMarca = MA.IdMarca
+    where V.IdEstadoPublicacion = 6
+    group by MA.NombreMarca, M.NombreModelo
+    order by MA.NombreMarca, Cantidad desc
 end
 go
 

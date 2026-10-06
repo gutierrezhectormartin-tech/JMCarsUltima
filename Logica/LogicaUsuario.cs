@@ -12,12 +12,14 @@ namespace Logica
 {
     public class LogicaUsuario : ILogicaUsuario
     {
-        private IPersistenciaUsuario persistenciaUsuario;
-        private IPersistenciaTokenRecuperacion persistenciaToken;
+        private readonly IPersistenciaUsuario persistenciaUsuario;
+        private readonly IPersistenciaTokenRecuperacion persistenciaToken;
+        private readonly IPersistenciaRegistroActividad persistenciaRegistro;
         public LogicaUsuario()
         {
             persistenciaUsuario = FabricaPersistencia.GetInstancia().GetPersistenciaUsuario();
             persistenciaToken = FabricaPersistencia.GetInstancia().GetPersistenciaTokenRecuperacion();
+            persistenciaRegistro = FabricaPersistencia.GetInstancia().GetPersistenciaRegistroActividad();
         }
 
         public Usuario Login(string pEmail, string pPass)
@@ -41,6 +43,13 @@ namespace Logica
                 throw new Exception("Tu cuenta de escribano no está activa. Si te registraste recientemente, un administrador tiene que aprobarla; si fue inactivada, un administrador puede reactivarla.");
             }
 
+            try
+            {
+                persistenciaRegistro.RegistrarActividad(usuario.IdUsuario, "Login", null);
+            }
+            catch (Exception) // no va a trabar nada si no registra tiene que permitir que siga todo funcando
+            {
+            }
             return usuario;
         }
 

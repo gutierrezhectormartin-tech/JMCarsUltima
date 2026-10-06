@@ -55,5 +55,14 @@ namespace Persistencia
             return new PersistenciaChat();
         }
 
+        public IPersistenciaRegistroActividad GetPersistenciaRegistroActividad()
+        {
+            return new PersistenciaRegistroActividad();
+        }
+        public IPersistenciaEstadisticas GetPersistenciaEstadisticas()
+        {
+            return new PersistenciaEstadistica();
+        }
+
     }
 }

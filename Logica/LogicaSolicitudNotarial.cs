@@ -10,13 +10,15 @@ namespace Logica
 {
     public class LogicaSolicitudNotarial : ILogicaSolicitudNotarial
     {
-        private IPersistenciaSolicitudNotarial _persistenciaSolicitud;
-        private IPersistenciaVehiculo _persistenciaVehiculo;
+        private readonly IPersistenciaSolicitudNotarial _persistenciaSolicitud;
+        private readonly IPersistenciaVehiculo _persistenciaVehiculo;
+        private readonly IPersistenciaRegistroActividad _persistenciaRegistro;
 
         public LogicaSolicitudNotarial()
         {
             _persistenciaSolicitud = FabricaPersistencia.GetInstancia().GetPersistenciaSolicitudNotarial();
             _persistenciaVehiculo = FabricaPersistencia.GetInstancia().GetPersistenciaVehiculo();
+            _persistenciaRegistro = FabricaPersistencia.GetInstancia().GetPersistenciaRegistroActividad();
         }
 
         public void Crear(int pIdCliente, int pIdVehiculo, int pIdEscribano)
@@ -86,6 +88,13 @@ namespace Logica
             {
                 throw new Exception(ex.Message);
             }
+            try
+            {
+                _persistenciaRegistro.RegistrarActividad(pIdEscribano, "Aceptar Solicitud", $"Solicitud {pIdSolicitud} aceptada");
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public void Rechazar(int pIdSolicitud, int pIdEscribano)
@@ -115,36 +124,15 @@ namespace Logica
             {
                 throw new Exception("No se pudo rechazar la solicitud. Intente nuevamente.");
             }
-        }
-
-        public void Finalizar(int pIdSolicitud, int pIdEscribano)
-        {
-            SolicitudEscribano solicitud = _persistenciaSolicitud.ObtenerPorId(pIdSolicitud);
-
-            if (solicitud == null)
-            {
-                throw new Exception("La solicitud no existe.");
-            }
-
-            if (solicitud.Escribano.IdUsuario != pIdEscribano)
-            {
-                throw new Exception("No tienes permiso para finalizar esta solicitud.");
-            }
-
-            if (solicitud.Solicitud.EstadoSolicitud != 2)
-            {
-                throw new Exception("Solo puedes finalizar una solicitud que hayas aceptado.");
-            }
-
             try
             {
-                _persistenciaSolicitud.Finalizar(pIdSolicitud);
+                _persistenciaRegistro.RegistrarActividad(pIdEscribano, "Solicitud Rechazada", $"La solicitud {pIdSolicitud} fue rechazada");
             }
             catch (Exception)
             {
-                throw new Exception("No se pudo finalizar la venta. Intente nuevamente.");
             }
         }
+
 
         public SolicitudEscribano ObtenerPorId(int pIdSolicitud)
         {
@@ -184,6 +172,13 @@ namespace Logica
             catch (Exception)
             {
                 throw;
+            }
+            try
+            {
+                _persistenciaRegistro.RegistrarActividad(pIdEscribano, "Cambia Estado CompraVenta", $"Cambia el estado del CompraVenta {pIdCompraVenta}");
+            }
+            catch (Exception)
+            {
             }
         }
 

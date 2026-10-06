@@ -57,7 +57,13 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<EscribanoDTO>($"api/escribano/{id}");
+                var respuesta = await _httpClient.GetAsync($"api/escribano/{id}");
+                if(respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<EscribanoDTO>();
+                }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido obtener el escribano");
+                throw new Exception(error);
             }
             catch (Exception ex)
             {

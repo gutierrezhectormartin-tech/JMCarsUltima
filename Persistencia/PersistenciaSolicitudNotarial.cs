@@ -85,29 +85,7 @@ namespace Persistencia
             }
         }
 
-        public void Finalizar(int pIdSolicitud)
-        {
-            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
 
-            SqlCommand oComando = new SqlCommand("sp_Notarial_FinalizarVenta", oConexion);
-            oComando.CommandType = CommandType.StoredProcedure;
-
-            oComando.Parameters.AddWithValue("@IdSolicitud", pIdSolicitud);
-
-            try
-            {
-                oConexion.Open();
-                oComando.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
-                oConexion.Close();
-            }
-        }
 
         public SolicitudEscribano ObtenerPorId(int pIdSolicitud)
         {
@@ -387,7 +365,7 @@ namespace Persistencia
             List<CompraVenta> lista = new List<CompraVenta>();
 
             SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
-            SqlCommand oComando = new SqlCommand("sp_Compraventa_ListarPorEscribano", oConexion);
+            SqlCommand oComando = new SqlCommand("sp_CompraVenta_ListarPorEscribano", oConexion);
             oComando.CommandType = CommandType.StoredProcedure;
             oComando.Parameters.AddWithValue("@IdEscribano", pIdEscribano);
 
@@ -422,7 +400,7 @@ namespace Persistencia
         public void CambiarEstadoCompraVenta(int pIdCompraVenta, int pIdEstadoCompraVenta, int pIdEscribano)
         {
             SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
-            SqlCommand oComando = new SqlCommand("sp_Compraventa_CambiarEstado", oConexion);
+            SqlCommand oComando = new SqlCommand("sp_CompraVenta_CambiarEstado", oConexion);
             oComando.CommandType = CommandType.StoredProcedure;
             oComando.Parameters.AddWithValue("@IdCompraVenta", pIdCompraVenta);
             oComando.Parameters.AddWithValue("@IdEstadoCompraVenta", pIdEstadoCompraVenta);

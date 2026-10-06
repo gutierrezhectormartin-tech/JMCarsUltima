@@ -54,5 +54,9 @@ namespace Logica
         {
             return new LogicaChat();
         }
+        public ILogicaEstadisticas GetLogicaEstadisticas()
+        {
+            return new LogicaEstadistica();
+        }
     }
 }

@@ -17,7 +17,17 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<List<VehiculoDTO>>("api/vehiculo/listar") ?? new List<VehiculoDTO>();
+                var respuesta = await _httpClient.GetAsync("api/vehiculo/listar");
+                if(respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<List<VehiculoDTO>>() ?? new List<VehiculoDTO>();
+                }
+                if(respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return new List<VehiculoDTO>();
+                }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido listar los vehiculos");
+                throw new Exception(error);
             }
             catch (Exception ex)
             {
@@ -52,7 +62,13 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<VehiculoDTO>($"api/vehiculo/detalle/{idVehiculo}");
+                var respuesta = await _httpClient.GetAsync($"api/vehiculo/detalle/{idVehiculo}");
+                if(respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<VehiculoDTO>();
+                }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo obtener el detalle del vehiculo");
+                throw new Exception(error);
             }
             catch (Exception ex)
             {

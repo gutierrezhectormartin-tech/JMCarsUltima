@@ -13,8 +13,8 @@ namespace Logica
     public class LogicaEscribano : ILogicaEscribano
     {
         // Referencia a la persistencia escribano
-        private IPersistenciaEscribano persistenciaEscribano;
-        private IPersistenciaUsuario persistenciaUsuario;
+        private readonly IPersistenciaEscribano persistenciaEscribano;
+        private readonly IPersistenciaUsuario persistenciaUsuario;
 
         public LogicaEscribano()
         {

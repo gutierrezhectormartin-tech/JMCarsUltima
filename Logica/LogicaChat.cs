@@ -13,10 +13,11 @@ namespace Logica
     public class LogicaChat : ILogicaChat
     {
         private readonly IPersistenciaChat _persistenciaChat;
-
+        private readonly IPersistenciaRegistroActividad _persistenciaRegistroActividad;
         public LogicaChat()
         {
             _persistenciaChat = FabricaPersistencia.GetInstancia().GetPersistenciaChat();
+            _persistenciaRegistroActividad = FabricaPersistencia.GetInstancia().GetPersistenciaRegistroActividad();
         }
 
         public List<Chat> ListarChatsPorUsuario(int pIdUsuario)
@@ -41,6 +42,13 @@ namespace Logica
         public void EnviarMensaje(int pIdChat, int pIdEmisor, string pContenido)
         {
             _persistenciaChat.EnviarMensaje(pIdChat, pIdEmisor, pContenido);
+            try
+            {
+                _persistenciaRegistroActividad.RegistrarActividad(pIdEmisor, "Envia Mensaje", $"Mensaje enviado al chat id {pIdChat}");
+            }
+            catch (Exception)
+            {
+            }
         }
         public List<Chat> ListarChatsPorVehiculo(int pIdVehiculo)
         {

@@ -11,7 +11,7 @@ namespace Logica.Interfaces
 
         void Rechazar(int pIdSolicitud, int pIdEscribano);
 
-        void Finalizar(int pIdSolicitud, int pIdEscribano);
+
 
         SolicitudEscribano ObtenerPorId(int pIdSolicitud);
 

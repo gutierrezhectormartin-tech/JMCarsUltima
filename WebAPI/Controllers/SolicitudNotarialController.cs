@@ -69,20 +69,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPut("{id}/finalizar")]
-        public IActionResult Finalizar(int id, [FromBody] AccionSolicitudRequest request)
-        {
-            try
-            {
-                _logicaSolicitud.Finalizar(id, request.IdEscribano);
-                return Ok(new { mensaje = "Venta finalizada correctamente" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { mensaje = ex.Message });
-            }
-        }
-
+        
         [HttpGet("{id}")]
         public IActionResult ObtenerPorId(int id)
         {

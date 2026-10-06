@@ -34,7 +34,15 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<ClienteDTO>($"api/cliente/{id}");
+
+                var respuesta =  await _httpClient.GetAsync($"api/cliente/{id}");
+
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<ClienteDTO>();
+                }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido obtener el cliente");
+                throw new Exception(error);
             }
             catch (Exception ex)
             {

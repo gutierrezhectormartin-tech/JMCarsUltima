@@ -12,12 +12,14 @@ namespace Logica
 {
     public class LogicaVehiculo : ILogicaVehiculo
     {
-        private IPersistenciaVehiculo _persistenciaVehiculo;
-        private ILogicaSolicitudNotarial _logicaSolicitudNotarial;
+        private readonly IPersistenciaVehiculo _persistenciaVehiculo;
+        private readonly ILogicaSolicitudNotarial _logicaSolicitudNotarial;
+        private readonly IPersistenciaRegistroActividad _persistenciaRegistroActividad;
         public LogicaVehiculo()
         {
             _persistenciaVehiculo = FabricaPersistencia.GetInstancia().GetPersistenciaVehiculo();
             _logicaSolicitudNotarial = FabricaLogica.GetInstancia().GetLogicaSolicitudNotarial();
+            _persistenciaRegistroActividad = FabricaPersistencia.GetInstancia().GetPersistenciaRegistroActividad();
         }
 
 
@@ -53,6 +55,13 @@ namespace Logica
             {
                 throw new Exception(ex.Message);
             }
+            try
+            {
+                _persistenciaRegistroActividad.RegistrarActividad(pVehiculo.Vendedor.IdUsuario, "Crea Publicacion", $"Vehiculo Id {pVehiculo.IdVehiculo} creado");
+            }
+            catch (Exception) // si no funca no impide publicacion
+            {
+            }
         }
 
         public Vehiculo DetalleVehiculo(int pIdVehiculo)
@@ -81,6 +90,13 @@ namespace Logica
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+            try
+            {
+                _persistenciaRegistroActividad.RegistrarActividad(pVehiculo.Vendedor.IdUsuario, "Modifica Vehiculo", $"Vehiculo id{pVehiculo.IdVehiculo} modificado");
+            }
+            catch (Exception)
+            {
             }
         }
 

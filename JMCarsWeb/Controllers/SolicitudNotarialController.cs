@@ -182,30 +182,7 @@ namespace JMCarsWeb.Controllers
             return RedirectToAction("SolicitudesEscribano");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Finalizar(int idSolicitud)
-        {
-            int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
-            int? idRol = HttpContext.Session.GetInt32("IdRol");
-
-            if (idUsuario == null || idRol != 2)
-            {
-                TempData["Error"] = "Debe iniciar sesión como escribano para gestionar solicitudes.";
-                return RedirectToAction("Index", "Login");
-            }
-
-            try
-            {
-                await _solicitudService.Finalizar(idSolicitud, idUsuario.Value);
-                TempData["Mensaje"] = "Venta finalizada correctamente.";
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-
-            return RedirectToAction("SolicitudesEscribano");
-        }
+        
 
         [HttpPost]
         public async Task<IActionResult> FinalizarCompraVenta(int idCompraVenta)

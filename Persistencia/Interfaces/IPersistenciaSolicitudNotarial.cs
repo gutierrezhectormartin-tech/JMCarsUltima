@@ -11,7 +11,6 @@ namespace Persistencia.Interfaces
 
         void Rechazar(int pIdSolicitud, int pIdEscribano);
 
-        void Finalizar(int pIdSolicitud);
 
         SolicitudEscribano ObtenerPorId(int pIdSolicitud);
 

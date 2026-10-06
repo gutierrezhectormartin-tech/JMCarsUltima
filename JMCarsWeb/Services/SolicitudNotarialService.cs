@@ -66,24 +66,6 @@ namespace JMCarsWeb.Services
             }
         }
 
-        public async Task Finalizar(int idSolicitud, int idEscribano)
-        {
-            try
-            {
-                var request = new { IdEscribano = idEscribano };
-                var respuesta = await _httpClient.PutAsJsonAsync($"api/solicitudnotarial/{idSolicitud}/finalizar", request);
-
-                if (!respuesta.IsSuccessStatusCode)
-                {
-                    throw new Exception(await ErrorHelper.LeerMensajeError(respuesta, "No se pudo finalizar la venta."));
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("No se pudo finalizar la venta: " + ex.Message);
-            }
-        }
-
         public async Task<SolicitudEscribanoDTO?> ObtenerPorId(int idSolicitud)
         {
             try

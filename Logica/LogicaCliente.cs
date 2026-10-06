@@ -12,8 +12,8 @@ namespace Logica
 {
     public class LogicaCliente : ILogicaCliente
     {
-        private IPersistenciaCliente persistenciaCliente;
-        private IPersistenciaUsuario persistenciaUsuario;
+        private readonly IPersistenciaCliente persistenciaCliente;
+        private readonly IPersistenciaUsuario persistenciaUsuario;
 
         public LogicaCliente()
         {

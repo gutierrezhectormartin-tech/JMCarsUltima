@@ -42,6 +42,28 @@ namespace JMCarsWeb.Controllers
             }
         }
 
+        [HttpGet]
+        public async  Task<IActionResult> HistorialPublicaciones(int idCliente)
+        {
+            int? idRol = HttpContext.Session.GetInt32("IdRol");
+
+            if(idRol != 1)
+            {
+                TempData["Error"] = "No hay un usuario con permisos de administrador logueado";
+                return RedirectToAction("Index", "Login");
+            }
+            try
+            {
+                List<VehiculoDTO> vehiculos = await _vehiculoService.ListarMisVehiculos(idCliente.ToString());
+                return View(vehiculos);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View(new List<VehiculoDTO>());
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> CambiarEstado(int id, int idEstado)
         {

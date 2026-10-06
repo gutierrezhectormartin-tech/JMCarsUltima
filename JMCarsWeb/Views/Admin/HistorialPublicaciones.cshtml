@@ -1,0 +1,84 @@
+﻿@model List<JMCarsWeb.DTOs.VehiculoDTO>
+@{
+    ViewData["Title"] = "Historial de Publicaciones";
+}
+
+<div class="container mt-4">
+    <h2>Historial de Publicaciones</h2>
+    @if (Model.Any())
+    {
+        <p class="text-muted mb-0">Cliente: @Model.First().Vendedor.NombreCompleto</p>
+    }
+
+    <hr />
+
+    @if(TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if(TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+
+    @if(!Model.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i>Este cliente no tiene publicaciones
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Vehiculo</th>
+                        <th>Año</th>
+                        <th>Km</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var v in Model)
+                    {
+                        <tr>
+                            <td>@v.Modelo.Marca.NombreMarca @v.Modelo.Modelo</td>
+                            <td>@v.Anio</td>
+                            <td>@v.Km</td>
+                            <td>@v.Precio.ToString("C0")</td>
+                            <td>
+                                @if(v.IdEstadoPublicacion == 1)
+                                {
+                                    <span class="badge bg-warning"><i class="bi bi-clock"></i>Pendiente</span>
+                                }
+                                else if(v.IdEstadoPublicacion == 2)
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i>Aprobada</span>
+                                }
+                                else if(v.IdEstadoPublicacion == 3)
+                                {
+                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i>Rechazada</span>
+                                }
+                                else if (v.IdEstadoPublicacion == 4)
+                                {
+                                    <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i>Inactiva</span>
+                                }
+                                else if (v.IdEstadoPublicacion == 5)
+                                {
+                                    <span class="badge bg-info"><i class="bi bi-hourglass-split"></i>En Tramite</span>
+                                }
+                                else if (v.IdEstadoPublicacion == 6)
+                                {
+                                    <span class="badge bg-dark"><i class="bi bi-bag-check"></i>Vendido</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    <a asp-controller="Admin" asp-action="Usuarios" class="btn btn-secondary mt-3">Volver</a>
+</div>

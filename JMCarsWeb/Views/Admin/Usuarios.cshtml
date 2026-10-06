@@ -66,6 +66,9 @@
                                 }
                             </td>
                             <td class="text-center">
+                                <a asp-controller="Admin" asp-action="HistorialPublicaciones" asp-route-idCliente="@c.IdUsuario" class="btn btn-outline-primary btn-sm" title="Ver Publicaciones">
+                                    <i class="bi bi-car-front"></i> Publicaciones
+                                </a>
                                 @if (c.EstadoUsu)
                                 {
                                     <form asp-controller="Admin" asp-action="InactivarCliente" method="post" class="d-inline">
