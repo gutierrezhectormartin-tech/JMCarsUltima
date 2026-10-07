@@ -47,7 +47,13 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                var respuesta = await _httpClient.GetFromJsonAsync<ExisteMailResponse>($"api/usuario/existe-mail/{email}");
+                var respuesta = await _httpClient.GetAsync($"api/usuario/existe-mail/{email}");
+
+                if(!respuesta.IsSuccessStatusCode)
+                {
+                    throw new Exception(await ErrorHelper.LeerMensajeError(respuesta, "No se pudo verificar el correo"));
+                }
+                var resultado = await respuesta.Content.ReadFromJsonAsync<ExisteMailResponse>();
                 return respuesta?.Existe ?? false;
             }
             catch (Exception ex)
@@ -90,6 +96,24 @@ namespace JMCarsWeb.Services
             }
         }
 
+        public async Task ResetearContrasena(string email, string contrasenaActual, string contrasenaNueva)
+        {
+            try
+            {
+                var request = new { Email = email, ContrasenaActual = contrasenaActual, ContrasenaNueva = contrasenaNueva};
+                var respuesta = await _httpClient.PostAsJsonAsync("api/usuario/cambiar-contrasena", request);
+
+                if(!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo cambiar la contraseña");
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
         public async Task<bool> EstadoVerificadorFuncionandoCorrectamente()
         {
             try

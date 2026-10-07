@@ -18,7 +18,7 @@ namespace Logica
             _persistenciaEstadisticas = FabricaPersistencia.GetInstancia().GetPersistenciaEstadisticas();
         }
 
-        public Estadisticas ObtenerConteo()
+        public Estadisticas ObtenerConteos()
         {
             return _persistenciaEstadisticas.ObtenerConteos();
         }

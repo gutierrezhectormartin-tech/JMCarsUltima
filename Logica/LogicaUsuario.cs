@@ -26,14 +26,14 @@ namespace Logica
         {
             Usuario usuario = persistenciaUsuario.Login(pEmail);
 
-            if(usuario == null)
+            if (usuario == null)
             {
                 return null!;
             }
 
             bool valida = Encriptacion.Verificar(pPass, usuario.Contrasena!);
 
-            if(!valida)
+            if (!valida)
             {
                 return null!;
             }
@@ -68,6 +68,13 @@ namespace Logica
             return Convert.ToBase64String(bytes).Replace("+", "-").Replace("/", "_").Replace("=", "");
         }
 
+        private void ValidarContrasenaNueva(string pContrasena)
+        {
+            if(string.IsNullOrWhiteSpace(pContrasena) || pContrasena.Length < 3)
+            {
+                throw new Exception("La contraseña debe tener al menos 3 caracteres");
+            }
+        }
         public TokenRecuperacion RecuperarContrasena(string pEmail)
         {
             Usuario usuario = persistenciaUsuario.ObtenerPorEmail(pEmail);
@@ -92,14 +99,11 @@ namespace Logica
 
         public bool ResetearContrasena(string pToken, string pNuevaContrasena)
         {
-            if (string.IsNullOrWhiteSpace(pNuevaContrasena) || pNuevaContrasena.Length < 3)
-            {
-                throw new Exception("La contraseña debe tener al menos 3 caracteres.");
-            }
+            ValidarContrasenaNueva(pNuevaContrasena);
 
             TokenRecuperacion tokenValido = persistenciaToken.ObtenerValido(pToken);
 
-            if(tokenValido == null)
+            if (tokenValido == null)
             {
                 return false;
             }
@@ -115,7 +119,31 @@ namespace Logica
         {
             return persistenciaUsuario.ListarAdministradoresActivos();
         }
-        
+
+        void CambiarContrasena(string pEmail, string pContrasenaActual, string pContrasenaNueva)
+        {
+            Usuario usuario = persistenciaUsuario.Login(pEmail);
+
+            if(usuario == null || string.IsNullOrEmpty(pContrasenaActual) || Encriptacion.Verificar(pContrasenaActual, pContrasenaNueva!))
+            {
+                throw new Exception("La contraseña actual es incorrecta");
+            }
+            ValidarContrasenaNueva(pContrasenaNueva);
+            if(pContrasenaActual == pContrasenaNueva)
+            {
+                throw new Exception("La nueva contraseña no puede ser igual a la actual");
+            }
+            string hashNuevo = Encriptacion.Hashear(pContrasenaNueva);
+            persistenciaUsuario.ActualizarContrasena(usuario.IdUsuario, hashNuevo);
+
+            try
+            {
+                persistenciaRegistro.RegistrarActividad(usuario.IdUsuario, "Cambio de Contraseña", null)
+            }
+            catch (Exception)
+            {
+            }
+        }
 
     }
 }

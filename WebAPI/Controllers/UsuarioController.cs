@@ -10,7 +10,7 @@ namespace WebAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
 
-        public class UsuarioController : ControllerBase
+    public class UsuarioController : ControllerBase
     {
         private readonly ILogicaUsuario _logicaUsuario;
         private readonly IEmailService _servicioEmail;
@@ -31,14 +31,14 @@ namespace WebAPI.Controllers
             {
                 return BadRequest(new { mensaje = "Datos Invalidos" });
             }
-                
+
             try
             {
                 Usuario usuario = _logicaUsuario.Login(request.Email, request.Contrasena);
-                if(usuario == null)
-                    {
-                        return Unauthorized(new { mensaje = "Email o Contraseña incorrectos" });
-                    }
+                if (usuario == null)
+                {
+                    return Unauthorized(new { mensaje = "Email o Contraseña incorrectos" });
+                }
 
                 usuario.Contrasena = null;
                 return Ok(usuario);
@@ -94,7 +94,7 @@ namespace WebAPI.Controllers
             {
                 bool exito = _logicaUsuario.ResetearContrasena(request.Token, request.NuevaContrasena);
 
-                if(!exito)
+                if (!exito)
                 {
                     return BadRequest(new { mensaje = "El enlace no es válido o está vencido" });
                 }
@@ -104,8 +104,27 @@ namespace WebAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message });
-            }  
+            }
         }
+
+        [HttpPost("cambiar-contrasena")]
+        public IActionResult CambiarContrasena([FromBody] CambiarContrasenaRequest request)
+        {
+            if (request == null)
+            {
+                return BadRequest(new { mensaje = "Datos Invalidos" });
+            }
+            try
+            {
+                _logicaUsuario.CambiarContrasena(request.Email, request.ContrasenaActual, request.ContrasenaNueva);
+                return Ok(new { mensaje = "Contraseña actualizada correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
+
 
         [HttpGet("estado-verificador")]
         public IActionResult EstadoVerificador()
@@ -140,6 +159,13 @@ namespace WebAPI.Controllers
     {
         public string Token { get; set; }
         public string? NuevaContrasena { get; set; }
+    }
+
+    public class CambiarContrasenaRequest
+    {
+        public string Email { get; set; }
+        public string ContrasenaActual { get; set; }
+        public string ContrasenaNueva { get; set; }
     }
 
 }

@@ -10,12 +10,13 @@ namespace JMCarsWeb.Controllers
         private VehiculoService _vehiculoService;
         private EscribanoService _escribanoService;
         private ClienteService _clienteService;
-
-        public AdminController(VehiculoService vehiculoService, EscribanoService escribanoService, ClienteService clienteService)
+        private EstadisticasService _estadisticasService;
+        public AdminController(VehiculoService vehiculoService, EscribanoService escribanoService, ClienteService clienteService, EstadisticasService estadisticasService)
         {
             _vehiculoService = vehiculoService;
             _escribanoService = escribanoService;
             _clienteService = clienteService;
+            _estadisticasService = estadisticasService;
         }
 
         [HttpGet]
@@ -88,6 +89,45 @@ namespace JMCarsWeb.Controllers
 
             return RedirectToAction("Vehiculos");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Estadisticas()
+        {
+            int? idRol = HttpContext.Session.GetInt32("IdRol");
+
+            if (idRol != 1)
+            {
+                TempData["Error"] = "Ningún usuario con permisos de administrador logueado";
+                return RedirectToAction("Index", "Login");
+            }
+
+            EstadisticasViewModel modelo = new EstadisticasViewModel();
+
+            try
+            {
+                modelo.Conteos = await _estadisticasService.ObtenerConteos();
+                modelo.MarcasPublicadas = await _estadisticasService.ObtenerMarcasPublicadas();
+                modelo.ModelosVendidos = await _estadisticasService.ObtenerModelosVendidosPorMarca();
+
+                List<CompraVentaPorMesDTO> comprasPorMes = await _estadisticasService.ObtenerComprasPorMes();
+                DateTime primerDiaMesActual = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+                for (int i = 11; i >= 0; i--)
+                {
+                    DateTime mes = primerDiaMesActual.AddMonths(-i);
+                    CompraVentaPorMesDTO existente = comprasPorMes.FirstOrDefault(c => c.Anio == mes.Year && c.Mes == mes.Month);
+
+                    modelo.ComprasPorMes.Add(new CompraVentaPorMesDTO{Anio = mes.Year, Mes = mes.Month, Cantidad = existente != null ? existente.Cantidad : 0});                
+                }
+                return View(modelo);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View(modelo);
+            }
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> Usuarios()

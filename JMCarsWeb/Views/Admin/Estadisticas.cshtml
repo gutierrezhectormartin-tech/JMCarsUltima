@@ -1,0 +1,315 @@
+﻿@model JMCarsWeb.ViewModels.EstadisticasViewModel
+@{
+    ViewData["Title"] = "Estadisticas";
+
+    string[] nombresMes = {"Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"};
+
+    //Compraventas por mes
+    List<string> etiquetasMeses = Model.ComprasPorMes.Select(c => nombresMes[c.Mes - 1] + "" + (c.Anio % 100)).ToList();
+    List<int> valoresMeses = Model.ComprasPorMes.Select(c => c.Cantidad).ToList();
+
+    //Para grafico marcas publicadas
+    List<string> etiquetasMarcas = Model.MarcasPublicadas.Select(m => m.NombreMarca).ToList();
+    List<int> valoresMarcas = Model.MarcasPublicadas.Select(m => m.Cantidad).ToList();
+
+    //para el grafico de modelos vendidos
+    //los que tienen mas ventas van a tener un color especial Martin
+    List<string> marcasVendidas = Model.ModelosVendidos.Select(m => m.NombreMarca).Distinct().ToList();
+    var topModelos = Model.ModelosVendidos.OrderByDescending(m => m.Cantidad).Take(5).ToList();
+    List<object> seriesModelos = new List<Object>();
+
+    foreach(var top in topModelos)
+    {
+        List<int> cantidadesPorMarca = marcasVendidas.Select(m => m == top.NombreMarca ? top.Cantidad : 0).ToList();
+        seriesModelos.Add(new { label = top.NombreMarca + " " + top.NombreModelo, data = cantidadesPorMarca });
+    }
+
+    List<int> cantidadesOtros = marcasVendidas.Select(marca => Model.ModelosVendidos.Where(m => m.NombreMarca == marca && !topModelos.Contains(m)).Sum(m => m.Cantidad)).ToList();
+
+    if(cantidadesOtros.Any(c=> c>0))
+    {
+        seriesModelos.Add(new { label = "Otros", data = cantidadesOtros });
+    }
+
+}
+
+<div class="container mt-4 mb-5">
+    <h2>Estadisticas</h2>
+    <hr/>
+
+    @if(TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
+    
+    }
+    @if(TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success" role="alert">@TempData["Mensaje"]</div>
+    
+    }
+
+    <h5 class="mb-3">Publicaciones por Estado</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                     <div class="fs-2 fw-bold">@Model.Conteos.CantPendientes</div>
+                     <div class="text-muted small">Pendientes</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                     <div class="fs-2 fw-bold">@Model.Conteos.CantAprobadas</div>
+                     <div class="text-muted small">Aprobadas</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                     <div class="fs-2 fw-bold">@Model.Conteos.CantRechazadas</div>
+                     <div class="text-muted small">Rechazadas</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                     <div class="fs-2 fw-bold">@Model.Conteos.CantInactivas</div>
+                     <div class="text-muted small">Inactivas</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                     <div class="fs-2 fw-bold">@Model.Conteos.CantEnTramite</div>
+                     <div class="text-muted small">En Tramite</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                     <div class="fs-2 fw-bold">@Model.Conteos.CantVendidas</div>
+                     <div class="text-muted small">Vendidas</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h5 class="mb-3">General</h5>
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-lg-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="fs-2 fw-bold">@Model.Conteos.CantClientesActivos</div>
+                    <div class="text-muted small">Clientes Activos</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="fs-2 fw-bold">@Model.Conteos.CantEscribanosActivos</div>
+                    <div class="text-muted small">Escribanos Activos</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="fs-2 fw-bold">@Model.Conteos.CantCompraVentasFinalizadas</div>
+                    <div class="text-muted small">CompraVentas Finalizadas</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="fs-2 fw-bold @(Model.Conteos.CantSolicitudesPendientesVencidas > 0 ? "text-danger" : "")">@Model.Conteos.CantSolicitudesPendientesVencidas</div>
+                    <div class="text-muted small">Solicitudes Pendientes Vencidas</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h5>Compraventas iniciados por mes</h5>
+    <p class="text-muted small">Ultimos 12 meses(se toman en cuenta todos los estaods)</p>
+    <div style="height: 300px;">
+        <canvas id="graficoMeses" role="img" aria-label="Grafico Compraventas ultimos 12 meses"></canvas>
+    </div>
+    <details class="mt-2 mb-5">
+        <summary>Ver como tabla</summary>
+        <table class="table table-sm w-auto mt-2">
+            <thead><tr><th>Mes</th><th class="text-end">Compraventas</th></tr></thead>
+            <tbody>
+                @foreach(var c in Model.ComprasPorMes)
+                {
+                    <tr><td>@nombresMes[c.Mes-1] @c.Anio</td><td class="text-end">@c.Cantidad</td></tr>
+                }
+            </tbody>
+        </table>
+    </details>
+
+    <h5>Marcas mas publicadas</h5>
+    <p class="text-muted small">Top Marcas(todos los estados de las publicaciones)</p>
+    @if(Model.MarcasPublicadas.Any())
+    {
+        <div style="height: 300px;">
+               <canvas id="graficoMarcas" role="img" aria-label="Grafico Marcas"></canvas>
+        </div>
+        <details class="mt-2 mb-5">
+            <summary class="small text-muted">Ver como tabla</summary>
+            <table class="table table-sm w-auto mt-2">
+                <thead><tr><th>Marca</th><th class="text-end">Publicaciones</th></tr></thead>
+                <tbody>
+                    @foreach(var m in Model.MarcasPublicadas)
+                    {
+                        <tr><td>@m.NombreMarca</td><td class="text-end">@m.Cantidad</td></tr>
+                    }
+                </tbody>
+            </table>
+        </details>
+    }
+    else
+    {
+        <p class="text-muted mb-5">Aun no hay publicaciones</p>
+    }
+
+    <h5>Modelos vendidos por Marca</h5>
+    <p class="text-muted small">Los 5 modelos mas vendidos</p>
+    @if (Model.ModelosVendidos.Any())
+    {
+        <div style="height: 300px;">
+            <canvas id="graficoModelos" role="img" aria-label="Modelos mas vendidos por marca"></canvas>
+        </div>
+        <details>
+            <summary class="small text-muted">Ver como Tabla</summary>
+            <table class="table table-sm w-auto mt-2">
+                <thead><tr><th>Marca</th><th>Modelo</th><th class="text-end">Vendidos</th></tr></thead>
+                <tbody>
+                    @foreach (var m in Model.ModelosVendidos)
+                    {
+                        <tr><td>@m.NombreMarca</td><td>@m.NombreModelo</td><td class="text-end">@m.Cantidad</td></tr>
+                    }
+                </tbody>
+            </table>
+        </details>
+    }
+    else
+    {
+        <p class="text-muted">Todavia no hay vehiculos vendidos</p>
+    }
+</div>
+@section Scripts
+{
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <script>
+    
+        //datos pasados como JSON
+        const etiquetasMeses = @Json.Serialize(etiquetasMeses);
+        const valoresMeses = @Json.Serialize(valoresMeses);
+        const etiquetasMarcas = @Json.Serialize(etiquetasMarcas);
+        const valoresMarcas = @Json.Serialize(valoresMarcas);
+        const marcasVendidas = @Json.Serialize(marcasVendidas);
+        const seriesModelos = @Json.Serialize(seriesModelos);
+
+        const colorPrincipal = '#2a78d6';
+        const coloresSeries = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7'];
+        const colorOtros = '#a3a3a3';
+
+        //por las dudas que en algun momento tengamos partidos, los redondeamos
+        const ejeEntero = {beginAtZero: true, ticks: {precision: 0}};
+
+        //compraventas por mes
+        new Chart(document.getElementById('graficoMeses'),
+        {
+            type: 'line',
+            data: 
+            {
+                labels: etiquetasMeses,
+                datasets: 
+                [{
+                    label: 'Compraventas iniciadas',
+                    data: valoresMeses,
+                    borderColor: colorPrincipal,
+                    backgroundColor: colorPrincipal,
+                    pointRadius: 3,
+                    tension: 0
+                }]
+            },
+            options:
+            {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {legend: {display: false}},
+                scales: {y: ejeEntero}
+            }
+        });
+
+        //marcas mas publicadas
+        const lienzoMarcas = document.getElementById('graficoMarcas');
+
+        if(lienzoMarcas)
+        {
+            new Chart(lienzoMarcas, {
+                type: 'bar',
+                data:
+                {
+                    labels: etiquetasMarcas,
+                    datasets: 
+                    [{
+                        label: 'Publicaciones',
+                        data: valoresMarcas,
+                        backgroundColor: colorPrincipal
+                    }]
+                },
+                options:
+                {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {legend:{display: false}},
+                    scales: {x: ejeEntero}
+                }
+            });
+        }
+
+        //modelos vendidos por marca
+        const lienzoModelos = document.getElementById('graficoModelos');
+
+        if(lienzoModelos)
+        {
+            const datasets = seriesModelos.map((serie, i) => 
+            ({
+                label: serie.label,
+                data: serie.data,
+                backgroundColor: serie.label === 'Otros' ? colorOtros : coloresSeries[i],
+                borderColor: '#ffffff',
+                borderWidth: 1
+            }));
+
+            new Chart(lienzoModelos, 
+            {
+                type: 'bar',
+                data: {labels: marcasVendidas, datasets: datasets},
+                options:
+                {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {legend:{position:'bottom'}},
+                    scales:
+                    {
+                        x: {stacked:true},
+                        y: {stacked:true, beginAtZero:true, ticks: {precision: 0}}
+                    }
+                }
+              });
+        }
+
+    </script>
+}
