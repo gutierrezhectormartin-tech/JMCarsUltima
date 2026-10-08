@@ -1,7 +1,7 @@
 ﻿using JMCarsWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WebApi.Controllers
+namespace JMCarsWeb.Controllers
 {
     public class UsuarioController : Controller
     {
@@ -61,6 +61,42 @@ namespace WebApi.Controllers
                 ViewBag.Token = ptoken;
                 return View();
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CambiarContrasena(string contrasenaActual, string contrasenaNueva, string repetirContrasenaNueva)
+        {
+            int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
+            int? idRol = HttpContext.Session.GetInt32("IdRol");
+
+            if(idUsuario == null || (idRol != 2 && idRol != 3))
+            {
+                TempData["Error"] = "Ningún usuario Logueado";
+                return RedirectToAction("Index", "Login");
+            }
+
+            string controladorPerfil = idRol == 2 ? "Escribano" : "Cliente";
+            string? email = idRol == 2 ? HttpContext.Session.GetString("EmailEscribano") : HttpContext.Session.GetString("EmailCliente");
+            if(string.IsNullOrEmpty(email))
+            {
+                TempData["Error"] = "No se ha podido confirmar usuario, logeese nuevamente";
+                return RedirectToAction("Index", "Login");
+            }
+            if(contrasenaNueva != repetirContrasenaNueva)
+            {
+                TempData["Error"] = "Las contraseña nueva y su verificacion no son iguales";
+                return RedirectToAction("Perfil", controladorPerfil);
+            }
+            try
+            {
+                await _usuarioService.ResetearContrasena(email, contrasenaActual, contrasenaNueva);
+                TempData["Mensaje"] = "Tu contraseña se cambio con exito";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction("Perfil", controladorPerfil);
         }
 
     }

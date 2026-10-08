@@ -50,6 +50,25 @@
             <button type="submit" class="btn btn-primary">Guardar cambios</button>
         }
 
+        <hr class="my-4"/>
+        <h5>Cambiar Contraseña</h5>
+        @using (Html.BeginForm("CambiarContrasena", "Usuario", FormMethod.Post))
+        {
+            <div class="mb-3">
+                <label class="form-label">Contraseña Actual</label>
+                <input type="password" name="contrasenaActual" class="form-control" autocomplete="current-password" required/>
+            </div>
+            <div>
+                <label class="form-label">Contraseña Nueva</label>
+                <input type="password" name="contrasenaNueva" class="form-control" autocomplete="new-password" required minlength="3" />
+            </div>
+            <div>
+                <label class="form-label">Repetir Contraseña Nueva</label>
+                <input type="password" name="repetirContrasenaNueva" class="form-control" autocomplete="new-password" required minlength="3"/>
+            </div>
+            <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+        }
+
         <hr class="my-4" />
 
         <h5>Inactivar cuenta</h5>

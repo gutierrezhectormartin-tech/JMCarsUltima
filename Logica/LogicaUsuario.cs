@@ -120,11 +120,11 @@ namespace Logica
             return persistenciaUsuario.ListarAdministradoresActivos();
         }
 
-        void CambiarContrasena(string pEmail, string pContrasenaActual, string pContrasenaNueva)
+        public void CambiarContrasena(string pEmail, string pContrasenaActual, string pContrasenaNueva)
         {
             Usuario usuario = persistenciaUsuario.Login(pEmail);
 
-            if(usuario == null || string.IsNullOrEmpty(pContrasenaActual) || Encriptacion.Verificar(pContrasenaActual, pContrasenaNueva!))
+            if(usuario == null || string.IsNullOrEmpty(pContrasenaActual) || !Encriptacion.Verificar(pContrasenaActual, usuario.Contrasena!))
             {
                 throw new Exception("La contraseña actual es incorrecta");
             }
@@ -138,7 +138,7 @@ namespace Logica
 
             try
             {
-                persistenciaRegistro.RegistrarActividad(usuario.IdUsuario, "Cambio de Contraseña", null)
+                persistenciaRegistro.RegistrarActividad(usuario.IdUsuario, "Cambio de Contraseña", null);
             }
             catch (Exception)
             {

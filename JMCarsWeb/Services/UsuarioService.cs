@@ -54,7 +54,7 @@ namespace JMCarsWeb.Services
                     throw new Exception(await ErrorHelper.LeerMensajeError(respuesta, "No se pudo verificar el correo"));
                 }
                 var resultado = await respuesta.Content.ReadFromJsonAsync<ExisteMailResponse>();
-                return respuesta?.Existe ?? false;
+                return resultado?.Existe ?? false;
             }
             catch (Exception ex)
             {

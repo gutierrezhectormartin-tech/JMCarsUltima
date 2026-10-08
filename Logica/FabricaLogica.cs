@@ -40,7 +40,7 @@ namespace Logica
             return new LogicaEscribano();
         }
 
-        public static ILogicaVehiculo GetLogicaVehiculo()
+        public ILogicaVehiculo GetLogicaVehiculo()
         {
             return new LogicaVehiculo();
         }

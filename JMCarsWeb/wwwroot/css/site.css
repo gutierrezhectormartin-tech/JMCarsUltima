@@ -1,6 +1,6 @@
 /* esstilos personalizados de JMCars */
 
-header .navbar {
+/*header .navbar {
     background-color: #031051 !important;
     border-bottom: 3px solid #0b1440;
     padding: 12px 0;
@@ -28,4 +28,495 @@ form .btn {
     height: 38px;
     line-height: 1.5;
     white-space: nowrap;
+}*/
+
+/* ============================================================
+   Estilos de JMCars
+   ============================================================ */
+
+/* ---------- 1. Colores de la marca ---------- */
+:root {
+    --jm-azul: #031051; /* color principal (igual al logo y al menú) */
+    --jm-azul-medio: #0b2a8a; /* para degradados y hover */
+    --jm-acento: #d9480f; /* naranja: acciones importantes */
+    --jm-acento-oscuro: #bf3f0c;
+    --jm-fondo: #f6f8fc; /* fondo general de las páginas */
+    --jm-gris-texto: #5b6577;
+    /* Bootstrap usa estas variables para links, foco, checks, etc. */
+    --bs-primary: #031051;
+    --bs-primary-rgb: 3, 16, 81;
+    --bs-link-color: #0b2a8a;
+    --bs-link-color-rgb: 11, 42, 138;
+    --bs-link-hover-color: #031051;
+    --bs-link-hover-color-rgb: 3, 16, 81;
 }
+
+/* ---------- 2. Base ---------- */
+body {
+    background-color: var(--jm-fondo);
+    color: #1f2937;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--jm-azul);
+    font-weight: 700;
+}
+
+/* ---------- 3. Menú superior (se mantiene lo que había) ---------- */
+header .navbar,
+.navbar {
+    background-color: var(--jm-azul) !important;
+    border-bottom: 3px solid #0b1440;
+    padding: 12px 0;
+}
+
+.navbar-brand {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #8d9eb2 !important;
+    letter-spacing: 1px;
+}
+
+    .navbar-brand:hover {
+        color: #ff6b6b !important;
+    }
+
+form .btn:not(.btn-sm) {
+    height: 38px;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+/* ---------- 3b. Menú: logo, enlaces y usuario ---------- */
+.navbar-brand img {
+    height: 52px;
+    border-radius: 8px;
+}
+
+.navbar .nav-link {
+    color: #c9d3e6;
+    font-weight: 500;
+    padding: 0.5rem 0.9rem;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+    .navbar .nav-link:hover,
+    .navbar .nav-link:focus {
+        color: #fff;
+    }
+
+    /* página actual: línea naranja debajo */
+    .navbar .nav-link.active {
+        color: #fff;
+        border-bottom-color: var(--jm-acento);
+    }
+
+    .navbar .nav-link .bi {
+        margin-right: 0.35rem;
+    }
+
+/* desplegable del usuario */
+.navbar .dropdown-menu {
+    border: 0;
+    border-radius: 12px;
+    padding: 0.5rem;
+    box-shadow: 0 8px 24px rgba(3, 16, 81, 0.2);
+}
+
+.navbar .dropdown-item {
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+
+    .navbar .dropdown-item:active {
+        background-color: var(--jm-azul);
+    }
+
+/* botón ☰ del celular */
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* en celular: la lista se despliega en vertical y la página actual se marca a la izquierda */
+@media (max-width: 991.98px) {
+    /* el menú desplegado queda pegado a la derecha, del lado del ☰ */
+    .navbar-collapse {
+        text-align: right;
+    }
+
+    /* la página actual se marca con la línea naranja a la derecha */
+    .navbar .nav-link {
+        border-bottom: 0;
+        border-right: 3px solid transparent;
+        padding: 0.5rem 0.75rem;
+    }
+
+        .navbar .nav-link.active {
+            border-right-color: var(--jm-acento);
+        }
+
+    .navbar-collapse .dropdown,
+    .navbar-collapse > .btn {
+        margin: 0.5rem 0;
+    }
+}
+/* ---------- 4. Botones (todas las páginas) ---------- */
+/* Principal: acción importante (guardar, enviar, publicar) */
+.btn-primary {
+    --bs-btn-bg: var(--jm-acento);
+    --bs-btn-border-color: var(--jm-acento);
+    --bs-btn-hover-bg: var(--jm-acento-oscuro);
+    --bs-btn-hover-border-color: var(--jm-acento-oscuro);
+    --bs-btn-active-bg: var(--jm-acento-oscuro);
+    --bs-btn-active-border-color: var(--jm-acento-oscuro);
+    --bs-btn-disabled-bg: var(--jm-acento);
+    --bs-btn-disabled-border-color: var(--jm-acento);
+    --bs-btn-focus-shadow-rgb: 217, 72, 15;
+}
+
+/* Secundario: volver, cancelar, "Entendido" */
+.btn-secondary {
+    --bs-btn-bg: var(--jm-azul);
+    --bs-btn-border-color: var(--jm-azul);
+    --bs-btn-hover-bg: var(--jm-azul-medio);
+    --bs-btn-hover-border-color: var(--jm-azul-medio);
+    --bs-btn-active-bg: var(--jm-azul-medio);
+    --bs-btn-active-border-color: var(--jm-azul-medio);
+    --bs-btn-disabled-bg: var(--jm-azul);
+    --bs-btn-disabled-border-color: var(--jm-azul);
+    --bs-btn-focus-shadow-rgb: 3, 16, 81;
+}
+
+/* Con borde: acciones de apoyo (ver detalle, editar, volver) */
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-info,
+.btn-outline-dark {
+    --bs-btn-color: var(--jm-azul);
+    --bs-btn-border-color: var(--jm-azul);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--jm-azul);
+    --bs-btn-hover-border-color: var(--jm-azul);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--jm-azul);
+    --bs-btn-active-border-color: var(--jm-azul);
+    --bs-btn-focus-shadow-rgb: 3, 16, 81;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* ---------- 4b. Etiquetas de estado (badges) ---------- */
+.badge {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.5em 0.85em;
+    border-radius: 8px;
+}
+
+    /* separación entre el ícono y el texto (algunas vistas no tienen espacio) */
+    .badge .bi {
+        margin-right: 0.35em;
+    }
+
+    /* el amarillo y el celeste con letra blanca casi no se leen: letra oscura */
+    .badge.bg-warning,
+    .badge.bg-info {
+        color: #1f2937;
+    }
+
+
+/* ---------- 5. Formularios y tablas ---------- */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--jm-azul-medio);
+    box-shadow: 0 0 0 0.2rem rgba(11, 42, 138, 0.15);
+}
+
+.form-control,
+.form-select {
+    border-radius: 8px;
+}
+
+.table {
+    --bs-table-bg: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(3, 16, 81, 0.06);
+}
+
+    .table thead th {
+        background-color: var(--jm-azul);
+        color: #fff;
+        border-bottom: 0;
+        font-weight: 600;
+    }
+
+/* ---------- 6. Tarjetas generales ---------- */
+.card {
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(3, 16, 81, 0.08);
+}
+
+/* ---------- 7. Portada del Home ---------- */
+.hero {
+    background: linear-gradient(135deg, var(--jm-azul) 0%, var(--jm-azul-medio) 100%);
+    color: #fff;
+    border-radius: 18px;
+    padding: 3rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+    .hero h1 {
+        color: #fff;
+        font-weight: 800;
+    }
+
+    .hero p {
+        color: #c9d3e6;
+        font-size: 1.1rem;
+    }
+
+.hero-filtros {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 1rem;
+}
+/* ---------- 7b. Títulos de sección ---------- */
+.titulo-seccion {
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--jm-azul);
+    margin-bottom: 1.25rem;
+    padding-left: 0.85rem;
+    border-left: 5px solid var(--jm-acento);
+}
+
+    .titulo-seccion small {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.9rem;
+        font-weight: 400;
+        color: var(--jm-gris-texto);
+    }
+/* ---------- 8. Franja de números ---------- */
+.numero-item {
+    text-align: center;
+    padding: 1rem 0.5rem;
+}
+
+    .numero-item .numero {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--jm-azul);
+        line-height: 1.1;
+    }
+
+    .numero-item .etiqueta {
+        font-size: 0.85rem;
+        color: var(--jm-gris-texto);
+    }
+
+/* ---------- 9. Carrusel de destacados ---------- */
+.carrusel-destacados {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(3, 16, 81, 0.18);
+}
+
+    .carrusel-destacados .carousel-item img {
+        height: 420px;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .carrusel-destacados .carousel-caption {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 3rem 2rem 1.5rem;
+        text-align: left;
+        background: linear-gradient(transparent, rgba(3, 16, 81, 0.92));
+    }
+
+        .carrusel-destacados .carousel-caption h3 {
+            color: #fff;
+        }
+
+@media (max-width: 768px) {
+    .carrusel-destacados .carousel-item img {
+        height: 260px;
+    }
+}
+/* ---------- 9b. Carrusel de tarjetas: flechas en los costados ---------- */
+.carrusel-tarjetas .carousel-control-prev,
+.carrusel-tarjetas .carousel-control-next {
+    width: 34px;
+    height: 34px;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    opacity: 1;
+    background-color: rgba(3, 16, 81, 0.14); /* azul de la marca, casi transparente */
+    border-radius: 50%;
+    z-index: 5;
+}
+
+.carrusel-tarjetas .carousel-control-prev {
+    left: 0.35rem;
+}
+
+.carrusel-tarjetas .carousel-control-next {
+    right: 0.35rem;
+}
+
+.carrusel-tarjetas .carousel-control-prev-icon,
+.carrusel-tarjetas .carousel-control-next-icon {
+    width: 0.8rem;
+    height: 0.8rem;
+    filter: invert(1) grayscale(100); /* ícono oscuro en lugar de blanco */
+    opacity: 0.7;
+}
+
+/* al pasar el mouse se vuelve un poco más visible */
+.carrusel-tarjetas .carousel-control-prev:hover,
+.carrusel-tarjetas .carousel-control-next:hover {
+    background-color: rgba(3, 16, 81, 0.3);
+}
+
+/* en pantallas grandes sobresalen un poco por fuera de las tarjetas */
+@media (min-width: 992px) {
+    .carrusel-tarjetas .carousel-control-prev {
+        left: -1.1rem;
+    }
+
+    .carrusel-tarjetas .carousel-control-next {
+        right: -1.1rem;
+    }
+}
+/* ---------- 10. Tarjetas de vehículos ---------- */
+.vehiculo-card {
+    overflow: hidden;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .vehiculo-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(3, 16, 81, 0.18);
+    }
+
+.vehiculo-foto {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background-color: #e9edf5;
+}
+
+.vehiculo-sin-foto {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9edf5;
+    color: #8d9eb2;
+    font-size: 3rem;
+}
+
+.vehiculo-precio {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--jm-azul);
+}
+
+.vehiculo-datos {
+    font-size: 0.85rem;
+    color: var(--jm-gris-texto);
+}
+/* ---------- 10b. Variantes de tarjeta ---------- */
+
+/* Destacada: más grande y con etiqueta */
+.vehiculo-card-destacada .vehiculo-foto {
+    aspect-ratio: 5 / 4;
+}
+
+.vehiculo-card-destacada .vehiculo-precio {
+    font-size: 1.6rem;
+}
+
+.vehiculo-card-destacada h3 {
+    font-size: 1.15rem;
+}
+
+.etiqueta-destacado {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 2;
+    background-color: var(--jm-acento);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Compacta: para el catálogo, se ven más vehículos de un vistazo */
+.vehiculo-card-compacta .vehiculo-foto,
+.vehiculo-card-compacta .vehiculo-sin-foto {
+    aspect-ratio: 16 / 10;
+}
+
+.vehiculo-card-compacta .card-body {
+    padding: 0.75rem 0.85rem 0.25rem;
+}
+
+.vehiculo-card-compacta h3 {
+    font-size: 0.95rem;
+}
+
+.vehiculo-card-compacta .vehiculo-datos {
+    font-size: 0.78rem;
+}
+
+.vehiculo-card-compacta .vehiculo-precio {
+    font-size: 1.1rem;
+}
+
+.vehiculo-card-compacta .card-footer {
+    padding: 0.5rem 0.85rem 0.85rem;
+}
+/* ---------- 11. Cómo funciona ---------- */
+.paso-numero {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--jm-acento);
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+}
+
+/* ---------- 12. Pie de página ---------- */
+.pie-pagina {
+    background-color: var(--jm-azul);
+    color: #c9d3e6;
+    margin-top: 4rem;
+    padding: 2rem 0;
+    font-size: 0.9rem;
+}
+
+    .pie-pagina a {
+        color: #fff;
+    }

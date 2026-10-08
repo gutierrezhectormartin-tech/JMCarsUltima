@@ -1819,7 +1819,28 @@ INSERT INTO Vehiculo
 VALUES
 (32000,35000,2022,'Automatica','Nafta','Hyundai Tucson Full.',2,-34.908,-56.171,8,14);
 
+--Fotos
 
+insert into FotoVehiculo(UrlFoto, IdVehiculo)
+select F.UrlFoto, V.IdVehiculo
+from (
+    Values
+        ('images/toyotacorolla2020.jpg', 'Toyota Corolla en excelente estado.'),
+    ('images/toyotacorolla2021.jpg', 'Toyota Corolla SEG.'),
+    ('images/Hilux2020.jpg',         'Toyota Hilux SR.'),
+    ('images/onix2022.jpg',          'Chevrolet Onix LT.'),
+    ('images/cruze2020.jpg',         'Chevrolet Cruze LTZ.'),
+    ('images/gol2019.jpg',           'Volkswagen Gol Trend.'),
+    ('images/vento2021.jpg',         'Volkswagen Vento Comfortline.'),
+    ('images/hb202022.jpg',          'Hyundai HB20 impecable.'),
+    ('images/tucson2022.jpg',        'Hyundai Tucson Full.')
+) as F (UrlFoto, Descripcion)
+inner join Vehiculo V on V.Descripcion = F.Descripcion
+where not exists (
+    select 1 from FotoVehiculo X
+    where X.IdVehiculo = V.IdVehiculo and X.UrlFoto = F.UrlFoto
+);
+go
 
 
 -- SOLICITUDES NOTARIALES

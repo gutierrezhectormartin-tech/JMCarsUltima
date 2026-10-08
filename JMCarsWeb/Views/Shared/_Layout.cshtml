@@ -2,9 +2,17 @@
     // leo el nombre del usuario logueado desde la sesion (null si no hay sesion)
     var nombreUsuario = Context.Session.GetString("NombreCompleto");
     var idRol = Context.Session.GetInt32("IdRol");
+
+    //enlace activo del menu
+    var controladorActual = ViewContext.RouteData.Values["controller"]?.ToString();
+    var accionActual = ViewContext.RouteData.Values["action"]?.ToString();
+
+    //marc active  si el enlace corresponde a la pagina en la que se esta
+    string Activo(string controlador, string accion) => (controladorActual == controlador && accionActual == accion) ? " active" : "";
 }
 <!DOCTYPE html>
 <html lang="es">
+   
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,52 +23,110 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-dark mb-4">
-            <div class="container">
-                <a class="navbar-brand" href="@Url.Action("Index", "Home")">
-                    <img src="~/images/logo.png" height="80" alt="JMCars" />
-                </a>
+<body class="d-flex flex-column min-vh-100">
+     <header>
+     <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+         <div class="container">
+             <a class="navbar-brand" href="@Url.Action("Index", "Home")">
+                 <img src="~/images/logo.png" alt="JMCars"/>
+             </a>
+             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal"
+             aria-controls="menuPrincipal" aria-expanded="false" aria-label="Abrir Menu">
+                 <span class="navbar-toggler-icon"></span>
+             </button>
+             <div class="collapse navbar-collapse" id="menuPrincipal">
+                 @if(string.IsNullOrEmpty(nombreUsuario))
+                 {
+                     <ul class="navbar-nav mx-lg-auto">
+                         <li class="nav-item">
+                             <a class="nav-link@(Activo("Home", "Index"))" href="@Url.Action("Index", "Home")"><i class="bi bi-house"></i>Inicio</a>
+                         </li>
+                     </ul>
+                     <a class="btn btn-primary" href="@Url.Action("Index", "Login")">Iniciar sesion</a>
+                 }
+                 else
+                 {
+                     <ul class="navbar-nav mx-lg-auto">
+                         <li class="nav-item">
+                             <a class="nav-link@(Activo("Home", "Index"))" href="@Url.Action("Index", "Home")"><i class="bi bi-house"></i>Inicio</a>
+                         </li>
 
-                <div>
-                    @if (string.IsNullOrEmpty(nombreUsuario))
-                    {
-                        @Html.ActionLink("Iniciar sesión", "Index", "Login", null, new { @class = "btn btn-outline-light" })
-                    }
-                    else
-                    {
-                        <span class="text-white me-3">Hola, @nombreUsuario</span>
-                        @if (idRol == 3)
-                        {
-                            @Html.ActionLink("Mi perfil", "Perfil", "Cliente", null, new { @class = "btn btn-outline-light me-2" })
-                            @Html.ActionLink("Mis Vehículos", "MisVehiculos", "Vehiculo", null, new { @class = "btn btn-outline-light me-2" })
-                            @Html.ActionLink("Buscar Vehículos", "Buscar", "Vehiculo", null, new { @class = "btn btn-outline-light me-2" })
-                            @Html.ActionLink("Mis Chats", "Historial", "Chat", null, new {@class = "btn btn-outline-light me-2"})
-                            @Html.ActionLink("Mis Solicitudes", "MisSolicitudes", "SolicitudNotarial", null, new { @class = "btn btn-outline-light me-2" })
-                        }
-                        else if (idRol == 2)
-                        {
-                            @Html.ActionLink("Mi perfil", "Perfil", "Escribano", null, new { @class = "btn btn-outline-light me-2" })
-                            @Html.ActionLink("Buscar Vehículos", "Buscar", "Vehiculo", null, new { @class = "btn btn-outline-light me-2" })
-                            @Html.ActionLink("Solicitudes Recibidas", "SolicitudesEscribano", "SolicitudNotarial", null, new { @class = "btn btn-outline-light me-2" })
-                        }
-                        else if (idRol == 1)
-                        {
-                            @Html.ActionLink("Panel de Vehiculos", "Vehiculos", "Admin", null, new { @class = "btn btn-outline-light me-2" })
-                            @Html.ActionLink("Usuarios", "Usuarios", "Admin", null, new { @class = "btn btn-outline-light me-2" })
-                            @Html.ActionLink("Estadisticas", "Estadisticas", "Admin", null, new {@class = "btn btn-outline-light me-2"})
-                        }
-                        @Html.ActionLink("Cerrar sesión", "Logout", "Login", null, new { @class = "btn btn-outline-light ms-2" })
-                        
-                    }
-                </div>
-            </div>
-        </nav>
-    </header>
-    <main class="container">
+                         if@(idRol == 3)
+                         {
+                             <li class="nav-item">
+                                 <a class="nav-link@(Activo("Vehiculo", "MisVehiculos"))" href="@Url.Action("MisVehiculos", "Vehiculo")"><i class="bi bi-car-front"></i>Mis Vehiculo</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link@(Activo("Vehiculo", "Buscar"))" href="@Url.Action("Buscar", "Vehiculo")"><i class="bi bi-search"></i>Buscar</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link@(Activo("Chat", "Historial"))" href="@Url.Action("Historial", "Chat")"><i class="bi bi-chat-dots"></i>Mis Conversaciones</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link@(Activo("SolicitudNotarial   ", "MisSolicitudes"))" href="@Url.Action("MisSolicitudes", "SolicitudNotarial")"><i class="bi bi-file-earmark-text"></i>Mis Solicitudes</a>
+                             </li>
+                         }
+                         else if(idRol == 2)
+                         {
+                             <li class="nav-item">
+                                 <a class="nav-link@(Activo("Vehiculo", "Buscar"))" href="@Url.Action("Buscar", "Vehiculo")"><i class="bi bi-search"></i>Buscar Vehiculos</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link@(Activo("SolicitudNotarial", "SolicitudesEscribano"))" href="@Url.Action("SolicitudesEscribano", "SolicitudNotarial")"><i class="bi bi-file-earmark-text"></i>Solicitudes recibidas</a>
+                             </li>
+                         }
+                         else if(idRol == 1)
+                         {
+                             <li class="nav-item">
+                                 <a class="nav-link@(Activo("Admin", "Vehiculos"))" href="@Url.Action("Vehiculos", "Admin")"><i class="bi bi-car-front"></i>Administracion de Vehiculos</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link@(Activo("Admin", "Usuarios"))" href="@Url.Action("Usuarios", "Admin")"><i class="bi bi-people"></i>Panel de Usuarios</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link@(Activo("Admin", "Estadisticas"))" href="@Url.Action("Estadisticas", "Admin")"><i class="bi bi-bar-chart"></i>Estadisticas</a>
+                             </li>
+                         }
+                     </ul>
+                     <div class="dropdown">
+                         <a class="btn btn-outline-light dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                             <i class="bi bi-person-circle me-1"></i>@nombreUsuario
+                         </a>
+                         <ul class="dropdown-menu dropdown-menu-end">
+                             @if(idRol == 3)
+                             {
+                                 <li><a class="dropdown-item" href="@Url.Action("Perfil", "Cliente")"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+                             }
+                             else if(idRol == 2)
+                             {
+                                 <li><a class="dropdown-item" href="@Url.Action("Perfil", "Escribano")"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+                             }
+                             @if(idRol == 2 || idRol == 3)
+                             {
+                                 <li><hr class="dropdown-divider"/></li>
+                             }
+                              <li><a class="dropdown-item" href"@Url.Action("Logout", "Login")"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesion</a></li>
+                     </ul>
+
+                     </div>
+                 }
+         </div>
+
+         </div>
+
+     </nav>
+ </header>
+    <main class="container flex-grow-1">
         @RenderBody()
     </main>
+    <footer class="pie-pagina">
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+            <div>@DateTime.Now.Year JMCars - Cerca de vos. Seguro para todos</div>
+            <div>
+                <a href="@Url.Action("TerminosYCondiciones", "Home")">Terminos y Condiciones</a>
+            </div>
+        </div>
+    </footer>
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

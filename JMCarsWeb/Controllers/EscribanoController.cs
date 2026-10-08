@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using JMCarsWeb.DTOs;
 using JMCarsWeb.Services;
 
-namespace WebApi.Controllers
+namespace JMCarsWeb.Controllers
 {
     public class EscribanoController : Controller
     {

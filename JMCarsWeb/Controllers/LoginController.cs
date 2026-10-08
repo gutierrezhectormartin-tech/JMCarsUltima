@@ -3,15 +3,17 @@ using JMCarsWeb.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using JMCarsWeb.DTOs;
 
-namespace WebApi.Controllers
+namespace JMCarsWeb.Controllers
 {
     public class LoginController : Controller
     {
         private UsuarioService _usuarioService;
+        private EstadisticasService _estadisticasService;
 
-        public LoginController(UsuarioService usuarioService)
+        public LoginController(UsuarioService usuarioService, EstadisticasService estadisticasService)
         {
             _usuarioService = usuarioService;
+            _estadisticasService = estadisticasService;
         }
 
         [HttpGet]
@@ -58,10 +60,26 @@ namespace WebApi.Controllers
             switch (usuarioLogueado.RolUsu)
             {
                 case 1:
+                    List<string> avisos = new List<string>();
                     bool funcionandoCorrectamente = await _usuarioService.EstadoVerificadorFuncionandoCorrectamente();
                     if(!funcionandoCorrectamente)
                     {
-                        TempData["Advertencia"] = "El servicio de notificacion de Solicitudes Vencidas no funciona correctamente";
+                        avisos.Add("El servicio de notificacion de Solicitudes Vencidas no funciona correctamente");
+                    }
+                    try
+                    {
+                        EstadisticasDTO conteos = await _estadisticasService.ObtenerConteos();
+                        if(conteos.CantSolicitudesPendientesVencidas > 0)
+                        {
+                            avisos.Add("Hay " + conteos.CantSolicitudesPendientesVencidas + " solicitudes vencidas");
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    if(avisos.Count > 0)
+                    {
+                        TempData["Advertencia"] = string.Join("|", avisos);
                     }
                     return RedirectToAction("Index", "Home");
                 case 2:

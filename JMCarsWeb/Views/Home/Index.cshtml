@@ -19,7 +19,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    @TempData["Advertencia"]
+                    <ul class="mb-0">
+                        @foreach (string aviso in TempData["Advertencia"]!.ToString()!.Split('|'))
+                        {
+                            <li>@aviso</li>
+                        }
+                    </ul>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
@@ -42,49 +47,170 @@
         Nombre = v.Modelo.Modelo
     }).Distinct().OrderBy(x => x.Nombre).ToList();
 }
+<section class="hero">
+    <h1>Encontrá tu próximo auto</h1>
+    <p class="mb-0">Cerca de vos. Seguro para todos. Publicaciones revisadas y cierre de la compraventa con escribano.</p>
 
-<h1>Vehículos publicados</h1>
+    
+</section>
 
-<form method="get" class="d-flex align-items-center gap-2 my-3">
+@{
+    JMCarsWeb.DTOs.EstadisticasDTO? conteos = ViewBag.Conteos as JMCarsWeb.DTOs.EstadisticasDTO;
+}
+@if(conteos != null)
+{
+    <div class="card mb-4">
+        <div class="row g-0">
+            <div class="col-6 numero-item">
+                <div class="numero">@conteos.CantAprobadas</div>
+                <div class="etiqueta">Vehiculos Publicados</div>
+            </div>
+            <div class="col-6 numero-item">
+                <div class="numero">@conteos.CantVendidas</div>
+                <div class="etiqueta">Vehiculos VEndidos</div>
+            </div>
+        </div>
 
-    <select name="marca" class="form-select">
-        <option value="">Lista de Marcas</option>
+    </div>
+}
+@{
+    List<JMCarsWeb.DTOs.VehiculoDTO> destacados = ViewBag.Destacados as List<JMCarsWeb.DTOs.VehiculoDTO>
+        ?? new List<JMCarsWeb.DTOs.VehiculoDTO>();
+    int porSlide = 3;
+    int cantidadSlides = (int)Math.Ceiling(destacados.Count / (double)porSlide);
+}
 
-        @foreach (var marca in marcas)
+@if (destacados.Any())
+{
+
+    <h2 class="titulo-seccion">Destacados <small>Los últimos vehículos publicados</small></h2>
+
+
+    <div id="carruselDestacados" class="carousel slide carrusel-tarjetas mb-5" data-bs-ride="carousel" data-bs-interval="6000">
+        <div class="carousel-inner px-1 pt-2 pb-3">
+            @for (int s = 0; s < cantidadSlides; s++)
             {
-                <option value="@marca.Id">
-                    @marca.Nombre
-                </option>
-            }
-    </select>
-    <select name="modelo" class="form-select">
-        <option value="">Lista de Modelos</option>
+                <div class="carousel-item @(s == 0 ? "active" : "")">
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+                        @foreach (var d in destacados.Skip(s * porSlide).Take(porSlide))
+                        {
+                            string foto = d.Fotografia.First().Replace("\\", "/");
 
-        @foreach (var modelo in modelos)
-            {
-                <option value="@modelo.idModelo" data-marca="@modelo.idMarca">
-                    @modelo.Nombre
-                </option>
+                            <div class="col">
+                                <div class="card vehiculo-card vehiculo-card-destacada h-100">
+                                    <span class="etiqueta-destacado">Destacado</span>
+                                    <img class="vehiculo-foto" src="/@foto" alt="@d.Modelo.Marca.NombreMarca @d.Modelo.Modelo" />
+                                    <div class="card-body pb-2">
+                                        <h3 class="h6 mb-1">@d.Modelo.Marca.NombreMarca @d.Modelo.Modelo</h3>
+                                        <div class="vehiculo-datos mb-2">@d.Anio · @d.Km.ToString("N0") km · @d.CajaCambios</div>
+                                        <div class="vehiculo-precio">@d.Precio.ToString("C")</div>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                                        <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@d.IdVehiculo" asp-route-origen="home" class="btn btn-outline-primary btn-sm w-100">Ver detalle</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
             }
-    </select> 
-    <select name="anio" class="form-select">
-        <option value="">Todos los años</option>
-        @foreach(var anio in Model.Select(v => v.Anio).Distinct().OrderBy(a => a))
-            {
-                <option value="@anio">@anio</option>
-            }
-        </select>
-        <select name="ordenPrecio" class="form-select">
-            <option value="">Ordenar por Precio</option>
-            <option value="asc">Menor a Mayor</option>
-            <option value="desc">Mayor a Menor</option>
-        </select>
-    <a href="/" class="btn btn-outline-dark" role="button">
-        Limpiar
-    </a>
+        </div>
+         @if (cantidadSlides > 1)
+        {
+            <button class="carousel-control-prev" type="button" data-bs-target="#carruselDestacados" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anteriores</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carruselDestacados" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguientes</span>
+            </button>
+        }
+    </div>
+}
 
-</form>
+<h2 class="titulo-seccion">Todos los vehículos <small>Filtrá por marca, modelo o año</small></h2>
 
+<form method="get" class="card card-body mb-4">
+        <div class="row g-2">
+            <div class="col-12 col-md-3">
+                <select name="marca" class="form-select">
+                    <option value="">Todas las marcas</option>
+                    @foreach (var marca in marcas)
+                    {
+                        <option value="@marca.Id">@marca.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <select name="modelo" class="form-select">
+                    <option value="">Todos los modelos</option>
+                    @foreach (var modelo in modelos)
+                    {
+                        <option value="@modelo.idModelo" data-marca="@modelo.idMarca">@modelo.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="anio" class="form-select">
+                    <option value="">Todos los años</option>
+                    @foreach (var anio in Model.Select(v => v.Anio).Distinct().OrderBy(a => a))
+                    {
+                        <option value="@anio">@anio</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="ordenPrecio" class="form-select">
+                    <option value="">Ordenar por precio</option>
+                    <option value="asc">Menor a mayor</option>
+                    <option value="desc">Mayor a menor</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2">
+                <a href="/" class="btn btn-outline-primary w-100" role="button">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span id="contadorVehiculos" class="text-muted small">@Model.Count vehículos</span>
+    <button type="button" id="btnAlternarVista" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-table"></i> Listado completo
+    </button>
+</div>
+
+<div id="vistaTarjetas" class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xl-5 g-3 mb-4">
+    @foreach (var v in Model)
+    {
+        string? fotoV = (v.Fotografia != null && v.Fotografia.Any())
+            ? "/" + v.Fotografia.First().Replace("\\", "/")
+            : null;
+
+        <div class="col" data-marca="@v.Modelo.Marca.IdMarca" data-modelo="@v.Modelo.IdModelo" data-anio="@v.Anio"
+             data-precio="@v.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+            <div class="card vehiculo-card vehiculo-card-compacta h-100">
+                @if (fotoV != null)
+                {
+                    <img class="vehiculo-foto" src="@fotoV" alt="@v.Modelo.Marca.NombreMarca @v.Modelo.Modelo" />
+                }
+                else
+                {
+                    <div class="vehiculo-sin-foto"><i class="bi bi-car-front"></i></div>
+                }
+                <div class="card-body pb-2">
+                    <h3 class="h6 mb-1">@v.Modelo.Marca.NombreMarca @v.Modelo.Modelo</h3>
+                    <div class="vehiculo-datos mb-2">@v.Anio · @v.Km.ToString("N0") km · @v.CajaCambios · @v.Motorizacion</div>
+                    <div class="vehiculo-precio">@v.Precio.ToString("C")</div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                    <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" asp-route-origen="home" class="btn btn-outline-primary btn-sm w-100">Ver detalle</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div id="vistaTabla" class="d-none">
 <table class="table">
     <thead>
         <tr>
@@ -104,7 +230,8 @@
     <tbody>
         @foreach (var v in Model)
         {
-            <tr data-marca="@v.Modelo.Marca.IdMarca" data-modelo="@v.Modelo.IdModelo" data-anio="@v.Anio">
+           <tr data-marca="@v.Modelo.Marca.IdMarca" data-modelo="@v.Modelo.IdModelo" data-anio="@v.Anio"
+            data-precio="@v.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
                 <td>@v.IdVehiculo</td>
                 <td>@v.Modelo.Marca.NombreMarca</td>
                 <td>@v.Modelo.Modelo</td>
@@ -123,75 +250,142 @@
         }
     </tbody>
 </table>
+</div>
 
+<section class="my-5">
+    <h2 class="titulo-seccion">Como funciona <small>Compra o vende en tres pasos</small></h2>
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="paso-numero">1</div>
+                    <h3 class="h5">Publica o busca</h3>
+                    <p class="text-muted mb-0">Registrate, publica tu vehiculo o encuentra el que quieres</p>
+                </div>
+            </div>
+       </div>
+       <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="paso-numero">2</div>
+                    <h3 class="h5">Habla con el vendedor/comprador</h3>
+                    <p class="text-muted mb-0">Conectate directamente desde nuestra web/app</p>
+                </div>
+            </div>
+        </div>
+       <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="paso-numero">3</div>
+                    <h3 class="h5">Cerra con confianza</h3>
+                    <p class="text-muted mb-0">Selecciona un escribano con nosotros y tene respaldo legal</p>
+                </div>
+            </div>
+        </div>
+            </div>
+
+    </div>
+</section>
 <script>
+    const selMarca = document.querySelector('select[name="marca"]');
+    const selModelo = document.querySelector('select[name="modelo"]');
+    const selAnio = document.querySelector('select[name="anio"]');
+    const selOrden = document.querySelector('select[name="ordenPrecio"]');
+
+    const contenedorTarjetas = document.getElementById('vistaTarjetas');
+    const contenedorTabla = document.getElementById('vistaTabla');
+    const cuerpoTabla = contenedorTabla.querySelector('tbody');
+    const contador = document.getElementById('contadorVehiculos');
+    const botonVista = document.getElementById('btnAlternarVista');
+
     // Guardar orden original de años al cargar la página
-    const ddlAnio = document.querySelector('select[name="anio"]');
-    const ordenOriginalAnios = Array.from(ddlAnio.querySelectorAll('option[value]')).map(o => o.value);
+    const ordenOriginalAnios = Array.from(selAnio.querySelectorAll('option[value]')).map(o => o.value);
+
+    // Las tarjetas y las filas de la tabla tienen los mismos data-marca / data-modelo / data-anio
+    function coincide(el, marca, modelo, anio) {
+        return (!marca || el.dataset.marca === marca)
+            && (!modelo || el.dataset.modelo === modelo)
+            && (!anio || el.dataset.anio === anio);
+    }
 
     function aplicarFiltros() {
-        const marcaSeleccionada = document.querySelector('select[name="marca"]').value;
-        const modeloSeleccionado = document.querySelector('select[name="modelo"]').value;
-        const anioSeleccionado = document.querySelector('select[name="anio"]').value;
+        const marca = selMarca.value;
+        const modelo = selModelo.value;
+        const anio = selAnio.value;
 
-        // Filtrar filas
-        document.querySelectorAll('tbody tr').forEach(function (fila) {
-            const coincideMarca = !marcaSeleccionada || fila.dataset.marca === marcaSeleccionada;
-            const coincideModelo = !modeloSeleccionado || fila.dataset.modelo === modeloSeleccionado;
-            const coincideAnio = !anioSeleccionado || fila.dataset.anio === anioSeleccionado;
-            fila.style.display = coincideMarca && coincideModelo && coincideAnio ? '' : 'none';
+        // Filtrar tarjetas y filas a la vez
+        document.querySelectorAll('#vistaTarjetas > [data-marca], #vistaTabla tbody tr').forEach(function (el) {
+            el.style.display = coincide(el, marca, modelo, anio) ? '' : 'none';
         });
+
+        // Actualizar el contador
+        const visibles = Array.from(contenedorTarjetas.children).filter(el => el.style.display !== 'none').length;
+        contador.textContent = visibles + (visibles === 1 ? ' vehículo' : ' vehículos');
 
         // Actualizar opciones de año según marca y modelo seleccionados
         const aniosVisibles = new Set();
-        document.querySelectorAll('tbody tr').forEach(function (fila) {
-            const coincideMarca = !marcaSeleccionada || fila.dataset.marca === marcaSeleccionada;
-            const coincideModelo = !modeloSeleccionado || fila.dataset.modelo === modeloSeleccionado;
-            if (coincideMarca && coincideModelo) aniosVisibles.add(fila.dataset.anio);
+        contenedorTarjetas.querySelectorAll('[data-marca]').forEach(function (el) {
+            if (coincide(el, marca, modelo, '')) aniosVisibles.add(el.dataset.anio);
         });
 
-        document.querySelectorAll('select[name="anio"] option').forEach(function (option) {
+        selAnio.querySelectorAll('option').forEach(function (option) {
             if (!option.value) return;
             option.style.display = aniosVisibles.has(option.value) ? '' : 'none';
         });
 
         // Restaurar orden original de años
-        ordenOriginalAnios.forEach(function(anio) {
-            const option = ddlAnio.querySelector(`option[value="${anio}"]`);
-            if (option) ddlAnio.appendChild(option);
+        ordenOriginalAnios.forEach(function (a) {
+            const option = selAnio.querySelector(`option[value="${a}"]`);
+            if (option) selAnio.appendChild(option);
         });
     }
 
-    document.querySelector('select[name="marca"]').addEventListener('change', function () {
+    function ordenarPorPrecio() {
+        const orden = selOrden.value;
+        if (!orden) return;
+
+        const comparar = function (a, b) {
+            const precioA = parseFloat(a.dataset.precio);
+            const precioB = parseFloat(b.dataset.precio);
+            return orden === 'asc' ? precioA - precioB : precioB - precioA;
+        };
+
+        Array.from(contenedorTarjetas.children).sort(comparar)
+            .forEach(function (el) { contenedorTarjetas.appendChild(el); });
+        Array.from(cuerpoTabla.querySelectorAll('tr')).sort(comparar)
+            .forEach(function (el) { cuerpoTabla.appendChild(el); });
+    }
+
+    selMarca.addEventListener('change', function () {
         const marcaSeleccionada = this.value;
-        const ddlModelo = document.querySelector('select[name="modelo"]');
-        ddlModelo.value = '';
-        ddlModelo.querySelectorAll('option').forEach(function (option) {
+        selModelo.value = '';
+        selModelo.querySelectorAll('option').forEach(function (option) {
             if (!option.value) return;
             option.style.display = !marcaSeleccionada || option.dataset.marca === marcaSeleccionada ? '' : 'none';
         });
         aplicarFiltros();
     });
 
-    document.querySelector('select[name="modelo"]').addEventListener('change', aplicarFiltros);
-    document.querySelector('select[name="anio"]').addEventListener('change', aplicarFiltros);
+    selModelo.addEventListener('change', aplicarFiltros);
+    selAnio.addEventListener('change', aplicarFiltros);
+    selOrden.addEventListener('change', ordenarPorPrecio);
 
-    document.querySelector('select[name="ordenPrecio"]').addEventListener('change', function () {
-        const orden = this.value;
-        if (!orden) return;
-        const tbody = document.querySelector('tbody');
-        const filas = Array.from(tbody.querySelectorAll('tr'));
-        filas.sort(function (a, b) {
-            const precioA = parseFloat(a.cells[8].textContent.replace(/[^0-9.]/g, ''));
-            const precioB = parseFloat(b.cells[8].textContent.replace(/[^0-9.]/g, ''));
-            return orden === 'asc' ? precioA - precioB : precioB - precioA;
+    // Botón para alternar entre las tarjetas y el listado completo (tabla)
+    botonVista.addEventListener('click', function () {
+        const mostrandoTabla = !contenedorTabla.classList.contains('d-none');
+        contenedorTabla.classList.toggle('d-none', mostrandoTabla);
+        contenedorTarjetas.classList.toggle('d-none', !mostrandoTabla);
+        botonVista.innerHTML = mostrandoTabla
+            ? '<i class="bi bi-table"></i> Listado completo'
+            : '<i class="bi bi-grid-3x3-gap"></i> Ver tarjetas';
+    });
+</script>
+@if(TempData["Advertencia"] != null)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var modal = new bootstrap.Modal(document.getElementById('modalAdvertencia'));
+            modal.show();
         });
-        filas.forEach(function (fila) { tbody.appendChild(fila); });
-    });
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var modal = new bootstrap.Modal(document.getElementById('modalAdvertencia'));
-        modal.show();
-    });
-</script>
+    </script>
+}

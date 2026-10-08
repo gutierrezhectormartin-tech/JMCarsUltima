@@ -18,7 +18,8 @@ namespace WebAPI.Controllers
         private readonly IEmailService _emailService;
         public VehiculoController(IEmailService emailService)
         {
-            _logicaVehiculo = FabricaLogica.GetLogicaVehiculo();
+         
+            _logicaVehiculo = FabricaLogica.GetInstancia().GetLogicaVehiculo();
             _emailService = emailService;
         }
 

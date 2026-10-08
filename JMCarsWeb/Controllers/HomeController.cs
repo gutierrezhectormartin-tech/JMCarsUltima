@@ -7,10 +7,12 @@ namespace JMCarsWeb.Controllers
     public class HomeController : Controller
     {
         private readonly VehiculoService _vehiculoService;
+        private readonly EstadisticasService _estadisticasService;
 
-        public HomeController(VehiculoService vehiculoService)
+        public HomeController(VehiculoService vehiculoService, EstadisticasService estadisticasService)
         {
             _vehiculoService = vehiculoService;
+            _estadisticasService = estadisticasService;
         }
 
         public async Task<IActionResult> Index(string marca)
@@ -19,6 +21,18 @@ namespace JMCarsWeb.Controllers
 
             lista = lista.Where(v => v.IdEstadoPublicacion == 2).ToList();
 
+            ViewBag.Destacados = lista.Where(v => v.Fotografia != null && v.Fotografia.Any()).OrderByDescending(v => v.IdVehiculo)
+                                            .Take(6)
+                                            .ToList();
+
+            try
+            {
+                ViewBag.Conteos = await _estadisticasService.ObtenerConteos();
+            }
+            catch (Exception)
+            {
+                ViewBag.Conteos = null;
+            }
             if (!string.IsNullOrEmpty(marca))
             {
                 lista = lista.Where(v =>

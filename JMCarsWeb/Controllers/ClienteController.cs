@@ -2,7 +2,7 @@ using JMCarsWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 using JMCarsWeb.DTOs;
 
-namespace WebApi.Controllers
+namespace JMCarsWeb.Controllers
 {
     public class ClienteController : Controller
     {

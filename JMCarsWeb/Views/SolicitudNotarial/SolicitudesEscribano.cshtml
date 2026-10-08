@@ -90,7 +90,7 @@
                                 <span class="badge @claseEstado mb-2 d-block">@textoEstado</span>
                                 @if (solicitud?.EstadoSolicitud == 1)
                                 {
-                                    <div class="btn-group btn-group-sm" role="group">
+                                    <div class="d-inline-flex gap-1">
                                         <form asp-action="Aceptar" method="post" class="d-inline">
                                             <input type="hidden" name="idSolicitud" value="@solicitud.IdSolicitud" />
                                             <button type="submit" class="btn btn-outline-success" title="Aceptar">
@@ -116,7 +116,7 @@
                                 else if (compraVenta.EstadoCompraVenta == 1)
                                 {
                                     <span class="badge bg-info text-dark mb-2 d-block">En Proceso</span>
-                                    <div class="btn-group btn-group-sm" role="group">
+                                    <div class="d-inline-flex gap-1">
                                         <form asp-action="FinalizarCompraVenta" method="post" class="d-inline">
                                             <input type="hidden" name="idCompraVenta" value="@compraVenta.IdCompraVenta" />
                                             <button type="submit" class="btn btn-outline-success" title="Finalizar Venta">
