@@ -3,19 +3,20 @@
     ViewData["Title"] = "Solicitar Escribano";
     var escribanos = ViewBag.Escribanos as List<JMCarsWeb.DTOs.EscribanoDTO>;
 }
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2>Solicitar Escribano</h2>
-            <p class="text-muted mb-0">Elegí el escribano que va a gestionar la compraventa</p>
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-10 col-lg8 col-xl-6">
+        
+        <div class="mb-3">
+            <a href="@Url.Action("Detalle", "Vehiculo", new { id = Model.IdVehiculo })" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>Volver al vehículo
+            </a>
         </div>
-        <a href="@Url.Action("Detalle", "Vehiculo", new { id = Model.IdVehiculo })" class="btn btn-outline-secondary">
-            Volver al vehículo
-        </a>
-    </div>
-
-    <hr />
-
+        <div class="text-center mb-4">
+            <i class="bi bi-file-earmark-text" style="font-size: 3rem; color: var(--jm-azul);"></i>
+            <h2 class="mt-2 mb-1">Solicitar Escribano</h2>
+            <div class="text-muted small">Selecciona el escribano con quien gestionar tu compraventa</div>
+        </div>
+        
     @if (TempData["Mensaje"] != null)
     {
         <div class="alert alert-success">@TempData["Mensaje"]</div>
@@ -25,39 +26,64 @@
         <div class="alert alert-danger">@TempData["Error"]</div>
     }
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">
-                @Model.Modelo?.Marca?.NombreMarca @Model.Modelo?.Modelo @Model.Anio
-            </h5>
-            <p class="card-text mb-1">
-                <strong>Precio:</strong> USD @Model.Precio.ToString("N0")
-            </p>
-            <p class="card-text text-muted mb-0">
-                <strong>Vendedor:</strong> @Model.Vendedor?.NombreCompleto
-            </p>
-        </div>
-    </div>
-
-    <form asp-action="Solicitar" method="post">
-        <input type="hidden" name="idVehiculo" value="@Model.IdVehiculo" />
-
-        <div class="mb-3">
-            <label for="idEscribano" class="form-label">Escribano</label>
-            <select name="idEscribano" id="idEscribano" class="form-select" required>
-                <option value="">-- Seleccioná un escribano --</option>
-                @if (escribanos != null)
-                {
-                    @foreach (var escribano in escribanos)
+    <div class="card card-body p-4">
+        
+        <div class="d-flex align-items-center gap-3 mb-3">
+                @{
+                    string? fotoMiniatura = null;
+                    if(Model.Fotografia != null && Model.Fotografia.Any())
                     {
-                        <option value="@escribano.IdUsuario">
-                            @escribano.NombreCompleto - Caja @escribano.NumeroCaja (@escribano.Direccion)
-                        </option>
+                        string primeraFoto = Model.Fotografia.First().Replace("\\", "/");
+                        fotoMiniatura = primeraFoto.StartsWith("/") ? primeraFoto : "/" + primeraFoto;
                     }
                 }
-            </select>
+                <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle overflow-hidden"
+                    style="width: 56px; height: 56px; background-color: #e9edf5; color: var(--jm-azul); font-size: 1.4rem;">
+                    @if(fotoMiniatura != null)
+                    {
+                        <img src="@fotoMiniatura" alt="Foto del Vehiculo" style="width: 100%; height: 100%; object-fit: cover;"/>
+                    }
+                    else
+                    {
+                        <i class="bi bi-car-front"></i>
+                    }
+                </div>
+            <div>
+                <div class="fw-bold" style:"color: var(--jm-azul);">
+                    @Model.Modelo?.Marca?.NombreMarca @Model.Modelo?.Modelo @Model.Anio
+                </div>
+                <div class="small text-muted">Vendedor: @Model.Vendedor?.NombreCompleto</div>
+            </div>
+            <div class="ms-auto fw-bold" style="color: var(--jm-azul);">
+                U$S @Model.Precio.ToString("N0")
+            </div>
         </div>
+        
+        <hr class="mt-0"/>
 
-        <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
-    </form>
+        <form asp-action="Solicitar" method="post">
+            <input type="hidden" name="idVehiculo" value="@Model.IdVehiculo" />
+
+            <div class="mb-3">
+                <label for="idEscribano" class="form-label">Escribano</label>
+                <select name="idEscribano" id="idEscribano" class="form-select" required>
+                    <option value="">-- Seleccioná un escribano --</option>
+                    @if (escribanos != null)
+                    {
+                        @foreach (var escribano in escribanos)
+                        {
+                            <option value="@escribano.IdUsuario">
+                                @escribano.NombreCompleto - Caja @escribano.NumeroCaja (@escribano.Direccion)
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-send"></i> Enviar Solicitud
+            </button>
+        </form>
+</div>
+</div>
 </div>

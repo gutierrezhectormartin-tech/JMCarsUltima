@@ -3,9 +3,13 @@
     ViewData["Title"] = "Mi perfil";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <h2>Mi perfil</h2>
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="text-center mb-4">
+                <i class="bi bi-person-circle" style="font-size: 3rem; color: var(--jm-azul);"></i>
+                <h2 class="mt-2 mb-1">Mi Perfil</h2>
+                <div class="text-muted small">Datos y Seguridad de tu cuenta</div>
+        </div>
 
         @if(TempData["Error"] != null)
         {
@@ -27,6 +31,8 @@
             <div class="alert alert-danger">@ViewBag.Error</div>
         }
 
+        <div class="card card-body p-4 mb-4">
+            <h5 class="mb-3">Datos Personales</h5>
         @using (Html.BeginForm("Perfil", "Cliente", FormMethod.Post))
         {
             <div class="mb-3">
@@ -49,9 +55,9 @@
             </div>
             <button type="submit" class="btn btn-primary">Guardar cambios</button>
         }
-
-        <hr class="my-4"/>
-        <h5>Cambiar Contraseña</h5>
+        </div>
+        <div class="card card-body p-4 mb-4">
+        <h5 class="mb-3">Cambiar Contraseña</h5>
         @using (Html.BeginForm("CambiarContrasena", "Usuario", FormMethod.Post))
         {
             <div class="mb-3">
@@ -66,16 +72,17 @@
                 <label class="form-label">Repetir Contraseña Nueva</label>
                 <input type="password" name="repetirContrasenaNueva" class="form-control" autocomplete="new-password" required minlength="3"/>
             </div>
-            <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+            <button type="submit" class="btn btn-primary mt-3">Cambiar Contraseña</button>
         }
-
-        <hr class="my-4" />
-
-        <h5>Inactivar cuenta</h5>
+        </div>
+        
+        <div class="card card-body p-4 mb-4 border border-danger-subtle">
+        <h5 class="mb-2 text-danger">Inactivar cuenta</h5>
         <p class="text-muted">Si inactivás tu cuenta vas a quedar fuera del sistema. Después, solo un administrador puede reactivarla.</p>
         @using (Html.BeginForm("Inactivar", "Cliente", FormMethod.Post))
         {
-            <button type="submit" class="btn btn-danger">Inactivar mi cuenta</button>
+            <button type="submit" class="btn btn-danger w-100">Inactivar mi cuenta</button>
         }
+       </div>
     </div>
 </div>

@@ -6,7 +6,7 @@
             <h2>Mis Vehículos Publicados</h2>
             <p class="text-muted mb-0">Acá podés gestionar las publicaciones de tus automóviles en JMCars.</p>
         </div>
-        <a asp-controller="Vehiculo" asp-action="Crear" class="btn btn-success">
+        <a asp-controller="Vehiculo" asp-action="Crear" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i> Nueva Publicación
         </a>
     </div>
@@ -72,13 +72,13 @@
                             <td>@vehiculo.Km.ToString("N0") Km</td>
 
                             <!-- Precio -->
-                            <td><span class="text-success fw-bold">U$S @vehiculo.Precio.ToString("N0")</span></td>
+                            <td><span class="fw-bold">U$S @vehiculo.Precio.ToString("N0")</span></td>
 
                             <!-- Estado -->
                             <td class="text-center">
                                 @if (vehiculo.IdEstadoPublicacion == 1)
                                 {
-                                    <span class="badge bg-warning"><i class="bi bi-clock"></i>Pendiente</span>
+                                    <span class="badge bg-warning"><i class="bi bi-clock"></i> Pendiente</span>
                                 }
                                 else if (vehiculo.IdEstadoPublicacion == 2)
                                 {
@@ -133,7 +133,7 @@
                                         </form>
                                     }
 
-                                    <a asp-controller="Chat" asp-action="ConsultasVehiculo" asp-route-idvehiculo="@vehiculo.IdVehiculo" class="btn btn-outline-info btn-sm" title="Ver Consultas">
+                                    <a asp-controller="Chat" asp-action="ConsultasVehiculo" asp-route-idvehiculo="@vehiculo.IdVehiculo" class="btn btn-outline-info" title="Ver Consultas">
                                         <i class="bi bi-chat-dots"></i>
                                     </a>
                                 </div>

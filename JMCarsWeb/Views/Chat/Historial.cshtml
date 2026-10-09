@@ -2,17 +2,14 @@
 @{
     ViewData["Title"] = "Historial de Chat";
 }
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2>
-                Historial de Conversaciones
-            </h2>
-            <p class="text-muted mb-0">Tus conversaciones</p>
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-lg-9 col-xl-8">
+        
+        <div class="text-center mb-4">
+            <i class="bi bi-chat-dots" style="font-size: 3rem; color: var(--jm-azul);"></i>
+            <h2 class="mt-2 mb-1">Historial de Conversaciones</h2>
+            <div class="text-muted small">Tus conversaciones</div>
         </div>
-    </div>
-
-    <hr />
 
     @if(TempData["Mensaje"] != null)
     {
@@ -25,36 +22,51 @@
 
     @if(Model == null || !Model.Any())
     {
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> Aun no tienes conversaciones
+        <div class="card card-body p-5 text-center">
+            <i class="bi bi-chat-square-text" style="font-size: 2.5rem; "></i>
+            <h5 class="mt-3">Aun no tienes conversaciones aqui</h5>
+            <p class="text-muted">Cuando tengas conversaciones apareceran aqui</p>
+            <div>
+                <a href="@Url.Action("Buscar", "Vehiculo")" class="btn btn-primary">
+                    <i class="bi bi-search me-1"></i> Buscar Vehiculos
+                </a>
+            </div>
         </div>
     }
     else
     {
-        <div class="list-group">
+        <div class="d-grid gap-3">
             @foreach (var chat in Model)
             {
-                <a href="@Url.Action("Conversacion", "Chat", new {idChat = chat.IdChat, idVehiculo = chat.Vehiculo?.IdVehiculo ?? 0})" class="list-group-item list-group-item-action">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>@chat.Vehiculo?.Modelo?.Marca?.NombreMarca @chat.Vehiculo?.Modelo?.Modelo @chat.Vehiculo?.Anio</strong>
+                <a href="@Url.Action("Conversacion", "Chat", new {idChat = chat.IdChat, idVehiculo = chat.Vehiculo?.IdVehiculo ?? 0})"
+                 class="card vehiculo-card text-decoration-none">
+                    <div class="card-body d-flex align-items-center gap3">
+                        <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle"
+                        style="width: 48px; height: 48px; background-color: #e9edf5; color: var(--jm-azul); font-size: 1.3rem;">
+                        <i class="bi bi-person"></i>
+                        </div>
+
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <div class="fw-bold" style="color: var(--jm-azul);">
+                                @chat.Vehiculo?.Modelo?.Marca?.NombreMarca @chat.Vehiculo?.Modelo?.Modelo @chat.Vehiculo?.Anio
+                            </div>
                             <div class="text-muted small">Con: @chat.NombreOtroUsuario</div>
                             @if(!string.IsNullOrEmpty(chat.UltimoMensaje))
                             {
-                                <div class="text-muted small">@chat.UltimoMensaje</div>
+                                <div class="text-truncate small" style="color: #1f2937;">@chat.UltimoMensaje</div>
                             }
-                        </div>
-                        <div class="text-muted small">
-                            @if(chat.FechaUltimoMensaje.HasValue)
-                            {
-                                @chat.FechaUltimoMensaje.Value.ToString("dd/MM/yyyy HH:mm")
-                            }
-                        </div>
-                    </div>
+                            </div>
 
-                </a>
+                            <div class="text-muted small text-end flex-shrink-0">
+                                @if(chat.FechaUltimoMensaje.HasValue)
+                                {
+                                    @chat.FechaUltimoMensaje.Value.ToString("dd/MM/yyyy HH:mm")
+                                }
+                            </div>
+                        </div>
+                    </a>
             }
-
         </div>
     }
+</div>
 </div>

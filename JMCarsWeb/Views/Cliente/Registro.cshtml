@@ -3,8 +3,14 @@
     ViewData["Title"] = "Registro de Cliente";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card card-body p-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-plus" style="font-size: 3rem; color: var(--jm-azul);"></i>
+                <h2 class="mt-2 mb-1">Registro de Cliente</h2>
+                <div class="text-muted small">Crea tu cuenta, publica y compra vehiculos.</div>
+            </div>
         <h2>Registro de Cliente</h2>
 
         @if(TempData["Error"] != null)
@@ -54,9 +60,12 @@
                     Acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#modalTerminos">Terminos y Condiciones</a>
                 </label>
             </div>
-            <button type="submit" class="btn btn-primary">Registrarme</button>
-            @Html.ActionLink("Volver al login", "Index", "Login", null, new { @class = "btn btn-link" })
+            <button type="submit" class="btn btn-primary w-100">Registrarme</button>
+            <div class="text-center mt-3">
+                @Html.ActionLink("Volver al login", "Index", "Login", null, new { @class = "small" })
+            </div>
         }
+        </div>
     </div>
     <div class="modal fade" id="modalTerminos" tabindex="-1" aria-labelledby="modalTerminosLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">

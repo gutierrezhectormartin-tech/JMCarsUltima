@@ -133,11 +133,6 @@ namespace JMCarsWeb.Controllers
             {
                 List<ChatDTO> chats = await _chatService.ListarChatsPorVehiculo(idVehiculo);
 
-                
-                if(!chats.Any())
-                {
-                    TempData["Mensaje"] = "El vehiculo no ha tenido consultas aun";
-                }
                 ViewBag.IdVehiculo = idVehiculo;
                 return View(chats);
             }

@@ -4,14 +4,11 @@
     var compraVentaPorSolicitud = ViewBag.CompraVentaPorSolicitud as Dictionary<int, JMCarsWeb.DTOs.CompraVentaDTO>;
 }
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2>Solicitudes Recibidas</h2>
-            <p class="text-muted mb-0">Solicitudes de compraventa asignadas a usted</p>
+    
+        <div class="mb-4">
+            <h2 class="mb-1">Solicitudes Recibidas</h2>
+            <p class="text-muted">Solicitudes de compraventa asignadas</p>
         </div>
-    </div>
-
-    <hr />
 
     @if (TempData["Mensaje"] != null)
     {
@@ -24,15 +21,18 @@
 
     @if (Model == null || !Model.Any())
     {
-        <div class="alert alert-info">
-            Todavía no recibiste solicitudes.
+        <div class="card card-body p-5 text-center">
+            <i class="bi bi-inbox text-muted" style="font-size: 2.5rem;"></i>
+            <h5 class="mt-3">Todavía no recibiste solicitudes.</h5>
+            <p class="text-muted mb-0">Cuando un cliente te seleccione, tendras su solicitud aqui</p>
         </div>
     }
     else
     {
+        <div class="card">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
                     <tr>
                         <th>Vehículo</th>
                         <th>Cliente</th>
@@ -64,6 +64,10 @@
                                 textoEstado = "Rechazada";
                                 claseEstado = "bg-danger";
                                 break;
+                            case 4:
+                                textoEstado = "Finalizada";
+                                claseEstado = "bg-primary";
+                                break;
                             default:
                                 textoEstado = "Desconocido";
                                 claseEstado = "bg-secondary";
@@ -76,31 +80,35 @@
 
                         <tr>
                             <td>
-                                <strong>@vehiculo?.Modelo?.Marca?.NombreMarca @vehiculo?.Modelo?.Modelo @vehiculo?.Anio</strong>
+                                <div class="fw-bold" style="color: var(--jm-azul)">@vehiculo?.Modelo?.Marca?.NombreMarca @vehiculo?.Modelo?.Modelo @vehiculo?.Anio</div>
                                 <div class="text-muted small">Vendedor: @vehiculo?.Vendedor?.NombreCompleto</div>
                             </td>
                             <td>
-                                @solicitud?.Cliente?.NombreCompleto
+                                <div class="fw-bold">@solicitud?.Cliente?.NombreCompleto</div>
                                 <div class="text-muted small">@solicitud?.Cliente?.Email</div>
+                                @if(solicitud?.EstadoSolicitud == 2)
+                                {
+                                    <div class="small"><i class="bi bi-telephone me-1"></i>@solicitud?.Cliente?.Telefono</div>
+                                }
                             </td>
-                            <td>@solicitud?.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-muted">@solicitud?.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
 
                             <!-- Columna Solicitud -->
                             <td class="text-center">
-                                <span class="badge @claseEstado mb-2 d-block">@textoEstado</span>
+                                <span class="badge @claseEstado">@textoEstado</span>
                                 @if (solicitud?.EstadoSolicitud == 1)
                                 {
-                                    <div class="d-inline-flex gap-1">
-                                        <form asp-action="Aceptar" method="post" class="d-inline">
+                                    <div class="d-flex justify-content-center gap-1 mt-2">
+                                        <form asp-action="Aceptar" method="post" data-confirmar="¿Aceptar esta solicitud? Esto dejara el vehiculo En Tramite">
                                             <input type="hidden" name="idSolicitud" value="@solicitud.IdSolicitud" />
-                                            <button type="submit" class="btn btn-outline-success" title="Aceptar">
-                                                <i class="bi bi-check-circle"></i>
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Aceptar Solicitud">
+                                                <i class="bi bi-check-circle"></i> Aceptar
                                             </button>
                                         </form>
-                                        <form asp-action="Rechazar" method="post" class="d-inline">
+                                        <form asp-action="Rechazar" method="post" data-confirmar="¿Rechazar esta Solicitud?">
                                             <input type="hidden" name="idSolicitud" value="@solicitud.IdSolicitud" />
-                                            <button type="submit" class="btn btn-outline-danger" title="Rechazar">
-                                                <i class="bi bi-x-circle"></i>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Rechazar Solicitud">
+                                                <i class="bi bi-x-circle"></i> Rechazar
                                             </button>
                                         </form>
                                     </div>
@@ -115,18 +123,18 @@
                                 }
                                 else if (compraVenta.EstadoCompraVenta == 1)
                                 {
-                                    <span class="badge bg-info text-dark mb-2 d-block">En Proceso</span>
-                                    <div class="d-inline-flex gap-1">
-                                        <form asp-action="FinalizarCompraVenta" method="post" class="d-inline">
+                                    <span class="badge bg-info text-dark">En Proceso</span>
+                                    <div class="d-flex justify-content-center gap-1 mt-2">
+                                        <form asp-action="FinalizarCompraVenta" method="post" data-confirmar="Finalizar la compraventa? El vehiculo pasara a Vendido">
                                             <input type="hidden" name="idCompraVenta" value="@compraVenta.IdCompraVenta" />
-                                            <button type="submit" class="btn btn-outline-success" title="Finalizar Venta">
-                                                <i class="bi bi-check-circle"></i>
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Finalizar Venta">
+                                                <i class="bi bi-check-circle"></i> Finalizar
                                             </button>
                                         </form>
-                                        <form asp-action="RechazarCompraVenta" method="post" class="d-inline">
+                                        <form asp-action="RechazarCompraVenta" method="post" data-confirmar="Rechazar la compraventa? El vehiculo volvera a estar publicado">
                                             <input type="hidden" name="idCompraVenta" value="@compraVenta.IdCompraVenta" />
-                                            <button type="submit" class="btn btn-outline-danger" title="Rechazar Venta">
-                                                <i class="bi bi-x-circle"></i>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Rechazar Venta">
+                                                <i class="bi bi-x-circle"></i> Rechazar
                                             </button>
                                         </form>
                                     </div>
@@ -145,5 +153,49 @@
                 </tbody>
             </table>
         </div>
+     </div>
     }
 </div>
+<div class="modal fade" id="modalConfirmar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow overflow-hidden">
+            <div class="modal-header" style="background-color: var(--jm-azul); color: #fff;">
+                <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>Confirma la accion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modalConfirmarTexto"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnModalConfirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script>
+        
+        var modalConfirmar = new bootstrap.Modal(document.getElementById('modalConfirmar'));
+        var formPendiente = null;
+
+        //aca paro los formularios, para pedirle una confirmacion al cliente o escribano o quien sea
+        document.querySelectorAll('form[data-confirmar]').forEach(function (form) {
+            form.addEventListener('submit', function (e){
+                e.preventDefault();
+                formPendiente = form;
+                document.getElementById('modalConfirmarTexto').textContent = form.dataset.confirmar;
+                modalConfirmar.show();
+            });
+        }); 
+
+        //aca envio el formulario si le dan boton confirmar, y lo desabilito para que no le den dos veces
+        document.getElementById('btnModalConfirmar').addEventListener('click', function(){
+            this.disabled = true;
+            if(formPendiente)
+            {
+                formPendiente.submit();
+            }
+        });
+    </script>
+}

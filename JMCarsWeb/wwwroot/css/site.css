@@ -261,6 +261,19 @@ form .btn:not(.btn-sm) {
     box-shadow: 0 2px 10px rgba(3, 16, 81, 0.08);
 }
 
+/* cabeceras de tarjeta en el azul de la marca (antes: gris oscuro y celeste) */
+.card-header.bg-dark,
+.card-header.bg-info {
+    background-color: var(--jm-azul) !important;
+    color: #fff !important;
+    border-bottom: 0;
+}
+
+.card-header {
+    border-top-left-radius: 14px !important;
+    border-top-right-radius: 14px !important;
+}
+
 /* ---------- 7. Portada del Home ---------- */
 .hero {
     background: linear-gradient(135deg, var(--jm-azul) 0%, var(--jm-azul-medio) 100%);

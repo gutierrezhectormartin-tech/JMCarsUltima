@@ -4,14 +4,11 @@
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2>Panel de Administracion de Publicaciones</h2>
-            <p class="text-muted mb-0">Puede aprobar o rechazar las publicaciones en la plataforma</p>
+    
+        <div class="mb-4">
+            <h2 class="mb-1">Panel de Administracion de Publicaciones</h2>
+            <p class="text-muted">Puede aprobar o rechazar las publicaciones en la plataforma</p>
         </div>
-    </div>
-
-    <hr />
 
     @if (TempData["Mensaje"] != null)
     {
@@ -24,15 +21,18 @@
 
     @if (Model == null || !Model.Any())
     {
-        <div class="alert alert-info" role="alert">
-            <i class="bi bi-info-circle">No existen vehiculos registrados</i>
+        <div class="card card-body p-5 text-center">
+            <i class="bi bi-car-front text-muted" style="font-size: 2.5rem;"></i>
+            <h5 class="mt-3">No existen vehiculos registrados</h5>
+            <p  class="text-muted mb-0">Cuando los usuarios publiquen sus vehiculos te apareceran aqui para administrarlos</p>
         </div>
     }
     else
     {
+        <div class="card">
         <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle">
-                <thead class="table-dark">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
                     <tr>
                         <th style="width: 90px;">Foto</th>
                         <th>Vehiculo</th>
@@ -60,41 +60,41 @@
                                 }
                             </td>
                             <td>
-                                <strong>@v.Modelo?.Marca?.NombreMarca @v.Modelo?.Modelo</strong>
+                                <div class="fw-bold" style="color: var(--jm-azul)">@v.Modelo?.Marca?.NombreMarca @v.Modelo?.Modelo</div>
                                 <div class="text-muted small">Año: @v.Anio</div>
                             </td>
-                            <td>@v.Vendedor.NombreCompleto</td>
-                            <td><span class="text-success fw-bold">U$S @v.Precio.ToString("N0")</span></td>
+                            <td>@v.Vendedor?.NombreCompleto</td>
+                            <td><span class="fw-bold" style="color: var(--jm-azul)">U$S @v.Precio.ToString("N0")</span></td>
                             <td>@v.Km.ToString("N0")</td>
                             <td class="text-center">
                                 @if(v.IdEstadoPublicacion == 1)
                                 {
-                                    <span class="badge bg-warning"><i class="bi bi-clock"></i>Pendiente</span>
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pendiente</span>
                                 }
                                 else if(v.IdEstadoPublicacion == 2)
                                 {
-                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i>Aprobada</span>
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Aprobada</span>
                                 }
                                 else if(v.IdEstadoPublicacion == 3)
                                 {
-                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i>Rechazada</span>
+                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rechazada</span>
                                 }
                                 else if (v.IdEstadoPublicacion == 4)
                                 {
-                                    <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i>Inactiva</span>
+                                    <span class="badge bg-secondary"><i class="bi bi-slash-circle"></i> Inactiva</span>
                                 }
                                 else if (v.IdEstadoPublicacion == 5)
                                 {
-                                    <span class="badge bg-info"><i class="bi bi-hourglass-split"></i>En Trámite</span>
+                                    <span class="badge bg-info text-dark"><i class="bi bi-hourglass-split"></i> En Trámite</span>
                                 }
                                 else if (v.IdEstadoPublicacion == 6)
                                 {
-                                    <span class="badge bg-dark"><i class="bi bi-bag-check"></i>Vendido</span>
+                                    <span class="badge bg-dark"><i class="bi bi-bag-check"></i> Vendido</span>
                                 }
                             </td>
                             <td class="text-center">
                                 <div class="d-inline-flex gap-1">
-                                    <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" asp-route-origen="admin" class="btn btn-outline-info btn-sm" title="Ver Detalle">
+                                    <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" asp-route-origen="admin" class="btn btn-outline-primary btn-sm" title="Ver Detalle">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     @if(v.IdEstadoPublicacion == 1) //hacemos de pendiente a aproar o rechazar
@@ -107,7 +107,7 @@
                                                 <i class="bi bi-check-circle"></i>
                                             </button>
                                         </form>
-                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
+                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline" data-confirmar="¿Rechazar esta publicacion? No se vera publicada">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@v.IdVehiculo" />
                                             <input type="hidden" name="idEstado" value="3" />
@@ -118,7 +118,7 @@
                                     }
                                     else if(v.IdEstadoPublicacion == 2) // si esta aprobada o rechazamos o inactivamos
                                     {
-                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
+                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline" data-confirmar="¿Rechazar esta publicacion? Ya no se vera publicada">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@v.IdVehiculo" />
                                             <input type="hidden" name="idEstado" value="3" />
@@ -126,7 +126,7 @@
                                                 <i class="bi bi-x-circle"></i>
                                             </button>
                                         </form>
-                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
+                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline" data-confirmar="¿Inactivar esta publicacion? Ya no se vera publicada">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@v.IdVehiculo" />
                                             <input type="hidden" name="idEstado" value="4" />
@@ -137,7 +137,7 @@
                                     }
                                     else if (v.IdEstadoPublicacion == 3 || v.IdEstadoPublicacion == 4) //aca solo van a estar rechazadas o inactivas, solo debemos aprobarlas(activarlas)
                                     {
-                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline">
+                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline" data-confirmar="¿Volver a aprobar esta publicacion?">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@v.IdVehiculo" />
                                             <input type="hidden" name="idEstado" value="2" />
@@ -153,8 +153,52 @@
                     }
                 </tbody>
             </table>
-
+            </div>
         </div>
     }
 
 </div>
+
+<div class="modal fade" id="modalConfirmar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow overflow-hidden">
+            <div class="modal-header" style="background-color: var(--jm-azul); color: #fff;">
+                <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>Confirma la accion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modalConfirmarTexto"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnModalConfirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script>
+        
+        var modalConfirmar = new bootstrap.Modal(document.getElementById('modalConfirmar'));
+        var formPendiente = null;
+
+        //aca paro los formularios, para pedirle una confirmacion al cliente o escribano o quien sea
+        document.querySelectorAll('form[data-confirmar]').forEach(function (form) {
+            form.addEventListener('submit', function (e){
+                e.preventDefault();
+                formPendiente = form;
+                document.getElementById('modalConfirmarTexto').textContent = form.dataset.confirmar;
+                modalConfirmar.show();
+            });
+        }); 
+
+        //aca envio el formulario si le dan boton confirmar, y lo desabilito para que no le den dos veces
+        document.getElementById('btnModalConfirmar').addEventListener('click', function(){
+            this.disabled = true;
+            if(formPendiente)
+            {
+                formPendiente.submit();
+            }
+        });
+    </script>
+}
