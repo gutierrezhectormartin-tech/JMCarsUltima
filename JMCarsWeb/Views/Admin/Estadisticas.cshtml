@@ -34,8 +34,11 @@
 }
 
 <div class="container mt-4 mb-5">
-    <h2>Estadisticas</h2>
-    <hr/>
+    
+    <div class="mb-4">
+        <h2 class="mb-1">Estadisticas</h2>
+        <div class="text-muted">Resumen de actividad del sistema</div>
+    </div>
 
     @if(TempData["Error"] != null)
     {
@@ -51,97 +54,99 @@
     <h5 class="mb-3">Publicaciones por Estado</h5>
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                     <div class="fs-2 fw-bold">@Model.Conteos.CantPendientes</div>
-                     <div class="text-muted small">Pendientes</div>
+            <div class="card h-100">
+                <div class="card-body text-center">
+                     <div class="fs-2 fw-bold" style="color: ver(--jm-azul);">@Model.Conteos.CantPendientes</div>
+                     <div class="text-muted small"><i class="bi bi-clock me-1"></i>Pendientes</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                     <div class="fs-2 fw-bold">@Model.Conteos.CantAprobadas</div>
-                     <div class="text-muted small">Aprobadas</div>
+            <div class="card  h-100">
+                <div class="card-body text-center">
+                     <div class="fs-2 fw-bold" style="color: var(--jm-azul;)">@Model.Conteos.CantAprobadas</div>
+                     <div class="text-muted small"><i class="bi bi-check-circle me-1"></i>Aprobadas</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                     <div class="fs-2 fw-bold">@Model.Conteos.CantRechazadas</div>
-                     <div class="text-muted small">Rechazadas</div>
+            <div class="card h-100">
+                <div class="card-body text-center">
+                     <div class="fs-2 fw-bold" style="color: var(--jm-azul);">@Model.Conteos.CantRechazadas</div>
+                     <div class="text-muted small"><i class="bi bi-x-circle me-1"></i>Rechazadas</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                     <div class="fs-2 fw-bold">@Model.Conteos.CantInactivas</div>
-                     <div class="text-muted small">Inactivas</div>
+            <div class="card h-100">
+                <div class="card-body text-center">
+                     <div class="fs-2 fw-bold" style="color: var(--jm-azul);">@Model.Conteos.CantInactivas</div>
+                     <div class="text-muted small"><i class="bi bi-slash-circle me-1"></i>Inactivas</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                     <div class="fs-2 fw-bold">@Model.Conteos.CantEnTramite</div>
-                     <div class="text-muted small">En Tramite</div>
+            <div class="card h-100">
+                <div class="card-body text-center">
+                     <div class="fs-2 fw-bold" style="color: var(--jm-azul);">@Model.Conteos.CantEnTramite</div>
+                     <div class="text-muted small"><i class="bi bi-hourglass-split me-1"></i>En Tramite</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                     <div class="fs-2 fw-bold">@Model.Conteos.CantVendidas</div>
-                     <div class="text-muted small">Vendidas</div>
+            <div class="card h-100">
+                <div class="card-body text-center">
+                     <div class="fs-2 fw-bold" style="color: var(--jm-azul);">@Model.Conteos.CantVendidas</div>
+                     <div class="text-muted small"><i class="bi bi-bag-check me-1"></i>Vendidas</div>
                 </div>
             </div>
         </div>
     </div>
     <h5 class="mb-3">General</h5>
     <div class="row g-3 mb-5">
-        <div class="col-6 col-lg-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <div class="fs-2 fw-bold">@Model.Conteos.CantClientesActivos</div>
-                    <div class="text-muted small">Clientes Activos</div>
+        <div class="col-6 col-lg-3"> 
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="fs-2 fw-bold" style="color: var(--jm-azul);">@Model.Conteos.CantClientesActivos</div>
+                    <div class="text-muted small"><i class="bi bi-people me-1"></i>Clientes Activos</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <div class="fs-2 fw-bold">@Model.Conteos.CantEscribanosActivos</div>
-                    <div class="text-muted small">Escribanos Activos</div>
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="fs-2 fw-bold" style="color: var(--jm-azul);">@Model.Conteos.CantEscribanosActivos</div>
+                    <div class="text-muted small"><i class="bi bi-briefcase me-1"></i>Escribanos Activos</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <div class="fs-2 fw-bold">@Model.Conteos.CantCompraVentasFinalizadas</div>
-                    <div class="text-muted small">CompraVentas Finalizadas</div>
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="fs-2 fw-bold" style="color: var(--jm-azul);">@Model.Conteos.CantCompraVentasFinalizadas</div>
+                    <div class="text-muted small"><i class="bi bi-patch-check me-1"></i>CompraVentas Finalizadas</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <div class="fs-2 fw-bold @(Model.Conteos.CantSolicitudesPendientesVencidas > 0 ? "text-danger" : "")">@Model.Conteos.CantSolicitudesPendientesVencidas</div>
-                    <div class="text-muted small">Solicitudes Pendientes Vencidas</div>
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="fs-2 fw-bold @(Model.Conteos.CantSolicitudesPendientesVencidas > 0 ? "text-danger" : "")"  style="color: var(--jm-azul);">@Model.Conteos.CantSolicitudesPendientesVencidas</div>
+                    <div class="text-muted small"><i class="bi bi-exclamation-triangle me-1"></i>Solicitudes Pendientes Vencidas</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <h5>Compraventas iniciados por mes</h5>
+    <div class="card mb-4">
+        <div class="card-body">
+    <h5 class="mb-1">Compraventas iniciados por mes</h5>
     <p class="text-muted small">Ultimos 12 meses(se toman en cuenta todos los estaods)</p>
     <div style="height: 300px;">
         <canvas id="graficoMeses" role="img" aria-label="Grafico Compraventas ultimos 12 meses"></canvas>
     </div>
-    <details class="mt-2 mb-5">
-        <summary>Ver como tabla</summary>
+    <details class="mt-3">
+        <summary class="small text-muted">Ver como tabla</summary>
         <table class="table table-sm w-auto mt-2">
             <thead><tr><th>Mes</th><th class="text-end">Compraventas</th></tr></thead>
             <tbody>
@@ -152,15 +157,21 @@
             </tbody>
         </table>
     </details>
-
-    <h5>Marcas mas publicadas</h5>
+    </div>
+</div>
+<div class="row g-4">
+    
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+    <h5 class="mb-1">Marcas mas publicadas</h5>
     <p class="text-muted small">Top Marcas(todos los estados de las publicaciones)</p>
     @if(Model.MarcasPublicadas.Any())
     {
         <div style="height: 300px;">
                <canvas id="graficoMarcas" role="img" aria-label="Grafico Marcas"></canvas>
         </div>
-        <details class="mt-2 mb-5">
+        <details class="mt-3">
             <summary class="small text-muted">Ver como tabla</summary>
             <table class="table table-sm w-auto mt-2">
                 <thead><tr><th>Marca</th><th class="text-end">Publicaciones</th></tr></thead>
@@ -175,10 +186,16 @@
     }
     else
     {
-        <p class="text-muted mb-5">Aun no hay publicaciones</p>
+        <p class="text-muted mb-0">Aun no hay publicaciones</p>
     }
+    </div>
+    </div>
+    </div>
 
-    <h5>Modelos vendidos por Marca</h5>
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+    <h5 class="mb-1">Modelos vendidos por Marca</h5>
     <p class="text-muted small">Los 5 modelos mas vendidos</p>
     @if (Model.ModelosVendidos.Any())
     {
@@ -200,8 +217,12 @@
     }
     else
     {
-        <p class="text-muted">Todavia no hay vehiculos vendidos</p>
+        <p class="text-muted mb-0">Todavia no hay vehiculos vendidos</p>
     }
+    </div>
+    </div>
+</div>
+</div>
 </div>
 @section Scripts
 {

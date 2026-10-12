@@ -2,13 +2,22 @@
     ViewData["Title"] = "Terminos y Condiciones";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-8">
-        <h2>Terminos y Condiciones</h2>
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-lg-9 col-xl-8">
+        <div class="mb-3">
+            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>Volver al inicio
+            </a>
+        </div>
+        <div class="card card-body p-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-file-earmark-text" style="font-size: 3rem; color: var(--jm-azul);"></i>
+                <h2 class="mt-1 mb-1">Terminos y Condiciones</h2>
+                <div class="text-muted small">Condiciones de utilizacion de JMCars</div>
+            </div>
+        </div>
 
         <p>Texto de ejemplo de terminos y condiciones de JMCars. Aqui se detallaran las condicones y politcas y demas clausulas aplicaables a la pagina</p>
-        <p>Este texto es provisorio para desarrollo y sera reemplazado por el definitivo antes de produccion</p>
-
-        <a href="@Url.Action("Index","Home")" class="btn btn-link">Volver al inicio</a>
+        <p class="mb-0">Este texto es provisorio para desarrollo y sera reemplazado por el definitivo antes de produccion</p>
     </div>
 </div>

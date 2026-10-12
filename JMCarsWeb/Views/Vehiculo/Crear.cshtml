@@ -3,10 +3,20 @@
     ViewData["Title"] = "Publicar Vehículo";
 }
 
-<div class="container mt-4" style="max-width: 800px;">
-    <h2>Publicar un nuevo vehículo</h2>
-    <p class="text-muted">Ingresá los detalles del auto, subí una foto y seleccioná su ubicación exacta en el mapa.</p>
-    <hr />
+<div class="row justify-content-center mt-4 mb-4">
+    <div class="col-12 col-lg-9 col-xl-8">
+
+        <div class="mb-3">
+            <a asp-action="MisVehiculos" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>Volver a mis vehiculos
+            </a>
+        </div>
+
+        <div class="text-center mb-4">
+            <i class="bi bi-car-front" style="font-size: 3rem; color: var(--jm-azul);"></i>
+            <h2 class="mt-2 mb-1">Publicar un nuevo vehiculo</h2>
+            <div class="text-muted small">Ingresa los detalles del vehiculo a publicar</div>
+        </div>
 
     @if (TempData["Mensaje"] != null)
     {
@@ -17,44 +27,44 @@
         <div class="alert alert-danger">@TempData["Error"]</div>
     }
 
-    <form asp-action="Crear" method="post" enctype="multipart/form-data" class="shadow p-4 bg-white rounded">
+    <form asp-action="Crear" method="post" enctype="multipart/form-data" class="card card-body p-4">
 
         <input type="hidden" id="latitudInput" name="Latitud" />
         <input type="hidden" id="longitudInput" name="Longitud" />
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label class="form-label font-weight-bold">Precio (USD)</label>
+                <label class="form-label fw-semibold">Precio (USD)</label>
                 <input type="number" name="Precio" class="form-control" placeholder="Ej: 14500" step="1" min="0" required />
             </div>
             <div class="col-md-6 mb-3">
-                <label class="form-label font-weight-bold">Kilómetros</label>
+                <label class="form-label fw-semibold">Kilómetros</label>
                 <input type="number" name="Km" class="form-control" placeholder="Ej: 65000" required />
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-4 mb-3">
-                <label class="form-label font-weight-bold">Motorización</label>
+                <label class="form-label fw-semibold">Motorización</label>
                 <input type="text" name="Motorizacion" class="form-control" placeholder="Ej: 1.4 TSI Nafta" required />
             </div>
             <div class="col-md-4 mb-3">
-                <label class="form-label font-weight-bold">Marca del Auto</label>
+                <label class="form-label fw-semibold">Marca del Auto</label>
                 <input type="text" name="Marca.Nombre" class="form-control" placeholder="Ej: Toyota, Chevrolet, Fiat..." required />
             </div>
             <div class="col-md-4 mb-3">
-                <label class="form-label font-weight-bold">Modelo del Auto</label>
+                <label class="form-label fw-semibold">Modelo del Auto</label>
                 <input type="text" name="Modelo.Nombre" class="form-control" placeholder="Ej: Corolla, Gol, Cruze..." required />
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label class="form-label font-weight-bold">Año</label>
+                <label class="form-label fw-semibold">Año</label>
                 <input type="number" name="Anio" class="form-control" placeholder="Ej: 2020" required />
             </div>
             <div class="col-md-6 mb-3">
-                <label class="form-label font-weight-bold">Caja de Cambios</label>
+                <label class="form-label fw-semibold">Caja de Cambios</label>
                 <select name="CajaCambios" class="form-select" required>
                     <option value="">Seleccione tipo...</option>
                     <option value="Manual">Manual</option>
@@ -64,18 +74,19 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label font-weight-bold">Foto del Vehículo</label>
+            <label class="form-label fw-semibold">Foto del Vehículo</label>
             <input type="file" name="fotoInput" class="form-control" accept="image/*" multiple required />
             <div class="form-text">Subí las imagenes de tu vehiculo. Debe ser por lo menos una.</div>
         </div>
 
         <div class="mb-4">
-            <label class="form-label font-weight-bold">Descripción / Detalles adicionales</label>
+            <label class="form-label fw-semibold">Descripción / Detalles adicionales</label>
             <textarea name="Descripcion" class="form-control" rows="4" placeholder="Contale a los compradores el estado del auto, equipamiento, agregados..." required></textarea>
         </div>
 
         <div class="mb-4">
-            <label class="form-label text-primary font-weight-bold">📍 Ubicación de Entrega / Exhibición</label>
+            <label class="form-labelfw-semibold">
+                <i class="bi bi-geo-alt" style="color: var(--jm-azul);"></i> Ubicación de Entrega / Exhibición</label>
             <p class="small text-muted m-0">Hacé un clic en el mapa para marcar el punto donde se encuentra el auto.</p>
 
             <div id="map" class="border rounded mt-2 shadow-sm" style="height: 380px; background-color: #f8f9fa;"></div>
@@ -83,9 +94,11 @@
             <div id="coordenadasInfo" class="text-success small mt-2 font-monospace fw-bold"></div>
         </div>
 
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-2">
-            <a asp-action="MisVehiculos" class="btn btn-outline-secondary px-4 me-md-2">Cancelar</a>
-            <button type="submit" class="btn btn-primary px-5 fw-bold">Publicar Auto</button>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a asp-action="MisVehiculos" class="btn btn-outline-secondary px-4">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-check-circle"></i>Publicar vehiculo
+            </button>
         </div>
     </form>
 </div>
