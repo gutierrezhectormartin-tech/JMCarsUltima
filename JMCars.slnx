@@ -2,7 +2,7 @@
   <Folder Name="/BaseDeDatos/">
     <File Path="BaseDeDatos/JMCars.sql" />
   </Folder>
-  <Project Path="JMCarsApp/JMCarsApp.csproj" Id="effc748a-2ded-4e8d-a42d-67be89289d69" />
+  <Project Path="JMCarsApp/JMCarsApp.csproj" Id="76274274-bc54-489a-907d-76a1f62b1898" />
   <Project Path="JMCarsWeb/JMCarsWeb.csproj" Id="67e8b618-3384-40a9-8fcc-707ece53f28e" />
   <Project Path="Logica/Logica.csproj" Id="7305b574-ae76-4b30-9f90-2ce55309c66f" />
   <Project Path="Modelo/Modelo.csproj" Id="12c9008c-1f30-4b52-b8e4-ef2a04e9dbf0" />

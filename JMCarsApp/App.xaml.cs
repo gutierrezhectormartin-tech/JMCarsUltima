@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-namespace JMCarsApp
+﻿namespace JMCarsApp
 {
     public partial class App : Application
     {
@@ -11,7 +9,7 @@ namespace JMCarsApp
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new AppShell());
+            return new Window(new MainPage()) { Title = "JMCarsApp" };
         }
     }
 }
