@@ -43,24 +43,24 @@ namespace JMCarsWeb.Services
             public bool Existe { get; set; }
         }
 
-        public async Task<bool> ExisteMail(string email)
-        {
-            try
-            {
-                var respuesta = await _httpClient.GetAsync($"api/usuario/existe-mail/{email}");
+        //public async Task<bool> ExisteMail(string email) // lo mismo que en el endpoint
+        //{
+        //    try
+        //    {
+        //        var respuesta = await _httpClient.GetAsync($"api/usuario/existe-mail/{email}");
 
-                if(!respuesta.IsSuccessStatusCode)
-                {
-                    throw new Exception(await ErrorHelper.LeerMensajeError(respuesta, "No se pudo verificar el correo"));
-                }
-                var resultado = await respuesta.Content.ReadFromJsonAsync<ExisteMailResponse>();
-                return resultado?.Existe ?? false;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
+        //        if(!respuesta.IsSuccessStatusCode)
+        //        {
+        //            throw new Exception(await ErrorHelper.LeerMensajeError(respuesta, "No se pudo verificar el correo"));
+        //        }
+        //        var resultado = await respuesta.Content.ReadFromJsonAsync<ExisteMailResponse>();
+        //        return resultado?.Existe ?? false;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
 
         public async Task RecuperarContrasena(string email)
         {

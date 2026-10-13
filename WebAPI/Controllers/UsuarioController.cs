@@ -49,19 +49,19 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpGet("existe-mail/{email}")]
-        public IActionResult ExisteMail(string email)
-        {
-            try
-            {
-                bool existe = _logicaUsuario.ExisteEmail(email);
-                return Ok(new { existe });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
-            }
-        }
+        //[HttpGet("existe-mail/{email}")] // esto es riesgo de seguridad, la logica llame directamente a la persistencia y no exponemos este endpoint
+        //public IActionResult ExisteMail(string email)
+        //{
+        //    try
+        //    {
+        //        bool existe = _logicaUsuario.ExisteEmail(email);
+        //        return Ok(new { existe });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { error = ex.Message });
+        //    }
+        //}
 
         [HttpPost("recuperar-contrasena")]
         public async Task<IActionResult> RecuperarContrasena([FromBody] string pEmail)

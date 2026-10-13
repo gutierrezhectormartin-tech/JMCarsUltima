@@ -1,17 +1,61 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+@using JMCarsApp.Services
+@inject SessionService Sesion
+@inject NavigationManager Navegacion
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<header>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+    <nav class="navbar navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="">
+                <i class="bi bi-car-front-fill me-2"></i>JMCars
+            </a>
+
+            <div>
+                @if(!Sesion.EstadoLogueado)
+                {
+                    <a class="btn btn-outline-light" href="login">Iniciar Sesion</a>
+                }
+                else
+                {
+                    <span class="text-white me-3">Hola, @Sesion.Usuario!.NombreCompleto</span>
+                    <button class="btn btn-outline-light" @onclick="CerrarSesion">Cerrar Sesion</button>
+                }
+            </div>
+
         </div>
+    </nav>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+</header>
+
+<main class="container flex-grow-1">
+    @Body
+</main>
+
+<footer class="pie-pagina">
+    <div class="container text-center">
+        © @DateTime.Now.Year JMCars - Cerca de vos. Seguro para todos
+    </div>
+</footer>
+
+@code
+{
+    protected override void OnInitialized()
+    {
+        Sesion.CambioSesion += AlCambiarSesion;
+    }
+    private void AlCambiarSesion()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+    private void CerrarSesion()
+    {
+        Sesion.Cerrar();
+        Navegacion.NavigateTo("/");
+    }
+    public void Dispose()
+    {
+        Sesion.CambioSesion -= AlCambiarSesion;
+    }
+}
