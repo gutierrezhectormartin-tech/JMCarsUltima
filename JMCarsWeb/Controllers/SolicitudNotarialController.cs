@@ -199,7 +199,7 @@ namespace JMCarsWeb.Controllers
             try
             {
                 await _solicitudService.CambiarEstadoCompraVenta(idCompraVenta, 3, idUsuario.Value);
-                TempData["Mensaje"] = "Venta finalizada correctamenta";
+                TempData["Mensaje"] = "Venta finalizada correctamente";
             }
             catch (Exception ex)
             {

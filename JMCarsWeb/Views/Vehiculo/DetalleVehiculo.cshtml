@@ -12,6 +12,13 @@
         volverControlador = "Admin";
         volverTexto = "Volver al Panel de Publicaciones";
     }
+
+    if (string.Equals(ViewBag.Origen as string, "buscar", StringComparison.OrdinalIgnoreCase))
+    {
+        volverAccion = "Buscar";
+        volverControlador = "Vehiculo";
+        volverTexto = "Volver a la Búsqueda";
+    }
 }
 
 <style>

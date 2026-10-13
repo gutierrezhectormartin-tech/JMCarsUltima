@@ -835,13 +835,17 @@ begin
             where CV.IdCompraVenta = @IdCompraVenta
         );
 
+        declare @IdS int = (select IdSolicitud from CompraVenta where IdCompraVenta = @IdCompraVenta);
+
         if @IdEstadoCompraVenta = 3 -- Finalizada
         begin
             update Vehiculo set IdEstadoPublicacion = 6 where IdVehiculo = @IdV;
+            update SolicitudNotarial set EstadoSolicitud = 4 where IdSolicitud = @IdS;
         end
         else if @IdEstadoCompraVenta = 2 -- Rechazada
         begin
             update Vehiculo set IdEstadoPublicacion = 2 where IdVehiculo = @IdV;
+            update SolicitudNotarial set EstadoSolicitud = 3 where IdSolicitud = @IdS;
         end
 
         commit transaction;
@@ -1929,7 +1933,7 @@ INSERT INTO SolicitudNotarial
 )
 VALUES
 (
-    2,
+    4,
     3,
     3
 )
@@ -1969,7 +1973,7 @@ INSERT INTO SolicitudNotarial
 )
 VALUES
 (
-    2,
+    3,
     4,
     4
 )

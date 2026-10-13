@@ -192,6 +192,11 @@ namespace Modelo
             {
                 throw new Exception("El vehículo debe tener un vendedor asociado.");
             }
+
+            if (Latitud == null || Longitud == null || Latitud < -90 || Latitud > 90 || Longitud < -180 || Longitud > 180)
+            {
+                throw new Exception("Debe seleccionar una ubicación válida en el mapa.");
+            }
         }
     }
 }

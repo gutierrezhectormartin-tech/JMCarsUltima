@@ -79,18 +79,18 @@ namespace JMCarsWeb.Controllers
             string? email = idRol == 2 ? HttpContext.Session.GetString("EmailEscribano") : HttpContext.Session.GetString("EmailCliente");
             if(string.IsNullOrEmpty(email))
             {
-                TempData["Error"] = "No se ha podido confirmar usuario, logeese nuevamente";
+                TempData["Error"] = "No se pudo confirmar el usuario, iniciá sesión nuevamente.";
                 return RedirectToAction("Index", "Login");
             }
             if(contrasenaNueva != repetirContrasenaNueva)
             {
-                TempData["Error"] = "Las contraseña nueva y su verificacion no son iguales";
+                TempData["Error"] = "La contraseña nueva y su verificación no son iguales.";
                 return RedirectToAction("Perfil", controladorPerfil);
             }
             try
             {
                 await _usuarioService.ResetearContrasena(email, contrasenaActual, contrasenaNueva);
-                TempData["Mensaje"] = "Tu contraseña se cambio con exito";
+                TempData["Mensaje"] = "Tu contraseña se cambió con éxito.";
             }
             catch (Exception ex)
             {

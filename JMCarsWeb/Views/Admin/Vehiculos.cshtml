@@ -126,14 +126,6 @@
                                                 <i class="bi bi-x-circle"></i>
                                             </button>
                                         </form>
-                                        <form asp-controller="Admin" asp-action="CambiarEstado" method="post" class="d-inline" data-confirmar="¿Inactivar esta publicacion? Ya no se vera publicada">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@v.IdVehiculo" />
-                                            <input type="hidden" name="idEstado" value="4" />
-                                            <button type="submit" class="btn btn-outline-secondary btn-sm" title="Inactivar">
-                                                <i class="bi bi-slash-circle"></i>
-                                            </button>
-                                        </form>
                                     }
                                     else if (v.IdEstadoPublicacion == 3 || v.IdEstadoPublicacion == 4) //aca solo van a estar rechazadas o inactivas, solo debemos aprobarlas(activarlas)
                                     {

@@ -109,9 +109,12 @@
                                         <i class="bi bi-eye"></i>
                                     </a>
 
-                                    <a asp-controller="Vehiculo" asp-action="Editar" asp-route-id="@vehiculo.IdVehiculo" class="btn btn-outline-primary" title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                                    @if (vehiculo.IdEstadoPublicacion != 5 && vehiculo.IdEstadoPublicacion != 6)
+                                    {
+                                        <a asp-controller="Vehiculo" asp-action="Editar" asp-route-id="@vehiculo.IdVehiculo" class="btn btn-outline-primary" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    }
 
 
                                     @if (vehiculo.IdEstadoPublicacion == 1 || vehiculo.IdEstadoPublicacion == 2)

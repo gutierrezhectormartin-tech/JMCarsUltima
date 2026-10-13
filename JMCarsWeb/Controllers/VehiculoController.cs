@@ -20,7 +20,7 @@ namespace JMCarsWeb.Controllers
             try
             {
                 List<VehiculoDTO> vehiculos = await _vehiculoService.ListarVehiculos();
-                return View(vehiculos);
+                return View(vehiculos.Where(v => v.IdEstadoPublicacion == 2).ToList());
             }
             catch (Exception ex)
             {
@@ -177,6 +177,12 @@ namespace JMCarsWeb.Controllers
                     return RedirectToAction("MisVehiculos");
                 }
 
+                if (vehiculo.IdEstadoPublicacion == 5 || vehiculo.IdEstadoPublicacion == 6)
+                {
+                    TempData["Error"] = "No se puede editar un vehículo En Trámite o Vendido.";
+                    return RedirectToAction("MisVehiculos");
+                }
+
                 return View(vehiculo);
 
     }
@@ -212,6 +218,12 @@ namespace JMCarsWeb.Controllers
 
             if (vehiculoActual.Vendedor?.IdUsuario != idUsuarioSession.Value)
             {
+                return RedirectToAction("MisVehiculos");
+            }
+
+            if (vehiculoActual.IdEstadoPublicacion == 5 || vehiculoActual.IdEstadoPublicacion == 6)
+            {
+                TempData["Error"] = "No se puede editar un vehículo En Trámite o Vendido.";
                 return RedirectToAction("MisVehiculos");
             }
 
