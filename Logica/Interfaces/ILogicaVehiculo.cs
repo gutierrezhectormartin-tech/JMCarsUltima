@@ -10,6 +10,7 @@ namespace Logica.Interfaces
     public interface ILogicaVehiculo
     {
         List<Vehiculo> ListarVehiculos();
+        List<Vehiculo> ListarPublicados();
         List<Vehiculo> ListarMisVehiculos(string idUsuario);
 
         Vehiculo DetalleVehiculo(int pIdVehiculo);
@@ -23,6 +24,6 @@ namespace Logica.Interfaces
         //void Inactivar(int pIdVehiculo);
 
         //void Activar(int pIdVehiculo);
-        void CambiarEstado(int pIdVehiculo, int pIdEstado);
+        void CambiarEstado(int pIdVehiculo, int pIdEstado, int pIdRol);
     }
 }

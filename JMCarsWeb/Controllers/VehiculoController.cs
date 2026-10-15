@@ -19,8 +19,8 @@ namespace JMCarsWeb.Controllers
         {
             try
             {
-                List<VehiculoDTO> vehiculos = await _vehiculoService.ListarVehiculos();
-                return View(vehiculos.Where(v => v.IdEstadoPublicacion == 2).ToList());
+                List<VehiculoDTO> vehiculos = await _vehiculoService.ListarPublicados();
+                return View(vehiculos);
             }
             catch (Exception ex)
             {
@@ -304,7 +304,7 @@ namespace JMCarsWeb.Controllers
                     return RedirectToAction("MisVehiculos");
                 }
 
-                await _vehiculoService.CambiarEstadoVehiculo(id, 4);
+                await _vehiculoService.CambiarEstadoVehiculo(id, 4, HttpContext.Session.GetInt32("IdRol") ?? 0);
                 TempData["Mensaje"] = "La publicación fue inactivada";
             }
             catch (Exception ex)
@@ -340,7 +340,7 @@ namespace JMCarsWeb.Controllers
                     return RedirectToAction("MisVehiculos");
                 }
 
-                await _vehiculoService.CambiarEstadoVehiculo(id, 2);
+                await _vehiculoService.CambiarEstadoVehiculo(id, 2, HttpContext.Session.GetInt32("IdRol") ?? 0);
                 TempData["Mensaje"] = "La publicación fue activada";
             }
             catch (Exception ex)

@@ -78,7 +78,7 @@ namespace JMCarsWeb.Controllers
 
             try
             {
-                await _vehiculoService.CambiarEstadoVehiculo(id, idEstado);
+                await _vehiculoService.CambiarEstadoVehiculo(id, idEstado, idRol.Value);
                 TempData["Mensaje"] = "El estado del vehiculo se ha cambiado exitosamente";
                
             }

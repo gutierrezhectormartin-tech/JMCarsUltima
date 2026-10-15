@@ -64,6 +64,11 @@ namespace Logica
             }
         }
 
+        public List<Vehiculo> ListarPublicados()
+        {
+            return _persistenciaVehiculo.ListarVehiculos().Where(v => v.IdEstadoPublicacion == 2).ToList();
+        }
+
         public Vehiculo DetalleVehiculo(int pIdVehiculo)
         {
             return _persistenciaVehiculo.DetalleVehiculo(pIdVehiculo);
@@ -83,6 +88,16 @@ namespace Logica
 
             pVehiculo.Validar();
 
+            Vehiculo vehiculoActual = _persistenciaVehiculo.DetalleVehiculo(pVehiculo.IdVehiculo);
+
+            if(vehiculoActual == null)
+            {
+                throw new Exception("El vehiculo a modificar no existe");
+            }
+            if(vehiculoActual.IdEstadoPublicacion == 5 || vehiculoActual.IdEstadoPublicacion == 6)
+            {
+                throw new Exception("No se puede modificar un vehiculo En Tramite o Vendido");
+            }
             try
             {
                 _persistenciaVehiculo.Modificar(pVehiculo);
@@ -134,7 +149,7 @@ namespace Logica
         //    }
         //}
 
-        public void CambiarEstado(int pIdVehiculo, int pIdEstado)
+        public void CambiarEstado(int pIdVehiculo, int pIdEstado, int pIdRol)
         {
             if(pIdEstado == 3 || pIdEstado == 4)
             {

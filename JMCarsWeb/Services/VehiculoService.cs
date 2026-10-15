@@ -26,6 +26,28 @@ namespace JMCarsWeb.Services
                 {
                     return new List<VehiculoDTO>();
                 }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido listar los vehiculos publicados");
+                throw new Exception(error);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido listar los vehiculos publicados: " + ex.Message);
+            }
+        }
+
+        public async Task<List<VehiculoDTO>> ListarPublicados()
+        {
+            try
+            {
+                var respuesta = await _httpClient.GetAsync("api/vehiculo/listar-publicados");
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<List<VehiculoDTO>>() ?? new List<VehiculoDTO>();
+                }
+                if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return new List<VehiculoDTO>();
+                }
                 string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido listar los vehiculos");
                 throw new Exception(error);
             }
@@ -34,7 +56,6 @@ namespace JMCarsWeb.Services
                 throw new Exception("No se ha podido listar los vehiculos: " + ex.Message);
             }
         }
-
         public async Task<List<VehiculoDTO>> ListarMisVehiculos(string idUsuario)
         {
             try
@@ -149,13 +170,13 @@ namespace JMCarsWeb.Services
             }
 
         }
-        public async Task CambiarEstadoVehiculo(int idVehiculo, int idEstado)
+        public async Task CambiarEstadoVehiculo(int idVehiculo, int idEstado, int idRol)
         {
 
             try
             {
 
-                var respuesta = await _httpClient.PutAsJsonAsync($"api/vehiculo/estado/{idVehiculo}", new { IdEstado = idEstado });
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/vehiculo/estado/{idVehiculo}", new { IdEstado = idEstado, IdRol = idRol });
                 if (!respuesta.IsSuccessStatusCode)
                 {
                     var error = await ErrorHelper.LeerMensajeError(respuesta, "No se pudo cambiar el estado a la publicacion");

@@ -41,6 +41,24 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpGet("listar-publicados")]
+        public IActionResult ListarPublicados()
+        {
+            try
+            {
+                List<Vehiculo> vehiculos = _logicaVehiculo.ListarPublicados();
+                if (vehiculos == null || !vehiculos.Any())
+                {
+                    return NotFound(new { mensaje = "No se han encontrado vehiculos publicados" });
+                }
+                return Ok(vehiculos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         [HttpGet("mis-vehiculos/{idUsuario}")]
         public IActionResult ListarMisVehiculos(string idUsuario)
         {
@@ -197,7 +215,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                _logicaVehiculo.CambiarEstado(id, request.IdEstado);
+                _logicaVehiculo.CambiarEstado(id, request.IdEstado, request.IdRol);
                 
 
                 if(request.IdEstado == 2 || request.IdEstado == 3)
@@ -227,5 +245,6 @@ namespace WebAPI.Controllers
     public class CambiarEstadoRequest
     {
         public int IdEstado { get; set; }
+        public int IdRol { get; set; }
     }
 }

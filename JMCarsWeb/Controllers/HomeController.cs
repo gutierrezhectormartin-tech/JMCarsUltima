@@ -17,9 +17,7 @@ namespace JMCarsWeb.Controllers
 
         public async Task<IActionResult> Index(string marca)
         {
-            List<VehiculoDTO> lista = await _vehiculoService.ListarVehiculos();
-
-            lista = lista.Where(v => v.IdEstadoPublicacion == 2).ToList();
+            List<VehiculoDTO> lista = await _vehiculoService.ListarPublicados();
 
             ViewBag.Destacados = lista.Where(v => v.Fotografia != null && v.Fotografia.Any()).OrderByDescending(v => v.IdVehiculo)
                                             .Take(6)

@@ -533,3 +533,49 @@ form .btn:not(.btn-sm) {
     .pie-pagina a {
         color: #fff;
     }
+
+/* Carrusel horizontal de destacados: se desliza con el dedo */
+.carrusel-destacados {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 4px 2px 12px;
+    scrollbar-width: none;
+}
+
+    .carrusel-destacados::-webkit-scrollbar {
+        display: none;
+    }
+
+.destacado-item {
+    flex: 0 0 78%;
+    max-width: 320px;
+    scroll-snap-align: start;
+}
+/* Fila de vehículo: foto a la izquierda, datos a la derecha */
+.vehiculo-fila {
+    flex-direction: row;
+    overflow: hidden;
+}
+
+    .vehiculo-fila img,
+    .vehiculo-fila-sinfoto {
+        width: 120px;
+        flex-shrink: 0;
+        object-fit: cover;
+    }
+
+.vehiculo-fila-sinfoto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef0f5;
+    color: #8a90a2;
+    font-size: 2rem;
+}
+
+.vehiculo-fila-info {
+    padding: 10px 12px;
+    min-width: 0;
+}
