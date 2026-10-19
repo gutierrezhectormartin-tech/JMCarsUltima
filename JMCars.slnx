@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/BaseDeDatos/">
     <File Path="BaseDeDatos/JMCars.sql" />
+    <File Path="DatosdePruebaExtras.sql" />
   </Folder>
   <Project Path="JMCarsApp/JMCarsApp.csproj" Id="76274274-bc54-489a-907d-76a1f62b1898">
     <Deploy Solution="Debug|*" />
