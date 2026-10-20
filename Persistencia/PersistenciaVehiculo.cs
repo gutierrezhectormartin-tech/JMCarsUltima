@@ -23,14 +23,13 @@ namespace Persistencia
 
             oComando.CommandType =
                 CommandType.StoredProcedure;
-
+            var reloj = System.Diagnostics.Stopwatch.StartNew();
             try
             {
                 oConexion.Open();
-
-                SqlDataReader lector =
-                    oComando.ExecuteReader();
-
+                Console.WriteLine("[ListarVehiculos] Open: " + reloj.ElapsedMilliseconds + " ms");
+                SqlDataReader lector = oComando.ExecuteReader();
+                Console.WriteLine("[ListarVehiculos] ExecuteReader: " + reloj.ElapsedMilliseconds + " ms");
                 Dictionary<int, Vehiculo> vistos = new Dictionary<int, Vehiculo>();
 
                 while (lector.Read())
@@ -84,7 +83,7 @@ namespace Persistencia
                 }
 
                 lector.Close();
-
+                Console.WriteLine("[ListarVehiculos] Lectura completa: " + reloj.ElapsedMilliseconds + " ms, filas=" + lista.Count);
                 return lista;
             }
             catch (Exception ex)
@@ -94,6 +93,7 @@ namespace Persistencia
             finally
             {
                 oConexion.Close();
+
             }
         }
         public List<Vehiculo> ListarMisVehiculos(string idUsuario)

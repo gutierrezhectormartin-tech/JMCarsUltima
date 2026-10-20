@@ -2,6 +2,9 @@
 using JMCarsWeb.Services;
 using JMCarsWeb.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
+using X.PagedList;
+using X.PagedList.Extensions;
 
 namespace JMCarsWeb.Controllers
 {
@@ -20,7 +23,7 @@ namespace JMCarsWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Vehiculos()
+        public async Task<IActionResult> Vehiculos(int? estado, string? marca, string? buscar, int pagina = 1)
         {
             int? idRol = HttpContext.Session.GetInt32("IdRol");
 
@@ -29,17 +32,63 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = "Ningún usuario con permisos de administrador logueado";
                 return RedirectToAction("Index", "Login");
             }
-
+            const int tamanoPagina = 20;
             try
             {
-                List<VehiculoDTO> vehiculos = await _vehiculoService.ListarVehiculos();
-                return View(vehiculos);
+
+                List<VehiculoDTO> todos = await _vehiculoService.ListarVehiculos();
+
+                List<string> marcas = todos.Select(v => v.Modelo?.Marca?.NombreMarca ?? "")
+                                            .Where(m => m != "")
+                                            .Distinct()
+                                            .OrderBy(m => m)
+                                            .ToList();
+
+                IEnumerable<VehiculoDTO> filtrados = todos;
+
+                if(estado.HasValue)
+                {
+                    filtrados = filtrados.Where(v => v.IdEstadoPublicacion == estado.Value);
+                }
+                if(!string.IsNullOrWhiteSpace(marca))
+                {
+                    filtrados = filtrados.Where(v => v.Modelo?.Marca?.NombreMarca == marca);
+                }
+                if(!string.IsNullOrWhiteSpace(buscar))
+                {
+                    string texto = buscar.Trim();
+                    filtrados = filtrados.Where(v => (v.Modelo?.Modelo ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase) || (v.Vendedor?.NombreCompleto ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase));
+                }
+
+                List<VehiculoDTO> lista = filtrados.OrderByDescending(v => v.IdVehiculo).ToList();
+
+                int totalPaginas = (int)Math.Ceiling(lista.Count / (double)tamanoPagina);
+                if(pagina > totalPaginas)
+                {
+                    pagina = totalPaginas;
+                }
+                if(pagina < 1)
+                {
+                    pagina = 1;
+                }
+
+                VehiculosAdminViewModel modelo = new VehiculosAdminViewModel
+                {
+                    Vehiculos = lista.ToPagedList(pagina, tamanoPagina),
+                    Marcas = marcas,
+                    Estado = estado,
+                    Marca = marca,
+                    Buscar = buscar,
+                    TotalFiltrados = lista.Count
+                };
+                return View(modelo);
+
             }
 
             catch (Exception ex )
             {
                 TempData["Error"] =  ex.Message;
-                return View(new List<VehiculoDTO>());
+                return View(new VehiculosAdminViewModel{ Vehiculos = new List<VehiculoDTO>().ToPagedList(1, tamanoPagina)});
             }
         }
 
