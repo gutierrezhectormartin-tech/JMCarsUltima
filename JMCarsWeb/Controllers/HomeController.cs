@@ -1,5 +1,6 @@
 ﻿using JMCarsWeb.DTOs;
 using JMCarsWeb.Services;
+using JMCarsWeb.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JMCarsWeb.Controllers
@@ -15,14 +16,33 @@ namespace JMCarsWeb.Controllers
             _estadisticasService = estadisticasService;
         }
 
-        public async Task<IActionResult> Index(string marca)
+        public async Task<IActionResult> Index(int? marca, int? modelo, int? anio, string? ordenPrecio)
         {
-            List<VehiculoDTO> lista = await _vehiculoService.ListarPublicados();
+            const int tamanoPagina = 12;
+            HomeViewModel modelo_vista = new HomeViewModel
+            {
+                Marca = marca,
+                Modelo = modelo,
+                Anio = anio,
+                OrdenPrecio = ordenPrecio
+            };
 
-            ViewBag.Destacados = lista.Where(v => v.Fotografia != null && v.Fotografia.Any()).OrderByDescending(v => v.IdVehiculo)
-                                            .Take(6)
-                                            .ToList();
+            ViewBag.Destacados = new List<VehiculoDTO>();
 
+            try
+            {
+                modelo_vista.Vehiculos = await _vehiculoService.ListarPublicadosPaginado(marca, modelo, anio, ordenPrecio, 1, tamanoPagina);
+                modelo_vista.Filtros = await _vehiculoService.ListarFiltrosPublicados();
+
+                PaginaDTO<VehiculoDTO> ultimos = await _vehiculoService.ListarPublicadosPaginado(null, null, null, null, 1, tamanoPagina);
+                List<VehiculoDTO> conFoto = ultimos.Items.Where(v => v.Fotografia != null && v.Fotografia.Any()).ToList();
+                ViewBag.Destacados = conFoto.Take(6).ToList();
+
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
             try
             {
                 ViewBag.Conteos = await _estadisticasService.ObtenerConteos();
@@ -31,16 +51,24 @@ namespace JMCarsWeb.Controllers
             {
                 ViewBag.Conteos = null;
             }
-            if (!string.IsNullOrEmpty(marca))
-            {
-                lista = lista.Where(v =>
-                    v.Modelo.Marca.NombreMarca
-                    .ToLower()
-                    .Contains(marca.ToLower()))
-                    .ToList();
-            }
 
-            return View(lista);
+            return View(modelo_vista);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CargarMas(int? marca, int? modelo, int? anio, string? ordenPrecio, int pagina = 2)
+        {
+            const int tamanoPagina = 12;
+            try
+            {
+                PaginaDTO<VehiculoDTO> resultado = await _vehiculoService.ListarPublicadosPaginado(marca, modelo, anio, ordenPrecio, pagina, tamanoPagina);
+                Response.Headers["X-Hay-Mas"] = resultado.HayMas ? "true" : "false";
+                return PartialView("_TarjetasVehiculos", resultado.Items);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
         }
 
         [HttpGet]

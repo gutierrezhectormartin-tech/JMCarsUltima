@@ -10,6 +10,8 @@ namespace Persistencia.Interfaces
     public interface IPersistenciaVehiculo
     {
         List<Vehiculo> ListarVehiculos();
+        FiltrosVehiculo ListarFiltrosPublicados();
+        PaginaResultado<Vehiculo> ListarPublicadosPaginado(int? pIdMarca, int? pIdModelo, int? pAnio, string pOrdenPrecio, int pPagina, int pTamanoPagina);
         List<Vehiculo> ListarMisVehiculos(string idUsuario);
 
         Vehiculo DetalleVehiculo(int IdVehiculo);

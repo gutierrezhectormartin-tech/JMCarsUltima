@@ -179,7 +179,7 @@ namespace JMCarsWeb.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Usuarios()
+        public async Task<IActionResult> Usuarios(string tipo = "clientes", string? buscar = null, bool? activo = null, int pagina = 1)
         {
             int? idRol = HttpContext.Session.GetInt32("IdRol");
 
@@ -189,12 +189,56 @@ namespace JMCarsWeb.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            UsuariosViewModel modelo = new UsuariosViewModel();
+            const int tamanoPagina = 10;
+
+            UsuariosViewModel modelo = new UsuariosViewModel
+            {
+                Tipo = tipo == "escribanos" ? "escribanos" : "clientes",
+                Buscar = buscar,
+                Activo = activo
+            };
 
             try
             {
-                modelo.Clientes = await _clienteService.ListarTodos();
-                modelo.Escribanos = await _escribanoService.ListarTodos();
+                string texto = buscar?.Trim() ?? "";
+
+                if(modelo.Tipo == "escribanos")
+                {
+                    IEnumerable<EscribanoDTO> filtrados = await _escribanoService.ListarTodos();
+
+                    if(activo.HasValue)
+                    {
+                        filtrados = filtrados.Where(e => e.EstadoUsu == activo.Value);
+                    }
+                    if(texto != "")
+                    {
+                        filtrados = filtrados.Where(e => (e.NombreCompleto ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                                                    || (e.Email ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                                                    || (e.NumeroCaja ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    List<EscribanoDTO> lista = filtrados.OrderBy(e => e.NombreCompleto).ToList();
+                    modelo.TotalFiltrados = lista.Count;
+                    modelo.Escribanos = lista.ToPagedList(CorregirPagina(pagina, lista.Count, tamanoPagina), tamanoPagina);
+                }
+                else
+                {
+                    IEnumerable<ClienteDTO> filtrados = await _clienteService.ListarTodos();
+
+                    if(activo.HasValue)
+                    {
+                        filtrados = filtrados.Where(c => c.EstadoUsu == activo.Value);
+                    }
+                    if(texto != "")
+                    {
+                        filtrados = filtrados.Where(c => (c.NombreCompleto ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                                                    || (c.Email ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                                                    || (c.Cedula ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase));
+                    }
+                    List<ClienteDTO> lista = filtrados.OrderBy(c => c.NombreCompleto ?? "").ToList();
+                    modelo.TotalFiltrados = lista.Count;
+                    modelo.Clientes = lista.ToPagedList(CorregirPagina(pagina, lista.Count, tamanoPagina), tamanoPagina);
+                }
                 return View(modelo);
             }
             catch (Exception ex)
@@ -205,7 +249,7 @@ namespace JMCarsWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ActivarCliente(int id)
+        public async Task<IActionResult> ActivarCliente(int id, string? returnUrl = null)
         {
             int? idRol = HttpContext.Session.GetInt32("IdRol");
 
@@ -225,11 +269,11 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("Usuarios");
+            return VolverAUsuarios(returnUrl);
         }
 
         [HttpPost]
-        public async Task<IActionResult> InactivarCliente(int id)
+        public async Task<IActionResult> InactivarCliente(int id, string? returnUrl = null)
         {
             int? idRol = HttpContext.Session.GetInt32("IdRol");
 
@@ -249,11 +293,11 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("Usuarios");
+            return VolverAUsuarios(returnUrl);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ActivarEscribano(int id)
+        public async Task<IActionResult> ActivarEscribano(int id, string? returnUrl = null)
         {
             int? idRol = HttpContext.Session.GetInt32("IdRol");
 
@@ -273,11 +317,11 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("Usuarios");
+            return VolverAUsuarios(returnUrl);
         }
 
         [HttpPost]
-        public async Task<IActionResult> InactivarEscribano(int id)
+        public async Task<IActionResult> InactivarEscribano(int id, string? returnUrl = null)
         {
             int? idRol = HttpContext.Session.GetInt32("IdRol");
 
@@ -297,8 +341,30 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("Usuarios");
+            return VolverAUsuarios(returnUrl);
         }
 
+        private int CorregirPagina(int pagina, int total, int tamanoPagina)
+        {
+            int totalPaginas = (int)Math.Ceiling(total / (double)tamanoPagina);
+            if (pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+            if (pagina < 1)
+            {
+                pagina = 1;
+            }
+            return pagina;
+        }
+
+        private IActionResult VolverAUsuarios(string? returnUrl)
+        {
+            if(!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            return RedirectToAction("Usuarios");
+        }
     }
 }

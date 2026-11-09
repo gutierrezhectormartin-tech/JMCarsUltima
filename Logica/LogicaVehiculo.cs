@@ -69,6 +69,48 @@ namespace Logica
             return _persistenciaVehiculo.ListarVehiculos().Where(v => v.IdEstadoPublicacion == 2).ToList();
         }
 
+        public PaginaResultado<Vehiculo> ListarPublicadosPaginado(int? pIdMarca, int? pIdModelo, int? pAnio, string pOrdenPrecio, int pPagina, int pTamanoPagina)
+        {
+            const int tamanoPorDefecto = 12;
+            const int tamanoMaximo = 50;
+
+            if(pPagina < 1)
+            {
+                pPagina = 1;
+            }
+            if(pTamanoPagina < 1)
+            {
+                pTamanoPagina = tamanoPorDefecto;
+            }
+            if(pTamanoPagina > tamanoMaximo)
+            {
+                pTamanoPagina = tamanoMaximo;
+            }
+            if(pIdMarca <= 0)
+            {
+                pIdMarca = null;
+            }
+            if(pIdModelo <= 0)
+            {
+                pIdModelo = null;
+            }
+            if(pAnio <= 0)
+            {
+                pAnio = null;
+            }
+
+            string orden = (pOrdenPrecio ?? "").Trim().ToLower();
+            if(orden != "asc" && orden != "desc")
+            {
+                orden = null;
+            }
+            return _persistenciaVehiculo.ListarPublicadosPaginado(pIdMarca, pIdModelo, pAnio, orden, pPagina, pTamanoPagina);
+        }
+
+        public FiltrosVehiculo ListarFiltrosPublicados()
+        {
+            return _persistenciaVehiculo.ListarFiltrosPublicados();
+        }
         public Vehiculo DetalleVehiculo(int pIdVehiculo)
         {
             return _persistenciaVehiculo.DetalleVehiculo(pIdVehiculo);

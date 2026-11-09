@@ -59,6 +59,34 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpGet("publicados")]
+        public IActionResult ListarPublicadosPaginado(int? idMarca = null, int? idModelo = null, int? anio = null, string ordenPrecio = null, int pagina = 1, int tamanoPagina = 12)
+        {
+            try
+            {
+                PaginaResultado<Vehiculo> resultado = _logicaVehiculo.ListarPublicadosPaginado(idMarca, idModelo, anio, ordenPrecio, pagina, tamanoPagina);
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("filtros")]
+        public IActionResult ListarFiltrosPublicados()
+        {
+            try
+            {
+                FiltrosVehiculo filtros = _logicaVehiculo.ListarFiltrosPublicados();
+                return Ok(filtros);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         [HttpGet("mis-vehiculos/{idUsuario}")]
         public IActionResult ListarMisVehiculos(string idUsuario)
         {

@@ -1,4 +1,4 @@
-﻿@model List<JMCarsWeb.DTOs.VehiculoDTO>
+﻿@model JMCarsWeb.ViewModels.HomeViewModel
 
 @if (TempData["Error"] != null)
 {
@@ -35,17 +35,13 @@
     </div>
 }
 @{
-    var marcas = Model.Where(v => v.Modelo?.Marca != null).Select(v => new { Id = v.Modelo.Marca.IdMarca, Nombre = v.Modelo.Marca.NombreMarca })
-            .Distinct().OrderBy(x => x.Nombre).ToList();
-}
+    var marcas = Model.Filtros.Modelos.Where(m => m.Marca != null)
+        .Select(m => new { Id = m.Marca.IdMarca, Nombre = m.Marca.NombreMarca })
+        .Distinct().OrderBy(x => x.Nombre).ToList();
 
-@{
-    var modelos = Model.Where(v => v.Modelo != null && v.Modelo.Marca != null).Select(v => new
-    {
-        idMarca = v.Modelo.Marca.IdMarca,
-        idModelo = v.Modelo.IdModelo,
-        Nombre = v.Modelo.Modelo
-    }).Distinct().OrderBy(x => x.Nombre).ToList();
+    var modelos = Model.Filtros.Modelos.Where(m => m.Marca != null)
+        .Select(m => new { idMarca = m.Marca.IdMarca, idModelo = m.IdModelo, Nombre = m.Modelo })
+        .OrderBy(x => x.Nombre).ToList();
 }
 <section class="hero">
     <h1>Encontrá tu próximo auto</h1>
@@ -131,127 +127,73 @@
 
 <h2 class="titulo-seccion">Todos los vehículos <small>Filtrá por marca, modelo o año</small></h2>
 
-<form method="get" class="card card-body mb-4">
-        <div class="row g-2">
-            <div class="col-12 col-md-3">
-                <select name="marca" class="form-select">
-                    <option value="">Todas las marcas</option>
-                    @foreach (var marca in marcas)
-                    {
-                        <option value="@marca.Id">@marca.Nombre</option>
-                    }
-                </select>
-            </div>
-            <div class="col-12 col-md-3">
-                <select name="modelo" class="form-select">
-                    <option value="">Todos los modelos</option>
-                    @foreach (var modelo in modelos)
-                    {
-                        <option value="@modelo.idModelo" data-marca="@modelo.idMarca">@modelo.Nombre</option>
-                    }
-                </select>
-            </div>
-            <div class="col-6 col-md-2">
-                <select name="anio" class="form-select">
-                    <option value="">Todos los años</option>
-                    @foreach (var anio in Model.Select(v => v.Anio).Distinct().OrderBy(a => a))
-                    {
-                        <option value="@anio">@anio</option>
-                    }
-                </select>
-            </div>
-            <div class="col-6 col-md-2">
-                <select name="ordenPrecio" class="form-select">
-                    <option value="">Ordenar por precio</option>
-                    <option value="asc">Menor a mayor</option>
-                    <option value="desc">Mayor a menor</option>
-                </select>
-            </div>
-            <div class="col-12 col-md-2">
-                <a href="/" class="btn btn-outline-primary w-100" role="button">Limpiar</a>
-            </div>
+<form id="formFiltros" method="get" class="card card-body mb-4">
+    <div class="row g-2">
+        <div class="col-12 col-md-3">
+            <select name="marca" class="form-select">
+                <option value="">Todas las marcas</option>
+                @foreach (var marca in marcas)
+                {
+                    <option value="@marca.Id" selected="@(Model.Marca == marca.Id)">@marca.Nombre</option>
+                }
+            </select>
         </div>
-    </form>
+        <div class="col-12 col-md-3">
+            <select name="modelo" class="form-select">
+                <option value="">Todos los modelos</option>
+                @foreach (var modelo in modelos)
+                {
+                    <option value="@modelo.idModelo" data-marca="@modelo.idMarca" selected="@(Model.Modelo == modelo.idModelo)">@modelo.Nombre</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <select name="anio" class="form-select">
+                <option value="">Todos los años</option>
+                @foreach (var anio in Model.Filtros.Anios)
+                {
+                    <option value="@anio" selected="@(Model.Anio == anio)">@anio</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <select name="ordenPrecio" class="form-select">
+                <option value="">Ordenar por precio</option>
+                <option value="asc" selected="@(Model.OrdenPrecio == "asc")">Menor a mayor</option>
+                <option value="desc" selected="@(Model.OrdenPrecio == "desc")">Mayor a menor</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-2">
+            <a href="/" class="btn btn-outline-primary w-100" role="button">Limpiar</a>
+        </div>
+    </div>
+</form>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <span id="contadorVehiculos" class="text-muted small">@Model.Count vehículos</span>
-    <button type="button" id="btnAlternarVista" class="btn btn-outline-primary btn-sm">
-        <i class="bi bi-table"></i> Listado completo
-    </button>
+    <span class="contador-vehiculos text-muted small" data-total="@Model.Vehiculos.Total">Mostrando @Model.Vehiculos.Items.Count de @Model.Vehiculos.Total vehículos</span>
 </div>
 
-<div id="vistaTarjetas" class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xl-5 g-3 mb-4">
-    @foreach (var v in Model)
-    {
-        string? fotoV = (v.Fotografia != null && v.Fotografia.Any())
-            ? "/" + v.Fotografia.First().Replace("\\", "/")
-            : null;
-
-        <div class="col" data-marca="@v.Modelo.Marca.IdMarca" data-modelo="@v.Modelo.IdModelo" data-anio="@v.Anio"
-             data-precio="@v.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
-            <div class="card vehiculo-card vehiculo-card-compacta h-100">
-                @if (fotoV != null)
-                {
-                    <img class="vehiculo-foto" src="@fotoV" alt="@v.Modelo.Marca.NombreMarca @v.Modelo.Modelo" />
-                }
-                else
-                {
-                    <div class="vehiculo-sin-foto"><i class="bi bi-car-front"></i></div>
-                }
-                <div class="card-body pb-2">
-                    <h3 class="h6 mb-1">@v.Modelo.Marca.NombreMarca @v.Modelo.Modelo</h3>
-                    <div class="vehiculo-datos mb-2">@v.Anio · @v.Km.ToString("N0") km · @v.CajaCambios · @v.Motorizacion</div>
-                    <div class="vehiculo-precio">@v.Precio.ToString("C")</div>
-                </div>
-                <div class="card-footer bg-transparent border-0 pt-0 pb-3">
-                    <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" asp-route-origen="home" class="btn btn-outline-primary btn-sm w-100">Ver detalle</a>
-                </div>
-            </div>
-        </div>
-    }
-</div>
-<div id="vistaTabla" class="d-none">
-<table class="table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th>Año</th>
-            <th>Caja De Cambios</th>
-            <th>Motorizacion</th>
-            <th>Kilometraje</th>
-            <th>Descripcion</th>
-            <th>Precio</th>
-            <th class="text-center">Acciones</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @foreach (var v in Model)
+@if (!Model.Vehiculos.Items.Any())
+{
+    <div class="card card-body p-5 text-center mb-4">
+        <i class="bi bi-car-front text-muted" style="font-size: 2.5rem"></i>
+        <h5 class="mt-3">No encontramos vehículos con esos filtros</h5>
+        <p class="text-muted mb-0">Probá con otra combinación o limpiá los filtros</p>
+    </div>
+}
+else
+{
+    <div id="vistaTarjetas" class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xl-5 g-3 mb-4">
+        <partial name="_TarjetasVehiculos" model="Model.Vehiculos.Items" />
+    </div>
+    <div class="text-center mb-5">
+        @if (Model.Vehiculos.HayMas)
         {
-           <tr data-marca="@v.Modelo.Marca.IdMarca" data-modelo="@v.Modelo.IdModelo" data-anio="@v.Anio"
-            data-precio="@v.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
-                <td>@v.IdVehiculo</td>
-                <td>@v.Modelo.Marca.NombreMarca</td>
-                <td>@v.Modelo.Modelo</td>
-                <td>@v.Anio</td>
-                <td>@v.CajaCambios</td>
-                <td>@v.Motorizacion</td>
-                <td>@v.Km.ToString("N0")</td>
-                <td>@v.Descripcion</td>
-                <td>@v.Precio.ToString("C")</td>
-                <td class="text-center">
-                    <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" asp-route-origen="home" class="btn btn-outline-info btn-sm" title="Ver Detalle">
-                        <i class="bi bi-eye"></i>
-                    </a>
-                </td>
-            </tr>
+            <button type="button" id="btnCargarMas" class="btn btn-outline-primary" data-pagina="2">Cargar más</button>
         }
-    </tbody>
-</table>
-</div>
-
+        <div class="contador-vehiculos text-muted small mt-2" data-total="@Model.Vehiculos.Total">Mostrando @Model.Vehiculos.Items.Count de @Model.Vehiculos.Total vehículos</div>
+    </div>
+}
 <section class="my-5">
     <h2 class="titulo-seccion">Como funciona <small>Compra o vende en tres pasos</small></h2>
     <div class="row g-4 text-center">
@@ -287,98 +229,68 @@
     </div>
 </section>
 <script>
-    const selMarca = document.querySelector('select[name="marca"]');
-    const selModelo = document.querySelector('select[name="modelo"]');
-    const selAnio = document.querySelector('select[name="anio"]');
-    const selOrden = document.querySelector('select[name="ordenPrecio"]');
+    const formFiltros = document.getElementById('formFiltros');
+    const selMarca = formFiltros.querySelector('select[name="marca"]');
+    const selModelo = formFiltros.querySelector('select[name="modelo"]');
 
-    const contenedorTarjetas = document.getElementById('vistaTarjetas');
-    const contenedorTabla = document.getElementById('vistaTabla');
-    const cuerpoTabla = contenedorTabla.querySelector('tbody');
-    const contador = document.getElementById('contadorVehiculos');
-    const botonVista = document.getElementById('btnAlternarVista');
-
-    // Guardar orden original de años al cargar la página
-    const ordenOriginalAnios = Array.from(selAnio.querySelectorAll('option[value]')).map(o => o.value);
-
-    // Las tarjetas y las filas de la tabla tienen los mismos data-marca / data-modelo / data-anio
-    function coincide(el, marca, modelo, anio) {
-        return (!marca || el.dataset.marca === marca)
-            && (!modelo || el.dataset.modelo === modelo)
-            && (!anio || el.dataset.anio === anio);
-    }
-
-    function aplicarFiltros() {
-        const marca = selMarca.value;
-        const modelo = selModelo.value;
-        const anio = selAnio.value;
-
-        // Filtrar tarjetas y filas a la vez
-        document.querySelectorAll('#vistaTarjetas > [data-marca], #vistaTabla tbody tr').forEach(function (el) {
-            el.style.display = coincide(el, marca, modelo, anio) ? '' : 'none';
-        });
-
-        // Actualizar el contador
-        const visibles = Array.from(contenedorTarjetas.children).filter(el => el.style.display !== 'none').length;
-        contador.textContent = visibles + (visibles === 1 ? ' vehículo' : ' vehículos');
-
-        // Actualizar opciones de año según marca y modelo seleccionados
-        const aniosVisibles = new Set();
-        contenedorTarjetas.querySelectorAll('[data-marca]').forEach(function (el) {
-            if (coincide(el, marca, modelo, '')) aniosVisibles.add(el.dataset.anio);
-        });
-
-        selAnio.querySelectorAll('option').forEach(function (option) {
-            if (!option.value) return;
-            option.style.display = aniosVisibles.has(option.value) ? '' : 'none';
-        });
-
-        // Restaurar orden original de años
-        ordenOriginalAnios.forEach(function (a) {
-            const option = selAnio.querySelector(`option[value="${a}"]`);
-            if (option) selAnio.appendChild(option);
-        });
-    }
-
-    function ordenarPorPrecio() {
-        const orden = selOrden.value;
-        if (!orden) return;
-
-        const comparar = function (a, b) {
-            const precioA = parseFloat(a.dataset.precio);
-            const precioB = parseFloat(b.dataset.precio);
-            return orden === 'asc' ? precioA - precioB : precioB - precioA;
-        };
-
-        Array.from(contenedorTarjetas.children).sort(comparar)
-            .forEach(function (el) { contenedorTarjetas.appendChild(el); });
-        Array.from(cuerpoTabla.querySelectorAll('tr')).sort(comparar)
-            .forEach(function (el) { cuerpoTabla.appendChild(el); });
-    }
-
-    selMarca.addEventListener('change', function () {
-        const marcaSeleccionada = this.value;
-        selModelo.value = '';
+    // Muestra solo los modelos de la marca elegida
+    function filtrarModelosPorMarca() {
+        const marcaSeleccionada = selMarca.value;
         selModelo.querySelectorAll('option').forEach(function (option) {
             if (!option.value) return;
             option.style.display = !marcaSeleccionada || option.dataset.marca === marcaSeleccionada ? '' : 'none';
         });
-        aplicarFiltros();
+    }
+
+    filtrarModelosPorMarca();
+
+    // Cada vez que se cambia un filtro, se pide al servidor la lista filtrada
+    formFiltros.querySelectorAll('select').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+            if (sel === selMarca) {
+                selModelo.value = '';
+            }
+            formFiltros.submit();
+        });
     });
 
-    selModelo.addEventListener('change', aplicarFiltros);
-    selAnio.addEventListener('change', aplicarFiltros);
-    selOrden.addEventListener('change', ordenarPorPrecio);
+    // Botón "Cargar más": pide la página siguiente y la agrega al final
+    const btnCargarMas = document.getElementById('btnCargarMas');
+    if (btnCargarMas) {
+        btnCargarMas.addEventListener('click', async function () {
+            const pagina = parseInt(btnCargarMas.dataset.pagina);
+            const parametros = new URLSearchParams(window.location.search);
+            parametros.set('pagina', pagina);
 
-    // Botón para alternar entre las tarjetas y el listado completo (tabla)
-    botonVista.addEventListener('click', function () {
-        const mostrandoTabla = !contenedorTabla.classList.contains('d-none');
-        contenedorTabla.classList.toggle('d-none', mostrandoTabla);
-        contenedorTarjetas.classList.toggle('d-none', !mostrandoTabla);
-        botonVista.innerHTML = mostrandoTabla
-            ? '<i class="bi bi-table"></i> Listado completo'
-            : '<i class="bi bi-grid-3x3-gap"></i> Ver tarjetas';
-    });
+            btnCargarMas.disabled = true;
+            btnCargarMas.textContent = 'Cargando...';
+
+            try {
+                const respuesta = await fetch('@Url.Action("CargarMas", "Home")?' + parametros.toString());
+                if (!respuesta.ok) {
+                    throw new Error();
+                }
+                const html = await respuesta.text();
+                const contenedor = document.getElementById('vistaTarjetas');
+                contenedor.insertAdjacentHTML('beforeend', html);
+
+                document.querySelectorAll('.contador-vehiculos').forEach(function (c) {
+                    c.textContent = 'Mostrando ' + contenedor.children.length + ' de ' + c.dataset.total + ' vehículos';
+                });
+
+                if (respuesta.headers.get('X-Hay-Mas') === 'true') {
+                    btnCargarMas.dataset.pagina = pagina + 1;
+                    btnCargarMas.disabled = false;
+                    btnCargarMas.textContent = 'Cargar más';
+                } else {
+                    btnCargarMas.remove();
+                }
+            } catch (e) {
+                btnCargarMas.disabled = false;
+                btnCargarMas.textContent = 'No se pudo cargar. Reintentar';
+            }
+        });
+    }
 </script>
 @if(TempData["Advertencia"] != null)
 {

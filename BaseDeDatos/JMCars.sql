@@ -509,6 +509,88 @@ begin
 end
 go
 
+--listado para cargar mas
+create proc sp_Vehiculo_ListarPublicadosPaginado
+    @IdMarca int = null,
+    @IdModelo int = null,
+    @Ano int = null,
+    @OrdenPrecio varchar(4) = null,
+    @Pagina int = 1,
+    @TamanoPagina int = 12
+as
+begin
+    set nocount on;
+
+    select count(*) as Total
+    from Vehiculo V
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    where V.IdEstadoPublicacion = 2
+      and (@IdMarca is null or M.IdMarca = @IdMarca)
+      and (@IdModelo is null or V.IdModelo = @IdModelo)
+      and (@Ano is null or V.Ano = @Ano);
+
+    select
+        V.IdVehiculo,
+        V.Precio,
+        V.Kilometraje,
+        V.Ano,
+        V.CajaDeCambios,
+        V.Motorizacion,
+        V.Descripcion,
+        V.IdEstadoPublicacion,
+        V.Latitud,
+        V.Longitud,
+        M.IdModelo,
+        M.NombreModelo,
+        MA.IdMarca,
+        MA.NombreMarca,
+        U.IdUsuario,
+        U.NombreCompleto,
+        isnull((select top 1 F.UrlFoto
+                from FotoVehiculo F
+                where F.IdVehiculo = V.IdVehiculo
+                order by F.IdFoto), 'images/sin-foto.jpg') as UrlFoto
+    from Vehiculo V
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    inner join Marca MA on M.IdMarca = MA.IdMarca
+    inner join Usuario U on V.IdUsuarioVendedor = U.IdUsuario
+    where V.IdEstadoPublicacion = 2
+      and (@IdMarca is null or M.IdMarca = @IdMarca)
+      and (@IdModelo is null or V.IdModelo = @IdModelo)
+      and (@Ano is null or V.Ano = @Ano)
+    order by
+        case when @OrdenPrecio = 'asc' then V.Precio end asc,
+        case when @OrdenPrecio = 'desc' then V.Precio end desc,
+        V.IdVehiculo desc
+    offset (@Pagina - 1) * @TamanoPagina rows
+    fetch next @TamanoPagina rows only;
+end
+go
+
+--Listado de filtros para cargar mas
+create proc sp_Vehiculo_ListarFiltrosPublicados
+as
+begin
+    set nocount on;
+
+    select distinct
+        MA.IdMarca,
+        MA.NombreMarca,
+        M.IdModelo,
+        M.NombreModelo
+    from Vehiculo V
+    inner join Modelo M on V.IdModelo = M.IdModelo
+    inner join Marca MA on M.IdMarca = MA.IdMarca
+    where V.IdEstadoPublicacion = 2
+    order by MA.NombreMarca, M.NombreModelo;
+
+    select distinct V.Ano
+    from Vehiculo V
+    where V.IdEstadoPublicacion = 2
+    order by V.Ano desc;
+end
+go
+
 -- Listar Vehículos de un Usuario específico (Mis Vehículos)
 create proc sp_Vehiculo_ListarMisVehiculos
 @IdUsuario int

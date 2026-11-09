@@ -23,13 +23,11 @@ namespace Persistencia
 
             oComando.CommandType =
                 CommandType.StoredProcedure;
-            var reloj = System.Diagnostics.Stopwatch.StartNew();
+
             try
             {
                 oConexion.Open();
-                Console.WriteLine("[ListarVehiculos] Open: " + reloj.ElapsedMilliseconds + " ms");
                 SqlDataReader lector = oComando.ExecuteReader();
-                Console.WriteLine("[ListarVehiculos] ExecuteReader: " + reloj.ElapsedMilliseconds + " ms");
                 Dictionary<int, Vehiculo> vistos = new Dictionary<int, Vehiculo>();
 
                 while (lector.Read())
@@ -83,7 +81,6 @@ namespace Persistencia
                 }
 
                 lector.Close();
-                Console.WriteLine("[ListarVehiculos] Lectura completa: " + reloj.ElapsedMilliseconds + " ms, filas=" + lista.Count);
                 return lista;
             }
             catch (Exception ex)
@@ -94,6 +91,114 @@ namespace Persistencia
             {
                 oConexion.Close();
 
+            }
+        }
+
+        public PaginaResultado<Vehiculo> ListarPublicadosPaginado(int? pIdMarca, int? pIdModelo, int? pAnio, string pOrdenPrecio, int pPagina, int pTamanoPagina)
+        {
+            PaginaResultado<Vehiculo> resultado = new PaginaResultado<Vehiculo>();
+            resultado.Pagina = pPagina;
+            resultado.TamanoPagina = pTamanoPagina;
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+            SqlCommand oComando = new SqlCommand("sp_Vehiculo_ListarPublicadosPaginado", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            oComando.Parameters.AddWithValue("@IdMarca", (object)pIdMarca ?? DBNull.Value);
+            oComando.Parameters.AddWithValue("@IdModelo", (object)pIdModelo ?? DBNull.Value);
+            oComando.Parameters.AddWithValue("@Ano", (object)pAnio ?? DBNull.Value);
+            oComando.Parameters.AddWithValue("@OrdenPrecio", (object)pOrdenPrecio ?? DBNull.Value);
+            oComando.Parameters.AddWithValue("@Pagina", (object)pPagina);
+            oComando.Parameters.AddWithValue("@TamanoPagina", (object)pTamanoPagina);
+
+            try
+            {
+                oConexion.Open();
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                if(lector.Read())
+                {
+                    resultado.Total = Convert.ToInt32(lector["Total"]);
+                }
+                lector.NextResult();
+                while(lector.Read())
+                {
+                    Marcas unaMarca = new Marcas(Convert.ToInt32(lector["IdMarca"]), lector["NombreMarca"].ToString());
+                    Modelos unModelo = new Modelos(Convert.ToInt32(lector["IdModelo"]), lector["NombreModelo"].ToString(), unaMarca);
+                    Cliente unCliente = new Cliente(Convert.ToInt32(lector["IdUsuario"]), lector["NombreCompleto"].ToString() ?? string.Empty,
+                        "", "", "", true, Rol.Cliente, null, "");
+                    List<string> fotos = new List<string>();
+                    string urlFoto = lector["UrlFoto"] != DBNull.Value ? lector["UrlFoto"].ToString() : null;
+                    if(urlFoto != null && !urlFoto.EndsWith("sin-foto-jgp"))
+                    {
+                        fotos.Add(urlFoto);
+                    }
+                    decimal? latitud = lector["Latitud"] == DBNull.Value ? null : Convert.ToInt32(lector["Latitud"]);
+                    decimal? longitud = lector["Longitud"] == DBNull.Value ? null : Convert.ToInt32(lector["Longitud"]);
+
+                    Vehiculo unVehiculo = new Vehiculo(Convert.ToInt32(lector["IdVehiculo"]),
+                        Convert.ToDecimal(lector["Precio"]),
+                        Convert.ToInt32(lector["Kilometraje"]),
+                        Convert.ToInt32(lector["Ano"]),
+                        lector["CajaDeCambios"].ToString() ?? string.Empty,
+                        lector["Motorizacion"].ToString() ?? string.Empty,
+                        lector["Descripcion"].ToString() ?? string.Empty,
+                        Convert.ToInt32(lector["IdEstadoPublicacion"]),
+                        latitud,
+                        longitud,
+                        unModelo,
+                        unCliente,
+                        fotos);
+
+                    resultado.Items.Add(unVehiculo);
+                }
+
+                return resultado;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
+            }
+        }
+
+        public FiltrosVehiculo ListarFiltrosPublicados()
+        {
+            FiltrosVehiculo filtros = new FiltrosVehiculo();
+
+            SqlConnection oConexion = new SqlConnection(Conexion.GetConexion());
+            SqlCommand oComando = new SqlCommand("sp_Vehiculo_ListarFiltrosPublicados", oConexion);
+            oComando.CommandType = CommandType.StoredProcedure;
+
+            try
+            {
+                oConexion.Open();
+                SqlDataReader lector = oComando.ExecuteReader();
+
+                while(lector.Read())
+                {
+                    Marcas unaMarca = new Marcas(Convert.ToInt32(lector["IdMarca"]), lector["NombreMarca"].ToString());
+                    Modelos unModelo = new Modelos(Convert.ToInt32(lector["IdModelo"]), lector["NombreModelo"].ToString(), unaMarca);
+                    filtros.Modelos.Add(unModelo);
+                }
+                lector.NextResult();
+                while(lector.Read())
+                {
+                    filtros.Anios.Add(Convert.ToInt32(lector["Ano"]));
+                }
+                return filtros;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally
+            {
+                oConexion.Close();
             }
         }
         public List<Vehiculo> ListarMisVehiculos(string idUsuario)

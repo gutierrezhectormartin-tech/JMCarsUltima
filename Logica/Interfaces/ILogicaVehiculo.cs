@@ -11,6 +11,8 @@ namespace Logica.Interfaces
     {
         List<Vehiculo> ListarVehiculos();
         List<Vehiculo> ListarPublicados();
+        PaginaResultado<Vehiculo> ListarPublicadosPaginado(int? pIdMarca, int? pIdModelo, int? pAnio, string pOrdenPrecio,int pPagina, int pTamanoPagina);
+        FiltrosVehiculo ListarFiltrosPublicados();
         List<Vehiculo> ListarMisVehiculos(string idUsuario);
 
         Vehiculo DetalleVehiculo(int pIdVehiculo);

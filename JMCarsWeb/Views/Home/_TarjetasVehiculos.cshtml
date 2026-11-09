@@ -1,0 +1,27 @@
+﻿@model List<JMCarsWeb.DTOs.VehiculoDTO>
+
+@foreach (var v in Model)
+{
+    string? fotoV = (v.Fotografia != null && v.Fotografia.Any()) ? "/" + v.Fotografia.First().Replace("\\", "/") : null;
+    
+    <div class="col">
+        <div class="card vehiculo-card vehiculo-card-compacta h-100">
+            @if(fotoV != null)
+            {
+                <img class="vehiculo_foto" src="@fotoV" alt="@v.Modelo.Marca.NombreMarca @v.Modelo.Modelo"/>
+            }
+            else
+            {
+                <div class="vehiculo-sin-foto"><i class="bi bi-car-front"></i></div>
+            }
+            <div class="card-body pb-2">
+                <h3 class="h6 mb-1">@v.Modelo.Marca.NombreMarca</h3>
+                <div class="vehiculo-datos mb-2">@v.Anio @v.Km.ToString("N0") km - @v.CajaCambios - @v.Motorizacion</div>
+                <div class="vehiculo-precio">@v.Precio.ToString("C")</div>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" asp-route-origen="home" class="btn btn-outline-primary btn-sm w-100">Ver Detalle</a>
+            </div>
+        </div>
+    </div>
+}
