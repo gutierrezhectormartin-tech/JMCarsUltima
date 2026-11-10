@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using X.PagedList;
 using X.PagedList.Extensions;
+using static JMCarsWeb.Helpers.Paginado;
 
 namespace JMCarsWeb.Controllers
 {
@@ -61,16 +62,7 @@ namespace JMCarsWeb.Controllers
                 }
 
                 List<VehiculoDTO> lista = filtrados.OrderByDescending(v => v.IdVehiculo).ToList();
-
-                int totalPaginas = (int)Math.Ceiling(lista.Count / (double)tamanoPagina);
-                if(pagina > totalPaginas)
-                {
-                    pagina = totalPaginas;
-                }
-                if(pagina < 1)
-                {
-                    pagina = 1;
-                }
+                pagina = CorregirPagina(pagina, lista.Count,tamanoPagina)
 
                 VehiculosAdminViewModel modelo = new VehiculosAdminViewModel
                 {
@@ -93,7 +85,7 @@ namespace JMCarsWeb.Controllers
         }
 
         [HttpGet]
-        public async  Task<IActionResult> HistorialPublicaciones(int idCliente)
+        public async  Task<IActionResult> HistorialPublicaciones(int idCliente, int? estado, string? buscar, int pagina = 1)
         {
             int? idRol = HttpContext.Session.GetInt32("IdRol");
 
@@ -102,15 +94,43 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = "No hay un usuario con permisos de administrador logueado";
                 return RedirectToAction("Index", "Login");
             }
+
+            const int tamanoPagina = 10;
+
+            HistorialPublicacionesViewModel modelo = new HistorialPublicacionesViewModel
+            {
+                IdCliente = idCliente,
+                Estado = estado,
+                Buscar = buscar
+            };
+
             try
             {
-                List<VehiculoDTO> vehiculos = await _vehiculoService.ListarMisVehiculos(idCliente.ToString());
-                return View(vehiculos);
+                List<VehiculoDTO> todos = await _vehiculoService.ListarMisVehiculos(idCliente.ToString());
+                modelo.NombreCliente = todos.FirstOrDefault()?.Vendedor?.NombreCompleto;
+                IEnumerable<VehiculoDTO> filtrados = todos;
+
+                if(estado.HasValue)
+                {
+                    filtrados = filtrados.Where(v => v.IdEstadoPublicacion == estado.Value);
+                }
+                if(!string.IsNullOrWhiteSpace(buscar))
+                {
+                    string texto = buscar.Trim();
+                    
+                    filtrados = filtrados.Where(v => (v.Modelo?.Marca?.NombreMarca ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || (v.Modelo?.Modelo ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || v.Anio.ToString().Contains(texto));
+                }
+                List<VehiculoDTO> lista = filtrados.OrderByDescending(v => v.IdVehiculo).ToList();
+                modelo.TotalFiltrados = lista.Count;
+                modelo.Vehiculos = lista.ToPagedList(CorregirPagina(pagina, lista.Count, tamanoPagina), tamanoPagina);
+                return View(modelo);
             }
             catch (Exception ex)
             {
                 TempData["Error"] = ex.Message;
-                return View(new List<VehiculoDTO>());
+                return View(modelo);
             }
         }
 
@@ -342,20 +362,6 @@ namespace JMCarsWeb.Controllers
             }
 
             return VolverAUsuarios(returnUrl);
-        }
-
-        private int CorregirPagina(int pagina, int total, int tamanoPagina)
-        {
-            int totalPaginas = (int)Math.Ceiling(total / (double)tamanoPagina);
-            if (pagina > totalPaginas)
-            {
-                pagina = totalPaginas;
-            }
-            if (pagina < 1)
-            {
-                pagina = 1;
-            }
-            return pagina;
         }
 
         private IActionResult VolverAUsuarios(string? returnUrl)

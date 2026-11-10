@@ -1,4 +1,4 @@
-﻿@model List<JMCarsWeb.DTOs.VehiculoDTO>
+﻿@model JMCarsWeb.ViewModels.HistorialPublicacionesViewModel
 @{
     ViewData["Title"] = "Historial de Publicaciones";
 }
@@ -11,9 +11,9 @@
     </div>
     <div class="mb-4">
         <h2 class="mb-1">Historial de Publicaciones</h2>
-        @if(Model.Any())
+        @if(!string.IsNullOrWhiteSpace(Model.NombreCliente))
         {
-            <div class="text-muted">Cliente: @Model.First().Vendedor?.NombreCompleto</div>
+            <div class="text-muted">Cliente: @Model.NombreCliente</div>
         }
     </div>
 
@@ -26,12 +26,44 @@
         <div class="alert alert-success">@TempData["Mensaje"]</div>
     }
 
-    @if(!Model.Any())
+    <form asp-controller="Admin" asp-action="HistorialPublicaciones" method="get" class="row g-2 mb-3">
+        <input type="hidden" name="idCliente" value="@Model.IdCliente"/>
+        <div class="col-md-5">
+            <input type="text" name="buscar" value="@Model.Buscar" class="form-control" placeholder="Marca modelo o año"/>
+        </div>
+        <div class="col-md-3">
+            <select name="estado" class="form-select">
+                <option value="">Todos</option>
+                <option value="1" selected="@(Model.Estado == 1)">Pendiente</option>
+                <option value="2" selected="@(Model.Estado == 2)">Aprobada</option>
+                <option value="3" selected="@(Model.Estado == 3)">Rechazada</option>
+                <option value="4" selected="@(Model.Estado == 4)">Inactiva</option>
+                <option value="5" selected="@(Model.Estado == 5)">En Tramite</option>
+                <option value="6" selected="@(Model.Estado == 6)">Vendido</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a asp-controller="Admin" asp-action="HistorialPublicaciones" asp-route-idCliente="@Model.IdCliente" class="btn btn-outline-secondary">Limpiar</a>
+        </div>
+    </form>
+
+    <div class="text-muted small mb-2">@Model.TotalFiltrados resultados(s)</div>
+
+    @if(Model.Vehiculos == null || !Model.Vehiculos.Any())
     {
         <div class="card card-body p-5 text-center">
             <i class="bi bi-car-front text-muted" style="font-size: 2.5rem"></i>
-            <h5 class="mt-3">Este cliente no tiene publicaciones</h5>
-            <p class="text-muted mb-0">Cuando publique, podras ver sus publicaciones aqui</p>
+            @if(Model.Estado.HasValue || !string.IsNullOrWhiteSpace(Model.Buscar))
+            {
+                <h5 class="mt-3">No existen publicaciones con estos filtros</h5>
+                <p class="text-muted mb-0">Proba con otros filtros o limpia los mismos</p>
+            }
+            else
+            {
+                <h5 class="mt-3">Este cliente no tiene publicaciones</h5>
+                <p class="text-muted mb-0">Cuando publique, podras ver sus publicaciones aqui</p>
+            }
         </div>
     }
     else
@@ -49,7 +81,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach(var v in Model)
+                    @foreach(var v in Model.Vehiculos)
                     {
                         <tr>
                             <td><div class="fw-bold" style="color: var(--jm-azul);">@v.Modelo?.Marca?.NombreMarca @v.Modelo?.Modelo</div></td>
@@ -88,5 +120,6 @@
             </table>
         </div>
         </div>
+        <partial name="_Paginador" model="Model.Vehiculos"/>
     }
 </div>

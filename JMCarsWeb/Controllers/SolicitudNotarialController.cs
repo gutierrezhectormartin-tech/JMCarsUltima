@@ -4,6 +4,7 @@ using JMCarsWeb.Services;
 using JMCarsWeb.ViewModels;
 using X.PagedList;
 using X.PagedList.Extensions;
+using static JMCarsWeb.Helpers.Paginado;
 
 namespace JMCarsWeb.Controllers
 {
@@ -85,7 +86,7 @@ namespace JMCarsWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> MisSolicitudes()
+        public async Task<IActionResult> MisSolicitudes(int? estado, string? buscar, int pagina = 1)
         {
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             int? idRol = HttpContext.Session.GetInt32("IdRol");
@@ -96,15 +97,42 @@ namespace JMCarsWeb.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
+            const int tamanoPagina = 10;
+
+            MisSolicitudesViewModel modelo = new MisSolicitudesViewModel
+            {
+                Estado = estado,
+                Buscar = buscar
+            };
+
             try
             {
-                List<SolicitudEscribanoDTO> solicitudes = await _solicitudService.ListarPorCliente(idUsuario.Value);
-                return View(solicitudes);
+                List<SolicitudEscribanoDTO> todas = await _solicitudService.ListarPorCliente(idUsuario.Value);
+
+                IEnumerable<SolicitudEscribanoDTO> filtradas = todas;
+
+                if(estado.HasValue)
+                {
+                    filtradas = filtradas.Where(s => s.Solicitud?.EstadoSolicitud == estado.Value);
+                }
+                if (!string.IsNullOrWhiteSpace(buscar))
+                {
+                    string texto = buscar.Trim();
+                    filtradas = filtradas.Where(s => (s.Solicitud?.Vehiculo?.Modelo?.Marca?.NombreMarca ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || (s.Solicitud?.Vehiculo?.Modelo?.Modelo ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || (s.Escribano?.NombreCompleto ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || (s.Escribano?.Email ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase));
+                }
+
+                List<SolicitudEscribanoDTO> lista = filtradas.OrderByDescending(s => s.Solicitud.FechaSolicitud).ToList();
+                modelo.TotalFiltrados = lista.Count;
+                modelo.Solicitudes = lista.ToPagedList(CorregirPagina(pagina, lista.Count, tamanoPagina), tamanoPagina);
+                return View(modelo);
             }
             catch (Exception ex)
             {
                 TempData["Error"] =  ex.Message;
-                return View(new List<SolicitudEscribanoDTO>());
+                return View(modelo);
             }
         }
 
@@ -261,19 +289,7 @@ namespace JMCarsWeb.Controllers
             }
             return RedirectToAction("SolicitudesEscribano");
         }
-        private int CorregirPagina(int pagina, int total, int tamanoPagina)
-        {
-            int totalPagina = (int)Math.Ceiling(total / (double)tamanoPagina);
-            if(pagina > totalPagina)
-            {
-                pagina = totalPagina;
-            }
-            if(pagina < 1)
-            {
-                pagina = 1;
-            }
-            return pagina;
-        }
+        
     }
 
 

@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using JMCarsWeb.DTOs;
 using System.Security.Cryptography.X509Certificates;
 using ImageMagick;
+using JMCarsWeb.ViewModels;
+using X.PagedList;
+using X.PagedList.Extensions;
+using static JMCarsWeb.Helpers.Paginado;
 
 namespace JMCarsWeb.Controllers
 {
@@ -36,7 +40,7 @@ namespace JMCarsWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> MisVehiculos()
+        public async Task<IActionResult> MisVehiculos(int? estado, string? buscar, int pagina = 1)
         {
             int? idUsuarioInt = HttpContext.Session.GetInt32("IdUsuario");
 
@@ -45,17 +49,41 @@ namespace JMCarsWeb.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
+            const int tamanoPagina = 10;
             string idUsuarioStr = idUsuarioInt.Value.ToString();
+
+            MisVehiculosViewModel modelo = new MisVehiculosViewModel
+            {
+                Estado = estado,
+                Buscar = buscar
+            };
 
             try
             {
-                List<VehiculoDTO> misVehiculos = await _vehiculoService.ListarMisVehiculos(idUsuarioStr);
-                return View(misVehiculos);
+                List<VehiculoDTO> todos = await _vehiculoService.ListarMisVehiculos(idUsuarioStr);
+                IEnumerable<VehiculoDTO> filtrados = todos;
+
+                if(estado.HasValue)
+                {
+                    filtrados = filtrados.Where(v => v.IdEstadoPublicacion == estado.Value);
+                }
+                if (!string.IsNullOrWhiteSpace(buscar))
+                {
+                    string texto = buscar.Trim();
+
+                    filtrados = filtrados.Where(v => (v.Modelo?.Marca?.NombreMarca ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || (v.Modelo?.Modelo ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || v.Anio.ToString().Contains(texto));
+                }
+                List<VehiculoDTO> lista = filtrados.OrderByDescending(v => v.IdVehiculo).ToList();
+                modelo.TotalFiltrados = lista.Count;
+                modelo.Vehiculos = lista.ToPagedList(CorregirPagina(pagina, lista.Count, tamanoPagina), tamanoPagina);
+                return View(modelo);
             }
             catch (Exception ex)
             {
                 TempData["Error"] = ex.Message;
-                return View(new List<VehiculoDTO>());
+                return View(modelo);
             }
         }
         [HttpGet]
@@ -281,7 +309,7 @@ namespace JMCarsWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Inactivar(int id)
+        public async Task<IActionResult> Inactivar(int id, string? returnUrl = null)
         {
             int? idUsuarioSession = HttpContext.Session.GetInt32("IdUsuario");
             if (idUsuarioSession == null)
@@ -295,13 +323,13 @@ namespace JMCarsWeb.Controllers
 
                 if (vehiculo.Vendedor?.IdUsuario != idUsuarioSession.Value)
                 {
-                    return RedirectToAction("MisVehiculos");
+                    return VolverAMisVehiculos(returnUrl);
                 }
 
                 if (vehiculo.IdEstadoPublicacion != 1 && vehiculo.IdEstadoPublicacion != 2)
                 {
                     TempData["Error"] = "Solo se pueden inactivar publicaciones pendientes o aprobadas.";
-                    return RedirectToAction("MisVehiculos");
+                    return VolverAMisVehiculos(returnUrl);
                 }
 
                 await _vehiculoService.CambiarEstadoVehiculo(id, 4, HttpContext.Session.GetInt32("IdRol") ?? 0);
@@ -312,12 +340,12 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("MisVehiculos");
+            return VolverAMisVehiculos(returnUrl);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Activar(int id)
+        public async Task<IActionResult> Activar(int id, string? returnUrl = null)
         {
             int? idUsuarioSession = HttpContext.Session.GetInt32("IdUsuario");
             if (idUsuarioSession == null)
@@ -331,13 +359,13 @@ namespace JMCarsWeb.Controllers
 
                 if (vehiculo.Vendedor?.IdUsuario != idUsuarioSession.Value)
                 {
-                    return RedirectToAction("MisVehiculos");
+                    return VolverAMisVehiculos(returnUrl);
                 }
 
                 if (vehiculo.IdEstadoPublicacion != 4)
                 {
                     TempData["Error"] = "Solo se pueden activar publicaciones inactivas.";
-                    return RedirectToAction("MisVehiculos");
+                    return VolverAMisVehiculos(returnUrl);
                 }
 
                 await _vehiculoService.CambiarEstadoVehiculo(id, 2, HttpContext.Session.GetInt32("IdRol") ?? 0);
@@ -348,7 +376,7 @@ namespace JMCarsWeb.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction("MisVehiculos");
+            return VolverAMisVehiculos(returnUrl);
         }
 
         //[HttpPost]
@@ -475,6 +503,15 @@ namespace JMCarsWeb.Controllers
             }
 
             return rutasGuardadas;
+        }
+
+        private IActionResult VolverAMisVehiculos(string? returnUrl)
+        {
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            return RedirectToAction("MisVehiculos");
         }
     }
 }

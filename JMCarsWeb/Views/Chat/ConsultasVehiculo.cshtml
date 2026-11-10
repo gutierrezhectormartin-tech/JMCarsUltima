@@ -1,4 +1,4 @@
-﻿@model List<JMCarsWeb.DTOs.ChatDTO>
+﻿@model JMCarsWeb.ViewModels.ChatsViewModel
 @{
     ViewData["Title"] = "Consultas del Vehiculo";
     int idVehiculo = (int)ViewBag.IdVehiculo;
@@ -27,18 +27,41 @@
     {
         <div class="alert alert-danger">@TempData["Error"]</div>
     }
-    @if(Model == null || !Model.Any())
+
+    <form asp-controller="Chat" asp-action="ConsultasVehiculo" method="get" class="row g-2 mb-3">
+        <input type="hidden" name="idVehiculo" value="@idVehiculo"/>
+        <div class="col-md-8">
+            <input type="text" name="buscar" value="@Model.Buscar" class="form-control" placeholder="Interesado o parte del ultimo mensaje"/>
+        </div>
+        <div class="col-md-4 d-flex gap-1">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a asp-controller="Chat" asp-action="ConsultasVehiculo" asp-route-idVehiculo="@idVehiculo" class="btn btn-outline-secondary">Limpiar</a>
+        </div>
+    </form>
+
+    <div class="muted-text small mb-2">@Model.TotalFiltrados resultado(s)</div>
+
+    @if(Model.Chats == null || !Model.Chats.Any())
     {
         <div class="card card-body p-5 text-center">
             <i class="bi bi-chat-square-text text-muted" style="font-size: 2.5rem;"></i>
-            <h5 class="mt-3">Todavia no tienes consultas</h5>
-            <p class="text-muted mb-0">Cuando te consulten esas conversaciones apareceran aqui</p>
+            @if(!string.IsNullOrEmpty(Model.Buscar))
+            {
+                <h5 class="mt-3">No hay con ese texto</h5>
+                <p class="text-muted mb-0">Proba con otra busqueda o limpia el filtro</p>
+            }
+            else
+            {
+                <h5 class="mt-3">Todavia no tienes consultas</h5>
+                <p class="text-muted mb-0">Cuando te consulten esas conversaciones apareceran aqui</p>
+            }
+
         </div>
     }
     else
     {
-        <div class="d-grip gap-3">
-            @foreach(var chat in Model)
+        <div class="d-grid gap-3">
+            @foreach(var chat in Model.Chats)
             {
                 <a href="@Url.Action("ConversacionesVendedor", "Chat", new {idChat = chat.IdChat, idVehiculo = idVehiculo})" class="card vehiculo-card text-decoration-none">
                     <div class="card-body d-flex align-items-center gap-3">
@@ -64,6 +87,7 @@
                 </a>
             }
         </div>
+        <partial name="_Paginador" model="Model.Chats"/>
     }
 
     </div>
