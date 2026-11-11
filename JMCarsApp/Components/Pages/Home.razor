@@ -63,7 +63,56 @@
 }
 
 <h2 class="titulo-seccion">Todos los Vehiculos <small>Filtra por marca, modelo o año</small></h2>
-<div class="mb-3 text-muted small">@todos.Count @(todos.Count == 1 ? "Vehiculo" : "Vehiculos")</div>
+
+<div class="card mb-3"> 
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-6">
+                <select class="form-select" @bind="idMarca" @bind:after="AlCambiarMarca">
+                    <option value="">Todas las Marcas</option>
+                    @foreach(MarcaDTO marca in Marcas)
+                    {
+                        <option value="@marca.IdMarca">@marca.NombreMarca</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6">
+                <select class="form-select" @bind="idModelo">
+                    <option value="">Todos los modelos</option>
+                    @foreach(ModeloDTO modelo in ModelosDeMarca)
+                    {
+                        <option value="@modelo.IdModelo">@modelo.Modelo</option>
+                    }
+
+                </select>
+            </div>
+            <div class="col-6">
+                <select class="form-select" @bind="anio">
+                    <option value="">Todos los años</option>
+                    @foreach(int a in filtros.Anios)
+                    {
+                        <option value="@a">@a</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6">
+                <select class="form-select" @bind="ordenPrecio">
+                    <option value="">Orden por precio</option>
+                    <option value="asc">Menor a Mayor</option>
+                    <option value="desc">Mayor a Menor</option>
+                </select>
+            </div>
+            <div class="col-6 d-grid">
+                <button class="btn btn-primary" @onclick="AplicarFiltros" disabled="@cargando">Filtrar</button>
+            </div>
+            <div class="col-6 d-grid">
+                <button class="btn btn-outline-secondary" @onclick="LimpiarFiltros" disabled="@cargando">Limpiar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3 text-muted small">Mostrando @todos.Count de @total @(total == 1 ? "vehiculo" : "vehiculos")</div>
 <div class="d-flex flex-column gap-3 mb-4">
     @foreach(VehiculoDTO v in todos)
     {
@@ -87,12 +136,39 @@
     }
 
 </div>
+<div class="mb-3 text-muted small text-center">Mostrando @todos.Count de @total</div>
+@if(hayMas)
+{
+    <div class="text-center mb-4">
+        <button class="btn btn-primary" @onclick="CargarMas" disabled="@cargando">
+            @(cargando ? "Cargando..." : "Cargar mas")
+        </button>
+
+    </div>
+}
 @code
 {
+    private const int TamanoPagina = 12;
     private EstadisticasDTO? conteos;
+    private FiltrosVehiculoDTO filtros = new();
     private List<VehiculoDTO> todos = new();    
     private List<VehiculoDTO> destacados = new();
     private Dictionary<string, string?> fotos = new();
+
+    private int? idMarca;
+    private int? idModelo;
+    private int? anio;
+    private string? ordenPrecio;
+
+    private int pagina = 1;
+    private int total = 0;
+    private bool hayMas = false;
+    private bool cargando = false;
+
+    private bool HayFiltros => idMarca != null || idModelo != null || anio != null || !string.IsNullOrEmpty(ordenPrecio);
+    private List<MarcaDTO> Marcas => filtros.Modelos.Select(m => m.Marca).DistinctBy(m => m.IdMarca).OrderBy(m => m.NombreMarca).ToList();
+    private List<ModeloDTO> ModelosDeMarca => filtros.Modelos.Where(m => idMarca == null || m.Marca.IdMarca == idMarca).OrderBy(m => m.Modelo).ToList();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -106,23 +182,81 @@
         }
         try
         {
-            List<VehiculoDTO> lista = await ServicioVehiculos.ListarPublicados();
-            todos = lista;
-            destacados = lista.Where(v => v.Fotografia != null && v.Fotografia.Any()).OrderByDescending(v => v.IdVehiculo).Take(6).ToList();
+            filtros = await ServicioVehiculos.ListarFiltrosPublicados();
+        }
+        catch (Exception)
+        {
+            filtros = new FiltrosVehiculoDTO();
+        }
+
+        await CargarPagina();
+    }
+
+    private async Task CargarPagina()
+    {
+        cargando = true;
+        try
+        {
+            PaginaDTO<VehiculoDTO> resultado = await ServicioVehiculos.ListarPublicadosPaginado(idMarca, idModelo, anio, ordenPrecio, pagina, TamanoPagina);
+
+            total = resultado.Total;
+            hayMas = resultado.HayMas;
+            todos.AddRange(resultado.Items);
+
+            if(pagina == 1 && destacados.Count == 0 && !HayFiltros)
+            {
+                destacados = todos.Where(v => v.Fotografia != null && v.Fotografia.Any()).OrderByDescending(v => v.IdVehiculo).Take(6).ToList();
+            }
             StateHasChanged();
-            foreach(VehiculoDTO v in lista)
+
+            foreach(VehiculoDTO v in resultado.Items)
             {
                 if (v.Fotografia == null || !v.Fotografia.Any()) continue;
 
                 string ruta = v.Fotografia.First();
+                if (fotos.ContainsKey(ruta)) continue;
+
                 fotos[ruta] = await ServicioImagenes.ObtenerDataUri(ruta);
                 StateHasChanged();
             }
         }
-        catch(Exception)
+        catch (Exception)
         {
-            todos = new();
-            destacados = new();
+            hayMas = false;
         }
+        finally
+        {
+            cargando = false;
+        }
+
+    }
+
+    private async Task CargarMas()
+    {
+        pagina++;
+        await CargarPagina();
+    }
+
+    private void AlCambiarMarca()
+    {
+        idModelo = null;
+    }
+
+    private async Task AplicarFiltros()
+    {
+        pagina = 1;
+        todos = new();
+        total = 0;
+        hayMas = false;
+        await CargarPagina();
+    }
+
+    private async Task LimpiarFiltros()
+    {
+        idMarca = null;
+        idModelo = null;
+        anio = null;
+        ordenPrecio = null;
+        await AplicarFiltros();
     }
 }

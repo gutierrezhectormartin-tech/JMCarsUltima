@@ -62,7 +62,7 @@ namespace JMCarsWeb.Controllers
                 }
 
                 List<VehiculoDTO> lista = filtrados.OrderByDescending(v => v.IdVehiculo).ToList();
-                pagina = CorregirPagina(pagina, lista.Count,tamanoPagina)
+                pagina = CorregirPagina(pagina, lista.Count, tamanoPagina);
 
                 VehiculosAdminViewModel modelo = new VehiculosAdminViewModel
                 {

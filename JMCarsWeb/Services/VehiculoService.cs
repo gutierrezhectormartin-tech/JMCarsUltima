@@ -61,7 +61,7 @@ namespace JMCarsWeb.Services
         {
             try
             {
-                string url = $"api/vehiculo/publicados?pagina={pagina}&tamanoPagina{tamanoPagina}";
+                string url = $"api/vehiculo/publicados?pagina={pagina}&tamanoPagina={tamanoPagina}";
 
                 if(idMarca.HasValue)
                 {

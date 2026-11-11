@@ -56,6 +56,62 @@ namespace JMCarsApp.Services
                 throw new Exception("No se ha podido listar los vehiculos: " + ex.Message);
             }
         }
+
+        public async Task<PaginaDTO<VehiculoDTO>> ListarPublicadosPaginado(int? idMarca, int? idModelo, int? anio, string? ordenPrecio, int pagina, int tamanoPagina)
+        {
+            try
+            {
+                string url = $"api/vehiculo/publicados?pagina={pagina}&tamanoPagina={tamanoPagina}";
+
+                if(idMarca.HasValue)
+                {
+                    url += $"&idMarca={idMarca.Value}";
+                }
+                if(idModelo.HasValue)
+                {
+                    url += $"&idModelo={idModelo.Value}";
+                }
+                if(anio.HasValue)
+                {
+                    url += $"&anio={anio.Value}";
+                }
+                if(!string.IsNullOrWhiteSpace(ordenPrecio))
+                {
+                    url += $"&ordenPrecio={Uri.EscapeDataString(ordenPrecio)}";
+                }
+
+                var respuesta = await _httpClient.GetAsync(url);
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<PaginaDTO<VehiculoDTO>>() ?? new PaginaDTO<VehiculoDTO>();
+                }
+
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido listar los vehiculos");
+                throw new Exception(error);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido listar los vehiculos: " + ex.Message);
+            }
+        }
+
+        public async Task<FiltrosVehiculoDTO> ListarFiltrosPublicados()
+        {
+            try
+            {
+                var respuesta = await _httpClient.GetAsync("api/vehiculo/filtros");
+                if(respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<FiltrosVehiculoDTO>() ?? new FiltrosVehiculoDTO();
+                }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido cargar los filtros");
+                throw new Exception(error);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido cargar los filtros: " + ex.Message);
+            }
+        }
         public async Task<List<VehiculoDTO>> ListarMisVehiculos(string idUsuario)
         {
             try
