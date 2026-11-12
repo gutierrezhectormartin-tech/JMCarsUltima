@@ -1,0 +1,128 @@
+@page "/registro/escribano"
+@using JMCarsApp.DTOs
+@using JMCarsApp.Services
+@inject EscribanoService ServicioEscribano
+
+<PageTitle>Registro de Escribano</PageTitle>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger">@error</div>
+        }
+
+        <div class="card card-body p-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-briefcase" style="font-size: 3rem; color: var(--jm-azul);"></i>
+                <h2 class="mt-2 mb-1">Registro de Escribanos</h2>
+                <div class="text-muted small">Tu cuenta será aprobada por un administrador a la brevedad.</div>
+            </div>
+
+            @if (registrado)
+            {
+                <div class="alert alert-success">Registro realizado con éxito. Vas a poder ingresar cuando un administrador apruebe tu cuenta.</div>
+                <a class="btn btn-primary w-100" href="login">Ir a iniciar sesión</a>
+            }
+            else
+            {
+                <EditForm Model="escribano" OnValidSubmit="Registrar">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre completo</label>
+                        <InputText @bind-Value="escribano.NombreCompleto" class="form-control" />
+                        <ValidationMessage For="() => escribano.NombreCompleto" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+                        <InputText @bind-Value="escribano.Telefono" type="tel" class="form-control" />
+                        <ValidationMessage For="() => escribano.Telefono" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <InputText @bind-Value="escribano.Email" type="email" class="form-control" />
+                        <ValidationMessage For="() => escribano.Email" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contraseña</label>
+                        <InputText @bind-Value="escribano.Contrasena" type="password" class="form-control" />
+                        <ValidationMessage For="() => escribano.Contrasena" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Número de caja profesional</label>
+                        <InputText @bind-Value="escribano.NumeroCaja" class="form-control" />
+                        <ValidationMessage For="() => escribano.NumeroCaja" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Dirección del estudio</label>
+                        <InputText @bind-Value="escribano.Direccion" class="form-control" />
+                        <ValidationMessage For="() => escribano.Direccion" />
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="aceptaTerminos" @bind="aceptaTerminos" />
+                        <label class="form-check-label" for="aceptaTerminos">Acepto los Términos y Condiciones</label>
+                        <button type="button" class="btn btn-link btn-sm p-0 d-block" @onclick="() => mostrarTerminos = !mostrarTerminos">
+                            @(mostrarTerminos ? "Ocultar términos" : "Leer términos")
+                        </button>
+                    </div>
+
+                    @if (mostrarTerminos)
+                    {
+                        <div class="border rounded p-3 mb-3 small text-muted">
+                            <p>Texto de ejemplo de los Términos y Condiciones de JMCars. Aquí se detallarán las condiciones de uso de la plataforma, responsabilidades de los usuarios, política de privacidad, y demás cláusulas legales aplicables al servicio.</p>
+                            <p class="mb-0">Este texto es provisorio y debe ser reemplazado por el texto definitivo antes de la entrega final del proyecto.</p>
+                        </div>
+                    }
+
+                    <button type="submit" class="btn btn-primary w-100" disabled="@cargando">
+                        @(cargando ? "Registrando..." : "Registrarme")
+                    </button>
+                </EditForm>
+
+                <div class="text-center mt-3">
+                    <a class="small" href="login">Volver al login</a>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private EscribanoDTO escribano = new();
+    private bool aceptaTerminos;
+    private bool mostrarTerminos;
+    private bool registrado;
+    private bool cargando;
+    private string? error;
+
+    private async Task Registrar()
+    {
+        error = null;
+
+        if (!aceptaTerminos)
+        {
+            error = "Debe aceptar los terminos y condiciones para registrarse";
+            return;
+        }
+
+        cargando = true;
+
+        try
+        {
+            await ServicioEscribano.Registrar(escribano, aceptaTerminos);
+            registrado = true;
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+}
