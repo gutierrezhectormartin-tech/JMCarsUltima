@@ -29,5 +29,41 @@ namespace JMCarsApp.Services
                 throw new Exception("No se pudo completar el registro: " + ex.Message);
             }
         }
+
+        public async Task<ClienteDTO?> ObtenerPorId(int id)
+        {
+            try
+            {
+                var respuesta = await _httpClient.GetAsync($"api/cliente/{id}");
+
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<ClienteDTO>();
+                }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido obtener el cliente");
+                throw new Exception(error);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido obtener el cliente: " + ex.Message);
+            }
+        }
+
+        public async Task ActualizarPerfil(ClienteDTO cliente)
+        {
+            try
+            {
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/cliente/{cliente.IdUsuario}", cliente);
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido actualizar el perfil");
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se pudo actualizar el perfil: " + ex.Message);
+            }
+        }
     }
 }

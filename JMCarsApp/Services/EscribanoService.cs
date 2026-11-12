@@ -29,5 +29,40 @@ namespace JMCarsApp.Services
                 throw new Exception("No se ha podido registrar: " + ex.Message);
             }
         }
+
+        public async Task<EscribanoDTO?> ObtenerPorId(int id)
+        {
+            try
+            {
+                var respuesta = await _httpClient.GetAsync($"api/escribano/{id}");
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    return await respuesta.Content.ReadFromJsonAsync<EscribanoDTO>();
+                }
+                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido obtener el escribano");
+                throw new Exception(error);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido obtener el escribano: " + ex.Message);
+            }
+        }
+
+        public async Task ActualizarPerfil(EscribanoDTO escribano)
+        {
+            try
+            {
+                var respuesta = await _httpClient.PutAsJsonAsync($"api/escribano/{escribano.IdUsuario}", escribano);
+                if (!respuesta.IsSuccessStatusCode)
+                {
+                    string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido actualizar el perfil, intentelo nuevamente.");
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se ha podido actualizar el perfil: " + ex.Message);
+            }
+        }
     }
 }

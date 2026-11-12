@@ -19,7 +19,18 @@
                 }
                 else
                 {
-                    <span class="text-white me-3">Hola, @Sesion.Usuario!.NombreCompleto</span>
+                    @if (Sesion.EsCliente)
+                    {
+                        <a class="text-white me-3" href="perfil/cliente"><i class="bi bi-person-circle me-1"></i>Hola, @Sesion.Usuario!.NombreCompleto</a>
+                    }
+                    else if (Sesion.EsEscribano)
+                    {
+                        <a class="text-white me-3" href="perfil/escribano"><i class="bi bi-person-circle me-1"></i>Hola, @Sesion.Usuario!.NombreCompleto</a>
+                    }
+                    else
+                    {
+                        <span class="text-white me-3">Hola, @Sesion.Usuario!.NombreCompleto</span>
+                    }
                     <button class="btn btn-outline-light" @onclick="CerrarSesion">Cerrar Sesion</button>
                 }
             </div>

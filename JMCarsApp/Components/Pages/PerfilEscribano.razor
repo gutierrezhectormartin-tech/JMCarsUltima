@@ -1,0 +1,129 @@
+@page "/perfil/escribano"
+@using JMCarsApp.DTOs
+@using JMCarsApp.Services
+@inject EscribanoService ServicioEscribano
+@inject SessionService Sesion
+@inject NavigationManager Navegacion
+
+<PageTitle>Mi perfil</PageTitle>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+
+        <div class="text-center mb-4">
+            <i class="bi bi-briefcase" style="font-size: 3rem; color: var(--jm-azul);"></i>
+            <h2 class="mt-2 mb-1">Mi Perfil</h2>
+            <div class="text-muted small">Datos y seguridad de tu cuenta</div>
+        </div>
+
+        @if (cargando)
+        {
+            <div class="text-center text-muted py-5">Cargando...</div>
+        }
+        else if (escribano == null)
+        {
+            <div class="alert alert-warning text-center">@(error ?? "No se pudo cargar tu perfil.")</div>
+        }
+        else
+        {
+            @if (!string.IsNullOrEmpty(error))
+            {
+                <div class="alert alert-danger">@error</div>
+            }
+            @if (!string.IsNullOrEmpty(mensaje))
+            {
+                <div class="alert alert-success">@mensaje</div>
+            }
+
+            <div class="card card-body p-4 mb-4">
+                <h5 class="mb-3">Datos personales</h5>
+                <EditForm Model="escribano" OnValidSubmit="Guardar">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre completo</label>
+                        <InputText @bind-Value="escribano.NombreCompleto" class="form-control" />
+                        <ValidationMessage For="() => escribano.NombreCompleto" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+                        <InputText @bind-Value="escribano.Telefono" type="tel" class="form-control" />
+                        <ValidationMessage For="() => escribano.Telefono" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="text" class="form-control" value="@escribano.Email" disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Número de caja profesional</label>
+                        <input type="text" class="form-control" value="@escribano.NumeroCaja" disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Dirección del estudio</label>
+                        <InputText @bind-Value="escribano.Direccion" class="form-control" />
+                        <ValidationMessage For="() => escribano.Direccion" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100" disabled="@guardando">
+                        @(guardando ? "Guardando..." : "Guardar cambios")
+                    </button>
+                </EditForm>
+            </div>
+
+            <CambiarContrasena />
+        }
+
+    </div>
+</div>
+
+@code {
+    private EscribanoDTO? escribano;
+    private bool cargando = true;
+    private bool guardando;
+    private string? error;
+    private string? mensaje;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Sesion.EstadoLogueado || !Sesion.EsEscribano)
+        {
+            Navegacion.NavigateTo("login");
+            return;
+        }
+
+        try
+        {
+            escribano = await ServicioEscribano.ObtenerPorId(Sesion.Usuario!.IdUsuario);
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private async Task Guardar()
+    {
+        error = null;
+        mensaje = null;
+        guardando = true;
+
+        try
+        {
+            await ServicioEscribano.ActualizarPerfil(escribano!);
+            Sesion.ActualizarNombre(escribano!.NombreCompleto);
+            mensaje = "El perfil se actualizó correctamente.";
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            guardando = false;
+        }
+    }
+}

@@ -22,6 +22,16 @@ namespace JMCarsApp.Services
             CambioSesion?.Invoke();
         }
 
+        public void ActualizarNombre(string pNombre)
+        {
+            if (Usuario == null)
+            {
+                return;
+            }
+            Usuario.NombreCompleto = pNombre;
+            CambioSesion?.Invoke();
+        }
+
         public void Cerrar()
         {
             Usuario = null;

@@ -1,0 +1,74 @@
+@using JMCarsApp.Services
+@inject UsuarioService ServicioUsuario
+@inject SessionService Sesion
+
+<div class="card card-body p-4 mb-4">
+    <h5 class="mb-3">Cambiar Contraseña</h5>
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+    @if (!string.IsNullOrEmpty(mensaje))
+    {
+        <div class="alert alert-success">@mensaje</div>
+    }
+
+    <form @onsubmit="Cambiar">
+        <div class="mb-3">
+            <label class="form-label">Contraseña actual</label>
+            <input type="password" class="form-control" @bind="contrasenaActual" autocomplete="current-password" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Contraseña nueva</label>
+            <input type="password" class="form-control" @bind="contrasenaNueva" autocomplete="new-password" required minlength="3" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Repetir contraseña nueva</label>
+            <input type="password" class="form-control" @bind="repetirContrasenaNueva" autocomplete="new-password" required minlength="3" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100" disabled="@cargando">
+            @(cargando ? "Cambiando..." : "Cambiar contraseña")
+        </button>
+    </form>
+</div>
+
+@code {
+    private string contrasenaActual = "";
+    private string contrasenaNueva = "";
+    private string repetirContrasenaNueva = "";
+    private string? error;
+    private string? mensaje;
+    private bool cargando;
+
+    private async Task Cambiar()
+    {
+        error = null;
+        mensaje = null;
+
+        if (contrasenaNueva != repetirContrasenaNueva)
+        {
+            error = "La contraseña nueva y su verificación no son iguales.";
+            return;
+        }
+
+        cargando = true;
+
+        try
+        {
+            await ServicioUsuario.ResetearContrasena(Sesion.Usuario!.Email, contrasenaActual, contrasenaNueva);
+            mensaje = "Tu contraseña se cambió con éxito.";
+            contrasenaActual = "";
+            contrasenaNueva = "";
+            repetirContrasenaNueva = "";
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+}
