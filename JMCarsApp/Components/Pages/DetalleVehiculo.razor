@@ -1,0 +1,184 @@
+﻿@page "/vehiculo/{Id:int}"
+@using JMCarsApp.DTOs
+@using JMCarsApp.Services
+@inject VehiculoService ServicioVehiculos
+@inject ImagenService ServicioImagenes
+
+<PageTitle>Detalles del Vehiculo</PageTitle>
+
+@if(cargando)
+{
+    <div class="text-center text-muted py-5">Cargando...</div>
+}
+else if(vehiculo == null)
+{
+    <div class="alert alert-warning text-center">
+        <h4 class="mt-2">Vehiculo no encontrado</h4>
+        <p>@(mensajeError ?? "El vehiculo que estas intentando acceder no existe o fue eliminado")</p>
+        <a class="btn btn-outline-primary" href="">Volver al Inicio</a>
+    </div>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="h4 mb-0">@vehiculo.Modelo?.Marca?.NombreMarca @vehiculo.Modelo?.Modelo </h2>
+            <p class="text-muted mb-0">Publicacion #@vehiculo.IdVehiculo</p>
+        </div>
+        <a class="btn btn-outline-secondary" href=""><i class="bi bi-arrow-left"></i> Volver</a>
+    </div>
+
+
+<hr />
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-body p-2 text-center bg-light rounded">
+        @if(vehiculo.Fotografia != null && vehiculo.Fotografia.Any())
+        {
+            string rutaActual = vehiculo.Fotografia[fotoActual];
+            <div class="position-relative">
+                @if(fotos.GetValueOrDefault(rutaActual) != null)
+                {
+                    <img src="@fotos[rutaActual]" alt="Foto @(fotoActual + 1)" class="img-fluid rounded" style="max-height: 300px; object-fit: contain;"/>
+                }
+                else
+                {
+                    <div class="py-5 text-muted">cargando foto...</div>
+                }
+                @if(vehiculo.Fotografia.Count > 1)
+                {
+                    <button class="btn btn-dark btn-sm position-absolute top-50 start-0 translate-middle-y ms-2" @onclick="FotoAnterior">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-dark btn-sm position-absolute top-50 end-0 translate-middle-y me-2" @onclick="FotoSiguiente">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                }
+            </div>
+            @if(vehiculo.Fotografia.Count > 1)
+            {
+                <div class="small text-muted mt-2">@(fotoActual + 1) de @vehiculo.Fotografia.Count</div>
+            }
+        }
+        else
+        {
+            <div class="py-5 text-muted">
+                <i class="bi bi-image fs-1 d-block"></i>
+                <span>Sin Fotografia Disponible</span>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card mb-4 shadow-sm border-success">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <h2 class="fw-bold mb-0">U$S @vehiculo.Precio.ToString("N0")</h2>
+            @if(vehiculo.IdEstadoPublicacion == 2)
+            {
+                <span class="badge bg-success fs-6"><i class="bi bi-check-circle"></i> Activo</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary fs-6"><i class="bi bi-slash-circle"></i> Inactivo</span>
+            }
+        </div>
+</div>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-light fw-bold">
+        <i class="bi bi-card-list"></i> Ficha Tecnica
+    </div>
+    <ul class="list-grouplist-group-flush">
+        <li class="list-group-item d-flex justify-content-between">
+            <span class="text-muted">Marca:</span>
+            <strong>@vehiculo.Modelo?.Marca?.NombreMarca</strong>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+            <span class="text-muted">Modelo:</span>
+            <strong>@vehiculo.Modelo?.Modelo</strong>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+            <span class="text-muted">Año:</span>
+            <strong>@vehiculo.Anio</strong>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+            <span class="text-muted">Kilometraje:</span>
+            <strong>@vehiculo.Km.ToString("N0")</strong>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+            <span class="text-muted">Caja de Cambios:</span>
+            <strong>@vehiculo.CajaCambios</strong>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+            <span class="text-muted">Motorizacion:</span>
+            <strong>@vehiculo.Motorizacion</strong>
+        </li>
+    </ul>
+</div>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-light fw-bold">
+        <i class="bi bi-file-text"></i> Descripcion
+    </div>
+    <div class="card-body">
+        <p class="card-text mb-0">
+            @(string.IsNullOrWhiteSpace(vehiculo.Descripcion) ? "Sin descripcion detallada" : vehiculo.Descripcion)
+        </p>
+    </div>
+</div>
+}
+
+@code
+{
+    [Parameter]
+    public int Id { get; set; }
+
+    private Dictionary<string, string?> fotos = new();
+    private int fotoActual = 0;
+    private VehiculoDTO? vehiculo;
+    private bool cargando = true;
+    private string? mensajeError;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        cargando = true;
+        mensajeError = null;
+        fotoActual = 0;
+        fotos = new();
+
+        try
+        {
+            vehiculo = await ServicioVehiculos.DetalleVehiculo(Id);
+        }
+        catch (Exception ex)
+        {
+            vehiculo = null;
+            mensajeError = ex.Message;
+        }
+        finally
+        {
+            cargando = false;
+        }
+
+        if(vehiculo?.Fotografia != null)
+        {
+            foreach(string ruta in vehiculo.Fotografia)
+            {
+                fotos[ruta] = await ServicioImagenes.ObtenerDataUri(ruta);
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void FotoAnterior()
+    {
+        int cantidad = vehiculo!.Fotografia.Count;
+        fotoActual = (fotoActual - 1 + cantidad) % cantidad;
+    }
+
+    private void FotoSiguiente()
+    {
+        int cantidad = vehiculo!.Fotografia.Count;
+        fotoActual = (fotoActual + 1) % cantidad;
+    }
+}

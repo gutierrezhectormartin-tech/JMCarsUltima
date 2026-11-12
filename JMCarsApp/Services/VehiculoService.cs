@@ -35,28 +35,6 @@ namespace JMCarsApp.Services
             }
         }
 
-        public async Task<List<VehiculoDTO>> ListarPublicados()
-        {
-            try
-            {
-                var respuesta = await _httpClient.GetAsync("api/vehiculo/listar-publicados");
-                if (respuesta.IsSuccessStatusCode)
-                {
-                    return await respuesta.Content.ReadFromJsonAsync<List<VehiculoDTO>>() ?? new List<VehiculoDTO>();
-                }
-                if (respuesta.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    return new List<VehiculoDTO>();
-                }
-                string error = await ErrorHelper.LeerMensajeError(respuesta, "No se ha podido listar los vehiculos");
-                throw new Exception(error);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("No se ha podido listar los vehiculos: " + ex.Message);
-            }
-        }
-
         public async Task<PaginaDTO<VehiculoDTO>> ListarPublicadosPaginado(int? idMarca, int? idModelo, int? anio, string? ordenPrecio, int pagina, int tamanoPagina)
         {
             try

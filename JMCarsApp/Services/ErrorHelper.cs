@@ -10,7 +10,7 @@ namespace JMCarsApp.Services
 			{
 				var contenido = await pRespuesta.Content.ReadFromJsonAsync <Dictionary<string, string>>(new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-				return contenido?.GetValueOrDefault("error") ?? contenido.GetValueOrDefault("mensaje") ?? pMensajePorDefecto;
+				return contenido?.GetValueOrDefault("error") ?? contenido?.GetValueOrDefault("mensaje") ?? pMensajePorDefecto;
 			}
 			catch (Exception)
 			{

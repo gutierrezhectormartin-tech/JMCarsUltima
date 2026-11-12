@@ -33,11 +33,13 @@
 @if(destacados.Any())
 {
     <h2 class="titulo-seccion">Destacados <small>Ultimos vehiculos publicados</small></h2>
+
     <div class="carrusel-destacados mb-4">
         @foreach(VehiculoDTO d in destacados)
         {
             string ruta = d.Fotografia.First();
             <div class="destacado-item">
+                <a class="d-block h-100 text-decoration-none text-reset" href="vehiculo/@d.IdVehiculo">
                 <div class="card vehiculo-card vehiculo-card-destacada h-100">
                     <span class="etiqueta-destacado">Destacado</span>
                     @if(fotos.GetValueOrDefault(ruta) != null)
@@ -57,6 +59,7 @@
                         <div class="vehiculo-precio">@d.Precio.ToString("C")</div>
                     </div>
                 </div>
+                </a>
             </div>
         }
     </div>
@@ -117,6 +120,7 @@
     @foreach(VehiculoDTO v in todos)
     {
         string? rutaFila = v.Fotografia?.FirstOrDefault();
+        <a class="d-block text-decoration-none text-reset" href="vehiculo/@v.IdVehiculo">
         <div class="card vehiculo-fila">
             @if(rutaFila != null && fotos.GetValueOrDefault(rutaFila) != null)
             {
@@ -133,9 +137,14 @@
                 <div class="vehiculo-precio mt-1">@v.Precio.ToString("C")</div>
             </div>
         </div>
+        </a>
     }
 
 </div>
+@if(consultado && !cargando && todos.Count == 0)
+{
+    <div class="alert alert-light text-center">No hay vehiculos con estos filtros</div>
+}
 <div class="mb-3 text-muted small text-center">Mostrando @todos.Count de @total</div>
 @if(hayMas)
 {
@@ -164,6 +173,7 @@
     private int total = 0;
     private bool hayMas = false;
     private bool cargando = false;
+    private bool consultado = true;
 
     private bool HayFiltros => idMarca != null || idModelo != null || anio != null || !string.IsNullOrEmpty(ordenPrecio);
     private List<MarcaDTO> Marcas => filtros.Modelos.Select(m => m.Marca).DistinctBy(m => m.IdMarca).OrderBy(m => m.NombreMarca).ToList();
@@ -227,6 +237,7 @@
         finally
         {
             cargando = false;
+            consultado = true;
         }
 
     }
