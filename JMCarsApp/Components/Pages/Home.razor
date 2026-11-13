@@ -4,6 +4,7 @@
 @inject EstadisticasService ServicioEstadisticas
 @inject VehiculoService ServicioVehiculos
 @inject ImagenService ServicioImagenes
+@inject SessionService Sesion
 
 <PageTitle>JMCars</PageTitle>
 
@@ -11,6 +12,13 @@
     <h1>Encontra tu proximo vehiculo</h1>
     <p class="mb-0">Cerca de vos. Seguro para todos. Publicaciones revisadas y cierre de la compraventa con escribano.</p>
 </section>
+
+@if(Sesion.EsCliente)
+{
+    <a class="btn btn-primary w-100 mb-4" href="vehiculo/publicar">
+        <i class="bi bi-plus-circle"></i> Publicar Vehiculo
+    </a>
+}
 
 @if(conteos != null)
 {

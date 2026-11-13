@@ -3,6 +3,7 @@
 @using JMCarsApp.Services
 @inject VehiculoService ServicioVehiculos
 @inject ImagenService ServicioImagenes
+@inject IJSRuntime JS
 
 <PageTitle>Detalles del Vehiculo</PageTitle>
 
@@ -70,6 +71,24 @@ else
     </div>
 </div>
 
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <i class="bi bi-geo-alt-fill text-danger"></i> Ubicacion del vehiculo
+    </div>
+    <div class="card-body p-0">
+        @if(vehiculo.Latitud.HasValue && vehiculo.Longitud.HasValue)
+        {
+            <div id="mapa-vehiculo" style="height: 250px; width: 100%;" class="rounded-bottom"></div>
+        }
+        else
+        {
+            <div class="p-3 text-muted text-center">
+                <i class="bi bi-geo-alt fs-4 d-block"></i> Ubicacion no especificada del vehiculo
+            </div>
+        }
+     </div>
+</div>
+
 <div class="card mb-4 shadow-sm border-success">
     <div class="card-body d-flex justify-content-between align-items-center">
         <h2 class="fw-bold mb-0">U$S @vehiculo.Precio.ToString("N0")</h2>
@@ -126,6 +145,16 @@ else
         </p>
     </div>
 </div>
+<div class="card mb-4 shadow-sm border-info">
+    <div class="card-header bg-info text-white fw-bold">
+        <i class="bi bi-person-badge"></i> Informacion del vendedor
+    </div>
+    <div class="vard-body">
+        <p class="mb-1"><strong>Nombre:</strong> @(vehiculo.Vendedor?.NombreCompleto ?? "No Disponible")</p>
+        <p class="mb-1"><strong>Email:</strong> @(vehiculo.Vendedor?.Email ?? "No Disponible")</p>
+        <p class="mb-0"><strong>Telefono:</strong> @(vehiculo.Vendedor?.Telefono ?? "No Disponible")</p>
+    </div>
+</div>
 }
 
 @code
@@ -138,6 +167,7 @@ else
     private VehiculoDTO? vehiculo;
     private bool cargando = true;
     private string? mensajeError;
+    private bool mapaPendiente;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -160,6 +190,8 @@ else
             cargando = false;
         }
 
+        mapaPendiente = vehiculo?.Latitud != null && vehiculo?.Longitud != null;
+
         if(vehiculo?.Fotografia != null)
         {
             foreach(string ruta in vehiculo.Fotografia)
@@ -180,5 +212,21 @@ else
     {
         int cantidad = vehiculo!.Fotografia.Count;
         fotoActual = (fotoActual + 1) % cantidad;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(mapaPendiente && vehiculo?.Latitud != null && vehiculo?.Longitud != null)
+        {
+            mapaPendiente = false;
+            string titulo = $"{vehiculo.Modelo?.Marca?.NombreMarca} {vehiculo.Modelo?.Modelo}";
+            try
+            {
+                await JS.InvokeVoidAsync("mapaDetalle.mostrar", "mapa-vehiculo", (double)vehiculo.Latitud.Value, (double)vehiculo.Longitud.Value, titulo);
+            }
+            catch (Exception)
+            {
+            }
+        }
     }
 }

@@ -1,0 +1,165 @@
+﻿@page "/vehiculo/publicar"
+@using JMCarsApp.Services
+@using Microsoft.Maui.Devices.Sensors
+@inject SessionService Sesion
+@inject NavigationManager Navegacion
+
+<PageTitle>Publicar Vehiculo</PageTitle>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        @if(!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger">@error</div>
+        }
+        @if(!string.IsNullOrEmpty(mensaje))
+        {
+            <div class="alert alert-success">@mensaje</div>
+        }
+        <div class="card card-body p-4 mb-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-plus-circle" style="font-size: 3rem; color: var(--jm-azul);"></i>
+                <h2 class="mt-2 mb-1">Publicar Vehiculo</h2>
+                <div class="text-muted small">Completa los datos de tu vehiculo</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Marca</label>
+                <input type="text" class="form-control" placeholder="ej. Toyota, Chevrolet, Fiat..." @bind="marca" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Modelos</label>
+                <input type="text" class="form-control" placeholder="ej. Corolla, Gol, Cruze..." @bind="modelo" />
+            </div>
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <label class="form-label">Año</label>
+                    <input type="number" class="form-control" placeholder="Ej: 2020" @bind="anio"/>
+                </div>
+                <div class="col-6 mb-3">
+                    <label class="form-label">Caja</label>
+                    <select class="form-select" @bind="cajaCambios">
+                        <option value="">Seleccione...</option>
+                        <option value="Manual">Manual</option>
+                        <option value="Automática">Automatica</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="form-label">Kilometraje</div>
+                <input type="number" class="form-control" placeholder="ej: 65000" @bind="km"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Motorizacion</label>
+                <input type="text" class="form-control" placeholder="ej: 1.4 TSI Nafta" @bind="motorizacion"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Precio (U$S)</label>
+                <input type="text" class="form-control" placeholder="ej: 14500" @bind="precio" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descripcion</label>
+                <textarea class="form-control" rows="4" placeholder="Estado del vehiculo, observaciones, etc." @bind="descripcion"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ubicacion del Vehiculo</label>
+                <button type="button" class="btn btn-outline-primary w-100" @onclick="ObtenerUbicacion" disabled="@obteniendoUbicacion">
+                    <i class="bi bi-geo-alt"></i> @(obteniendoUbicacion ? "Obteniendo..." : "Usar mi ubicacion Actual")
+                </button>
+                @if(latitud != null && longitud != null)
+                {
+                    <div class="text-success small mt-2">
+                        <i class="bi bi-check-circle"></i> Ubicacion obtenida: @latitud.Value.ToString("F5"), @longitud.Value.ToString("F5")
+                    </div>
+                }
+            </div>
+
+            <button type="btn btn-primary w-100" @onclick="Validar">Continuar</button>
+
+        </div>
+
+    </div>
+
+</div>
+
+@code
+{
+    private string marca = "";
+    private string modelo = "";
+    private int? anio;
+    private string cajaCambios = "";
+    private int? km;
+    private string motorizacion = "";
+    private decimal? precio;
+    private string descripcion = "";
+    private string? error;
+    private string? mensaje;
+    private double? latitud;
+    private double? longitud;
+    private bool obteniendoUbicacion;
+
+    protected override void OnInitialized()
+    {
+        if(!Sesion.EstadoLogueado || !Sesion.EsCliente)
+        {
+            Navegacion.NavigateTo("login");
+        }
+    }
+
+    private async Task ObtenerUbicacion()
+    {
+        error = null;
+        mensaje = null;
+        obteniendoUbicacion = true;
+
+        try
+        {
+            var pedido = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
+            var ubicacion = await Geolocation.Default.GetLocationAsync(pedido);
+
+            if(ubicacion == null)
+            {
+                error = "No se pudo obtener la ubicacion. Intente nuevamente";
+            }
+            else
+            {
+                latitud = ubicacion.Latitude;
+                longitud = ubicacion.Longitude;
+            }
+        }
+        catch(FeatureNotEnabledException)
+        {
+            error = "El GPS esta desactivado, activelo e intente nuevamente";
+        }
+        catch(PermissionException)
+        {
+            error = "No hay permiso para utilizar su ubicacion. Habilitalo en los permisos de la APP";
+        }
+        catch(Exception)
+        {
+            error = "No se pudo obtener ubicacion del dispositivo";
+        }
+        finally
+        {
+            obteniendoUbicacion = false;
+        }
+    }
+
+    private void Validar()
+    {
+        error = null;
+        mensaje = null;
+
+        if(string.IsNullOrWhiteSpace(marca) || string.IsNullOrWhiteSpace(modelo) || anio == null || string.IsNullOrWhiteSpace(cajaCambios)
+        || km == null || string.IsNullOrWhiteSpace(motorizacion) || precio == null || string.IsNullOrWhiteSpace(descripcion))
+        {
+            error = "Completa todos los campos";
+            return;
+        }
+        if(latitud == null || longitud == null)
+        {
+            error = "Brinda la ubicacion del vehiculo";
+        }
+        mensaje = "Datos validos (falta agregar fotos)";
+    }
+}
