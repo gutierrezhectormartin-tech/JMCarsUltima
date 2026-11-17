@@ -17,7 +17,7 @@
             <div class="card-body pb-2">
                 <h3 class="h6 mb-1">@v.Modelo.Marca.NombreMarca</h3>
                 <div class="vehiculo-datos mb-2">@v.Anio @v.Km.ToString("N0") km - @v.CajaCambios - @v.Motorizacion</div>
-                <div class="vehiculo-precio">@v.Precio.ToString("C")</div>
+                <div class="vehiculo-precio">U$S @v.Precio.ToString("N0")</div>
             </div>
             <div class="card-footer bg-transparent border-0 pt-0 pb-3">
                 <a asp-controller="Vehiculo" asp-action="Detalle" asp-route-id="@v.IdVehiculo" asp-route-origen="home" class="btn btn-outline-primary btn-sm w-100">Ver Detalle</a>

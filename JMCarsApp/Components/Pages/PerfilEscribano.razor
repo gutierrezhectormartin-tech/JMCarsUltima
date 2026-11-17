@@ -42,7 +42,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Nombre completo</label>
-                        <InputText @bind-Value="escribano.NombreCompleto" class="form-control" />
+                        <InputText @bind-Value="escribano.NombreCompleto" autocapitalize="words" class="form-control" />
                         <ValidationMessage For="() => escribano.NombreCompleto" />
                     </div>
                     <div class="mb-3">
@@ -60,7 +60,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Dirección del estudio</label>
-                        <InputText @bind-Value="escribano.Direccion" class="form-control" />
+                        <InputText @bind-Value="escribano.Direccion" autocapitalize="words" class="form-control" />
                         <ValidationMessage For="() => escribano.Direccion" />
                     </div>
 

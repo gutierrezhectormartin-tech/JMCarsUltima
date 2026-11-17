@@ -64,7 +64,7 @@
                     <div class="card-body pb-3">
                         <h3 class="h6 mb-1">@d.Modelo.Marca.NombreMarca @d.Modelo.Modelo </h3>
                         <div class="vehiculo-datos mb-2">@d.Anio - @d.Km.ToString("N0") km - @d.CajaCambios</div>
-                        <div class="vehiculo-precio">@d.Precio.ToString("C")</div>
+                        <div class="vehiculo-precio">U$S @d.Precio.ToString("N0")</div>
                     </div>
                 </div>
                 </a>
@@ -142,7 +142,7 @@
                  <h3 class="h6 mb-1">@v.Modelo.Marca.NombreMarca @v.Modelo.Modelo</h3>
                 <div class="vehiculo-datos">@v.Anio - @v.Km.ToString("N0") km</div>
                 <div class="vehiculo-datos">@v.CajaCambios - @v.Motorizacion</div>
-                <div class="vehiculo-precio mt-1">@v.Precio.ToString("C")</div>
+                <div class="vehiculo-precio mt-1">U$S @v.Precio.ToString("N0")</div>
             </div>
         </div>
         </a>
@@ -181,7 +181,7 @@
     private int total = 0;
     private bool hayMas = false;
     private bool cargando = false;
-    private bool consultado = true;
+    private bool consultado = false;
 
     private bool HayFiltros => idMarca != null || idModelo != null || anio != null || !string.IsNullOrEmpty(ordenPrecio);
     private List<MarcaDTO> Marcas => filtros.Modelos.Select(m => m.Marca).DistinctBy(m => m.IdMarca).OrderBy(m => m.NombreMarca).ToList();

@@ -13,25 +13,29 @@
             </a>
 
             <div>
-                @if(!Sesion.EstadoLogueado)
+                @if (!Sesion.EstadoLogueado)
                 {
                     <a class="btn btn-outline-light" href="login">Iniciar Sesion</a>
                 }
                 else
                 {
-                    @if (Sesion.EsCliente)
-                    {
-                        <a class="text-white me-3" href="perfil/cliente"><i class="bi bi-person-circle me-1"></i>Hola, @Sesion.Usuario!.NombreCompleto</a>
-                    }
-                    else if (Sesion.EsEscribano)
-                    {
-                        <a class="text-white me-3" href="perfil/escribano"><i class="bi bi-person-circle me-1"></i>Hola, @Sesion.Usuario!.NombreCompleto</a>
-                    }
-                    else
-                    {
-                        <span class="text-white me-3">Hola, @Sesion.Usuario!.NombreCompleto</span>
-                    }
-                    <button class="btn btn-outline-light" @onclick="CerrarSesion">Cerrar Sesion</button>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light" @onclick="AlternarMenu">
+                            <i class="bi bi-person-circle me-1"></i>Hola, @Sesion.Usuario!.NombreCompleto <i class="bi bi-caret-down-fill small"></i>
+                        </button>
+                        @if (menuAbierto)
+                        {
+                            <div style="position: fixed; inset: 0; z-index: 999;" @onclick="CerrarMenu"></div>
+                            <ul class="dropdown-menu show" style="right: 0; left: auto; top: 100%; z-index: 1000;">
+                                @if(RutaPerfil != null)
+                                {
+                                    <li><a class="dropdown-item" href="@RutaPerfil" @onclick="CerrarMenu"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+                                    <li><hr class="dropdown-divider"/></li>
+                                }
+                                <li><button class="dropdown-item" @onclick="CerrarSesion"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesion</button></li>
+                            </ul>
+                        }
+                    </div>
                 }
             </div>
 
@@ -52,6 +56,18 @@
 
 @code
 {
+    private bool menuAbierto = false;
+    private string? RutaPerfil => Sesion.EsCliente ? "perfil/cliente" : Sesion.EsEscribano ? "perfil/escribano" : null;
+
+    private void AlternarMenu()
+    {
+        menuAbierto = !menuAbierto;
+    }
+
+    private void CerrarMenu()
+    {
+        menuAbierto = false;
+    }
     protected override void OnInitialized()
     {
         Sesion.CambioSesion += AlCambiarSesion;
@@ -62,6 +78,7 @@
     }
     private void CerrarSesion()
     {
+        menuAbierto = false;
         Sesion.Cerrar();
         Navegacion.NavigateTo("/");
     }
