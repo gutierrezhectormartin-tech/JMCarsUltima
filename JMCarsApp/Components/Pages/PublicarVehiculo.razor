@@ -1,6 +1,8 @@
 ﻿@page "/vehiculo/publicar"
 @using JMCarsApp.Services
 @using Microsoft.Maui.Devices.Sensors
+@using Microsoft.Maui.Storage
+@using Microsoft.Maui.ApplicationModel
 @inject SessionService Sesion
 @inject NavigationManager Navegacion
 
@@ -74,6 +76,36 @@
                 }
             </div>
 
+            <div class="mb-3">
+                <label class="form-label">Fotos del Vehiculo (@fotos.Count de @MaximoFotos)</label>
+                <div class="row g-2">
+                    <div class="col-6 d-grid">
+                        <button type="button" class="btn btn-outline-primary" @onclick="SacarFoto" disabled="@(fotos.Count >= MaximoFotos)">
+                            <i class="bi bi-camera"></i> Sacar Foto
+                        </button>
+                    </div>
+                    <div class="col-6 d-grid">
+                        <button type="button" class="btn btn-outline-primary" @onclick="ElegirDeGaleria" disabled="@(fotos.Count >= MaximoFotos)">
+                            <i class="bi bi-images"></i> Galeria
+                        </button>
+                    </div>
+                </div>
+                @if(fotos.Any())
+                {
+                    <div class="row g-2 mt-2">
+                        @foreach(FotoElegida foto in fotos)
+                        {
+                            <div class="col-4 position-relative">
+                                <img src="@foto.VistaPrevia" alt="Foto del Vehiculo" class="rounded" style="width: 100%; aspect-ratio: 1 / 1;object-fit: cover;"/>
+                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1" @onclick="() => QuitarFoto(foto)">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
             <button type="btn btn-primary w-100" @onclick="Validar">Continuar</button>
 
         </div>
@@ -97,6 +129,11 @@
     private double? latitud;
     private double? longitud;
     private bool obteniendoUbicacion;
+    private const int MaximoFotos = 3;
+    private const int AnchoMaximoFoto = 1600;
+    private const int CalidadFoto = 85;
+    private record FotoElegida(FileResult Archivo, string VistaPrevia);
+    private List<FotoElegida> fotos = new();
 
     protected override void OnInitialized()
     {
@@ -161,5 +198,87 @@
             error = "Brinda la ubicacion del vehiculo";
         }
         mensaje = "Datos validos (falta agregar fotos)";
+    }
+
+    private async Task SacarFoto()
+    {
+        error = null;
+        mensaje = null;
+
+        if(fotos.Count >= MaximoFotos)
+        {
+            error = $"Maximo {MaximoFotos} fotos por publicacion";
+            return;
+        }
+        try
+        {
+            if(!MediaPicker.Default.IsCaptureSupported)
+            {
+                error = "Este dispositivo no cuenta con una camara disponible";
+                return;
+            }
+            FileResult? foto = await MediaPicker.Default.CapturePhotoAsync(new MediaPickerOptions { MaximumWidth = AnchoMaximoFoto, MaximumHeight = AnchoMaximoFoto, CompressionQuality = CalidadFoto });
+            if(foto != null)
+            {
+                await AgregarFoto(foto);
+            }
+
+        }
+        catch (PermissionException)
+        {
+            error = "Sin permiso de camara. Habilitalo en ajustes para poder utilizarlo en la app";
+        }
+        catch(Exception)
+        {
+            error = "No se pudo sacar la foto";
+        }
+    }
+
+    private async Task ElegirDeGaleria()
+    {
+        error = null;
+        mensaje = null;
+
+        int disponibles = MaximoFotos - fotos.Count;
+        if(disponibles <= 0)
+        {
+            error = $"Maximo {MaximoFotos} fotos por publicacion";
+            return;
+        }
+        try
+        {
+            List<FileResult>? elegidas = await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions { SelectionLimit = disponibles, MaximumWidth = AnchoMaximoFoto, MaximumHeight = AnchoMaximoFoto, CompressionQuality = CalidadFoto });
+            if(elegidas != null)
+            {
+                foreach(FileResult elegida in elegidas.Take(disponibles))
+                {
+                    await AgregarFoto(elegida);
+                }
+            }
+        }
+        catch(PermissionException)
+        {
+            error = "Sin permiso para leer la galeria, habilitalo en tus ajustes de app";
+        }
+        catch (Exception)
+        {
+            error = "No se pudieron leer las fotos";
+        }
+    }
+    private async Task AgregarFoto(FileResult archivo)
+    {
+        using (Stream stream = await archivo.OpenReadAsync())
+        using (MemoryStream memoria = new MemoryStream())
+        {
+            await stream.CopyToAsync(memoria);
+            string tipo = archivo.ContentType ?? "image/jpg";
+            string vistaPrevia = $"data:{tipo};base64,{Convert.ToBase64String(memoria.ToArray())}";
+            fotos.Add(new FotoElegida(archivo, vistaPrevia));
+        }
+    }
+
+    private void QuitarFoto(FotoElegida foto)
+    {
+        fotos.Remove(foto);
     }
 }

@@ -1,8 +1,12 @@
 using Logica;
 using Logica.Interfaces;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
 using Persistencia;
 using Persistencia.Interfaces;
 using WebAPI.Services;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +29,20 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+string rutaImagenes = app.Configuration["Imagenes:Ruta"]!;
+Directory.CreateDirectory(rutaImagenes);
+
+FileExtensionContentTypeProvider proveedorTipoDeArchivo = new FileExtensionContentTypeProvider();
+proveedorTipoDeArchivo.Mappings[".avif"] = "image/avif";
+proveedorTipoDeArchivo.Mappings[".webp"] = "image/webp";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(rutaImagenes),
+    RequestPath = "/images",
+    ContentTypeProvider = proveedorTipoDeArchivo
+});
 
 app.UseAuthorization();
 

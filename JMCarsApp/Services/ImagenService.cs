@@ -9,7 +9,7 @@ namespace JMCarsApp.Services
 
         public ImagenService(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory.CreateClient("JMCarsWeb");
+            _httpClient = httpClientFactory.CreateClient("JMCarsAPI");
         }
 
         public async Task<string?> ObtenerDataUri(string pRuta)
