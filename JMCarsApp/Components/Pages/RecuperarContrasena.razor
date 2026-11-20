@@ -1,0 +1,78 @@
+@page "/recuperar-contrasena"
+@using JMCarsApp.Services
+@using JMCarsApp.ViewModels
+@inject UsuarioService ServicioUsuario
+
+<PageTitle>Recuperar contraseña</PageTitle>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-7 col-lg-5 col-xl-4">
+
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger">@error</div>
+        }
+
+        <div class="card card-body p-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-key" style="font-size: 3rem; color: var(--jm-azul);"></i>
+                <h2 class="mt-2 mb-1">Recuperar contraseña</h2>
+                <div class="text-muted small">Ingresá tu Email y te enviaremos instrucciones para resetear tu contraseña.</div>
+            </div>
+
+            @if (enviado)
+            {
+                <div class="alert alert-success">Si el email existe, se enviaron instrucciones a tu correo.</div>
+                <a class="btn btn-primary w-100" href="login">Volver a iniciar sesión</a>
+            }
+            else
+            {
+                <EditForm Model="modelo" OnValidSubmit="Enviar">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <InputText @bind-Value="modelo.Email" type="email" class="form-control" />
+                        <ValidationMessage For="() => modelo.Email" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100" disabled="@cargando">
+                        <i class="bi bi-envelope"></i> @(cargando ? "Enviando..." : "Enviar instrucciones")
+                    </button>
+                </EditForm>
+
+                <p class="text-center mt-3 mb-0">
+                    <a class="small" href="login">Volver al inicio de sesión</a>
+                </p>
+            }
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private RecuperarContrasenaViewModel modelo = new();
+    private string? error;
+    private bool cargando;
+    private bool enviado;
+
+    private async Task Enviar()
+    {
+        error = null;
+        cargando = true;
+
+        try
+        {
+            await ServicioUsuario.RecuperarContrasena(modelo.Email);
+            enviado = true;
+        }
+        catch (Exception)
+        {
+            error = "Ocurrió un error. Intentá nuevamente.";
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+}
