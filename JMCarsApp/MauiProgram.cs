@@ -22,6 +22,7 @@ namespace JMCarsApp
             builder.Services.AddScoped<EstadisticasService>();
             builder.Services.AddScoped<ClienteService>();
             builder.Services.AddScoped<EscribanoService>();
+            builder.Services.AddScoped<SolicitudNotarialService>();
             builder.Services.AddHttpClient("JMCarsAPI", cliente => cliente.BaseAddress = new Uri("https://10.0.2.2:7289"))
 #if DEBUG
 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler

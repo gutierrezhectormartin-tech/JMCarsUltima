@@ -32,6 +32,11 @@
                                     <li><a class="dropdown-item" href="@RutaPerfil" @onclick="CerrarMenu"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
                                     <li><hr class="dropdown-divider"/></li>
                                 }
+                                @if (Sesion.EsEscribano)
+                                {
+                                    <li><a class="dropdown-item" href="solicitudes/escribano" @onclick="CerrarMenu"><i class="bi bi-file-earmark-text me-2"></i>Solicitudes recibidas</a></li>
+                                    <li><hr class="dropdown-divider"/></li>
+                                }
                                 <li><button class="dropdown-item" @onclick="CerrarSesion"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesion</button></li>
                             </ul>
                         }

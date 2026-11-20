@@ -1,0 +1,324 @@
+@page "/solicitudes/escribano"
+@using JMCarsApp.DTOs
+@using JMCarsApp.Services
+@inject SolicitudNotarialService ServicioSolicitud
+@inject SessionService Sesion
+@inject NavigationManager Navegacion
+
+<PageTitle>Solicitudes recibidas</PageTitle>
+
+<div class="mb-3">
+    <h2 class="mb-1">Solicitudes recibidas</h2>
+    <div class="text-muted small">Solicitudes de compraventa asignadas</div>
+</div>
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-success">@mensaje</div>
+}
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+<div class="card card-body mb-3">
+    <input type="text" class="form-control mb-2" placeholder="Vehículo, cliente o email"
+           @bind="buscar" @bind:event="oninput" />
+    <div class="d-flex gap-2">
+        <select class="form-select" @bind="estado">
+            <option value="">Todos los estados</option>
+            <option value="1">Pendiente</option>
+            <option value="2">Aceptada</option>
+            <option value="3">Rechazada</option>
+            <option value="4">Finalizada</option>
+        </select>
+        <button class="btn btn-outline-secondary" @onclick="LimpiarFiltros">Limpiar</button>
+    </div>
+</div>
+
+@if (cargando)
+{
+    <div class="text-center text-muted my-5">Cargando solicitudes...</div>
+}
+else if (Filtradas.Count == 0)
+{
+    <div class="card card-body p-5 text-center">
+        <i class="bi bi-inbox text-muted" style="font-size: 2.5rem;"></i>
+        @if (HayFiltros)
+        {
+            <h5 class="mt-3">No hay solicitudes con estos filtros</h5>
+            <p class="text-muted mb-0">Probá con otra combinación o limpiá los filtros.</p>
+        }
+        else
+        {
+            <h5 class="mt-3">Todavía no recibiste solicitudes</h5>
+            <p class="text-muted mb-0">Cuando un cliente te seleccione, vas a ver su solicitud acá.</p>
+        }
+    </div>
+}
+else
+{
+    <div class="text-muted small mb-2">@Filtradas.Count resultado(s)</div>
+
+    @foreach (var item in Filtradas)
+    {
+        var solicitud = item.Solicitud;
+        var vehiculo = solicitud.Vehiculo;
+        CompraVentaDTO? compraVenta = compraVentaPorSolicitud.GetValueOrDefault(solicitud.IdSolicitud);
+
+        <div class="card card-body mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fw-bold" style="color: var(--jm-azul);">
+                        @vehiculo?.Modelo?.Marca?.NombreMarca @vehiculo?.Modelo?.Modelo @vehiculo?.Anio
+                    </div>
+                    <div class="text-muted small">Vendedor: @vehiculo?.Vendedor?.NombreCompleto</div>
+                </div>
+                <span class="badge @ClaseEstadoSolicitud(solicitud.EstadoSolicitud)">@TextoEstadoSolicitud(solicitud.EstadoSolicitud)</span>
+            </div>
+
+            <hr class="my-2" />
+
+            <div class="small">
+                <div><i class="bi bi-person me-1"></i><strong>@solicitud.Cliente?.NombreCompleto</strong></div>
+                <div class="text-muted"><i class="bi bi-envelope me-1"></i>@solicitud.Cliente?.Email</div>
+                @if (solicitud.EstadoSolicitud == 2)
+                {
+                    <div><i class="bi bi-telephone me-1"></i>@solicitud.Cliente?.Telefono</div>
+                }
+                <div class="text-muted"><i class="bi bi-calendar me-1"></i>@solicitud.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</div>
+            </div>
+
+            @if (solicitud.EstadoSolicitud == 1)
+            {
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-outline-success flex-fill" disabled="@procesando"
+                            @onclick="() => PedirConfirmacion(TextoAceptar, () => Aceptar(solicitud.IdSolicitud))">
+                        <i class="bi bi-check-circle"></i> Aceptar
+                    </button>
+                    <button class="btn btn-outline-danger flex-fill" disabled="@procesando"
+                            @onclick="() => PedirConfirmacion(TextoRechazar, () => Rechazar(solicitud.IdSolicitud))">
+                        <i class="bi bi-x-circle"></i> Rechazar
+                    </button>
+                </div>
+            }
+
+            @if (compraVenta != null)
+            {
+                <div class="mt-3 pt-2 border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small text-muted">Compraventa</span>
+                        <span class="badge @ClaseEstadoCompraVenta(compraVenta.EstadoCompraVenta)">@TextoEstadoCompraVenta(compraVenta.EstadoCompraVenta)</span>
+                    </div>
+
+                    @if (compraVenta.EstadoCompraVenta == 1)
+                    {
+                        <div class="d-flex gap-2 mt-2">
+                            <button class="btn btn-outline-success flex-fill" disabled="@procesando"
+                                    @onclick="() => PedirConfirmacion(TextoFinalizarVenta, () => CambiarEstadoCompraVenta(compraVenta.IdCompraVenta, 3))">
+                                <i class="bi bi-check-circle"></i> Finalizar
+                            </button>
+                            <button class="btn btn-outline-danger flex-fill" disabled="@procesando"
+                                    @onclick="() => PedirConfirmacion(TextoRechazarVenta, () => CambiarEstadoCompraVenta(compraVenta.IdCompraVenta, 2))">
+                                <i class="bi bi-x-circle"></i> Rechazar
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+}
+
+@if (accionPendiente != null)
+{
+    <div style="position: fixed; inset: 0; z-index: 1050; background-color: rgba(0, 0, 0, 0.5);"
+         class="d-flex align-items-center justify-content-center p-3">
+        <div class="card w-100 shadow" style="max-width: 400px;">
+            <div class="card-header text-white" style="background-color: var(--jm-azul);">
+                <i class="bi bi-question-circle me-2"></i>Confirmá la acción
+            </div>
+            <div class="card-body">@textoConfirmacion</div>
+            <div class="card-footer d-flex justify-content-end gap-2">
+                <button class="btn btn-outline-secondary" @onclick="CancelarConfirmacion">Cancelar</button>
+                <button class="btn btn-primary" disabled="@procesando" @onclick="Confirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private const string TextoAceptar = "¿Aceptar esta solicitud? El vehículo va a quedar En Trámite.";
+    private const string TextoRechazar = "¿Rechazar esta solicitud?";
+    private const string TextoFinalizarVenta = "¿Finalizar la compraventa? El vehículo va a pasar a Vendido.";
+    private const string TextoRechazarVenta = "¿Rechazar la compraventa? El vehículo va a volver a estar publicado.";
+
+    private List<SolicitudEscribanoDTO> solicitudes = new List<SolicitudEscribanoDTO>();
+    private Dictionary<int, CompraVentaDTO> compraVentaPorSolicitud = new Dictionary<int, CompraVentaDTO>();
+
+    private string? buscar;
+    private int? estado;
+
+    private bool cargando = true;
+    private bool procesando;
+    private string? mensaje;
+    private string? error;
+
+    private string? textoConfirmacion;
+    private Func<Task>? accionPendiente;
+
+    private bool HayFiltros => estado.HasValue || !string.IsNullOrWhiteSpace(buscar);
+
+    private List<SolicitudEscribanoDTO> Filtradas
+    {
+        get
+        {
+            IEnumerable<SolicitudEscribanoDTO> resultado = solicitudes;
+
+            if (estado.HasValue)
+            {
+                resultado = resultado.Where(s => s.Solicitud.EstadoSolicitud == estado.Value);
+            }
+            if (!string.IsNullOrWhiteSpace(buscar))
+            {
+                string texto = buscar.Trim();
+                resultado = resultado.Where(s =>
+                    (s.Solicitud.Vehiculo?.Modelo?.Marca?.NombreMarca ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || (s.Solicitud.Vehiculo?.Modelo?.Modelo ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || (s.Solicitud.Cliente?.NombreCompleto ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || (s.Solicitud.Cliente?.Email ?? "").Contains(texto, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return resultado.OrderByDescending(s => s.Solicitud.FechaSolicitud).ToList();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Sesion.EstadoLogueado || !Sesion.EsEscribano)
+        {
+            Navegacion.NavigateTo("login");
+            return;
+        }
+
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        cargando = true;
+
+        try
+        {
+            int idEscribano = Sesion.Usuario!.IdUsuario;
+            solicitudes = await ServicioSolicitud.ListarPorEscribano(idEscribano);
+            List<CompraVentaDTO> comprasVenta = await ServicioSolicitud.ListarComprasVentaPorEscribano(idEscribano);
+            compraVentaPorSolicitud = comprasVenta.ToDictionary(cv => cv.Solicitud.IdSolicitud, cv => cv);
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void LimpiarFiltros()
+    {
+        buscar = null;
+        estado = null;
+    }
+
+    private void PedirConfirmacion(string texto, Func<Task> accion)
+    {
+        textoConfirmacion = texto;
+        accionPendiente = accion;
+    }
+
+    private void CancelarConfirmacion()
+    {
+        textoConfirmacion = null;
+        accionPendiente = null;
+    }
+
+    private async Task Confirmar()
+    {
+        if (accionPendiente == null)
+        {
+            return;
+        }
+
+        mensaje = null;
+        error = null;
+        procesando = true;
+
+        try
+        {
+            await accionPendiente();
+            await Cargar();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            procesando = false;
+            CancelarConfirmacion();
+        }
+    }
+
+    private async Task Aceptar(int idSolicitud)
+    {
+        await ServicioSolicitud.Aceptar(idSolicitud, Sesion.Usuario!.IdUsuario);
+        mensaje = "Solicitud aceptada correctamente.";
+    }
+
+    private async Task Rechazar(int idSolicitud)
+    {
+        await ServicioSolicitud.Rechazar(idSolicitud, Sesion.Usuario!.IdUsuario);
+        mensaje = "Solicitud rechazada correctamente.";
+    }
+
+    private async Task CambiarEstadoCompraVenta(int idCompraVenta, int nuevoEstado)
+    {
+        await ServicioSolicitud.CambiarEstadoCompraVenta(idCompraVenta, nuevoEstado, Sesion.Usuario!.IdUsuario);
+        mensaje = nuevoEstado == 3 ? "Venta finalizada correctamente." : "Venta rechazada correctamente.";
+    }
+
+    private string TextoEstadoSolicitud(int estadoSolicitud) => estadoSolicitud switch
+    {
+        1 => "Pendiente",
+        2 => "Aceptada",
+        3 => "Rechazada",
+        4 => "Finalizada",
+        _ => "Desconocido"
+    };
+
+    private string ClaseEstadoSolicitud(int estadoSolicitud) => estadoSolicitud switch
+    {
+        1 => "bg-warning text-dark",
+        2 => "bg-success",
+        3 => "bg-danger",
+        4 => "bg-primary",
+        _ => "bg-secondary"
+    };
+
+    private string TextoEstadoCompraVenta(int estadoCompraVenta) => estadoCompraVenta switch
+    {
+        1 => "En proceso",
+        2 => "Rechazada",
+        3 => "Finalizada",
+        _ => "Desconocido"
+    };
+
+    private string ClaseEstadoCompraVenta(int estadoCompraVenta) => estadoCompraVenta switch
+    {
+        1 => "bg-info text-dark",
+        2 => "bg-danger",
+        3 => "bg-primary",
+        _ => "bg-secondary"
+    };
+}
